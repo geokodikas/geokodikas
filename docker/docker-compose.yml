@@ -1,0 +1,29 @@
+version: '3'
+services:
+  postgis:
+    build: ./
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ./postgresql.conf:/etc/postgresql/postgresql.conf
+    environment:
+      POSTGRES_PASSWORD: "random"
+    ports:
+      - 5432:5432
+    command:  postgres -c 'config_file=/etc/postgresql/postgresql.conf'
+  osm2pgsql:
+    build:
+      context: ./
+      dockerfile: osm2psql.Dockerfile
+      args:
+        HOST_GID: 100   # use `getent group users | awk -F ":" '{ print $3 }'`
+        HOST_UID: 1000  # use `id -u`
+    links:
+        - postgis
+    volumes:
+      - "./osm_input:/workdir/input/"
+    environment:
+      PGPASSWORD: "random"
+
+
+volumes:
+  postgres:
