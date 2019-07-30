@@ -4,7 +4,7 @@ import be.ledfan.geocoder.db.entity.OsmUpstreamElement
 import mu.KotlinLogging
 import java.sql.Connection
 
-class OsmUpstreamLineMapper(con: Connection) : Mapper(con) {
+class OsmUpstreamLineMapper(con: Connection) : Mapper<OsmUpstreamElement>(con) {
 
     override val entityCompanion = OsmUpstreamElement.Companion
 

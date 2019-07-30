@@ -1,8 +1,9 @@
 package be.ledfan.geocoder.importer.processors
 
+import be.ledfan.geocoder.db.entity.OsmUpstreamElement
 import be.ledfan.geocoder.importer.core.BaseProcessor
 //import be.ledfan.geocoder.db.entity.OneWayRestriction
-//import be.ledfan.geocoder.db.mapper.*
+import be.ledfan.geocoder.db.mapper.*
 import de.topobyte.osm4j.core.model.iface.OsmWay
 import mu.KotlinLogging
 import java.sql.Connection
@@ -10,8 +11,7 @@ import java.sql.Connection
 /**
  * Process OsmWay objects.
  */
-class OsmWayProcessor(
-//        private val osmUpstreamLineMapper: OsmUpstreamLineMapper,
+class OsmWayProcessor(private val osmUpstreamLineMapper: OsmUpstreamLineMapper,
 //                      private val osmUpstreamPolygonMapper: OsmUpstreamPolygonMapper,
 //                      private val osmWayMapper: OsmWayMapper,
 //                      private val wayNodeMapper: WayNodeMapper,
@@ -27,21 +27,21 @@ class OsmWayProcessor(
 
     override suspend fun processOneEntity(node: List<OsmWay>) {
 
-//        val osmIds = ArrayList<Long>()
-//
+        val osmIds = ArrayList<Long>()
+
 //        val dbObjects: ArrayList<dbOsmWay> = ArrayList()
 //
 //        val wayNodes: ArrayList<WayNodeMapper.BulkInsertData> = ArrayList()
-//
-//        node.forEach {
-//            osmIds.add(it.id)
-//        }
-//
+
+        node.forEach {
+            osmIds.add(it.id)
+        }
+
 //        val upstreamLineObjects = osmUpstreamLineMapper.getByPrimaryIds(osmIds)
 //        val upstreamPolygonObjects = osmUpstreamPolygonMapper.getByPrimaryIds(osmIds)
-//
-//        loop@ for (it in node) {
-//            val line = upstreamLineObjects[it.id] as OsmUpstreamElement?
+
+        loop@ for (it in node) {
+//            val line = upstreamLineObjects[it.id]
 //            val polygon = upstreamPolygonObjects[it.id] as OsmUpstreamElement?
 //
 //            val upObject = when {
@@ -98,7 +98,7 @@ class OsmWayProcessor(
 //            } catch (e: java.lang.Exception) {
 //                logger.error(e) {}
 //            }
-//        }
+        }
 
 //        osmWayMapper.bulkInsert(dbObjects)
 //        wayNodeMapper.bulkInsert(wayNodes)

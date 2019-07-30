@@ -2,9 +2,9 @@ package be.ledfan.geocoder.db.entity
 
 import java.sql.ResultSet
 
-interface EntityCompanion {
+interface EntityCompanion<T> {
 
-    fun fillFromRow(row: ResultSet): Entity
+    fun fillFromRow(row: ResultSet): T
 
 }
 
