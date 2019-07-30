@@ -1,0 +1,16 @@
+<configuration debug="false">
+
+    <appender name="FILE-IMPORTER" class="ch.qos.logback.core.FileAppender">
+        <file>logs/importer.log</file>
+        <append>false</append>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <immediateFlush>true</immediateFlush>
+    </appender>
+
+    <root level="DEBUG">
+        <appender-ref ref="FILE-IMPORTER" />
+    </root>
+
+</configuration>
