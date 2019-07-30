@@ -1,5 +1,6 @@
 package be.ledfan.geocoder.importer.core
 
+import de.topobyte.osm4j.core.model.iface.OsmEntity
 import mu.KotlinLogging
 import java.sql.Connection
 import java.util.concurrent.LinkedBlockingQueue
@@ -47,7 +48,7 @@ abstract class BaseProcessor<OsmType>(private val connection: Connection) {
             }
 
             if (items.size > 0) {
-                processOneEntity(items)
+                processEntities(items)
             }
             processedCount += blockSize
         }
@@ -65,6 +66,7 @@ abstract class BaseProcessor<OsmType>(private val connection: Connection) {
         logger.debug { "Processor $threadId stopped"}
     }
 
-    abstract suspend fun processOneEntity(node: List<OsmType>)
+    abstract suspend fun processEntities(entities: List<OsmType>)
+
 
 }

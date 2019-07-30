@@ -20,8 +20,6 @@ class OsmUpstreamElement(val id: Long) : Entity {
     }
 
     lateinit var way: PGgeometry
-
     var zOrder: Int = 0
-
     lateinit var tags: HashMap<String, String>
 }

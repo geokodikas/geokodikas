@@ -43,7 +43,7 @@ val kodein = Kodein {
 
 //    bind<OsmRelationProcessor>() with provider { OsmRelationProcessor(instance(), instance(), instance(), instance(), instance()) }
 //
-    bind<OsmWayProcessor>() with provider { OsmWayProcessor(instance(), instance()) }
+    bind<OsmWayProcessor>() with provider { OsmWayProcessor(instance(), instance(), instance(), instance(), instance(), instance()) }
 
 //    bind<DetermineLayerNode>() with singleton { DetermineLayerNode() }
 //

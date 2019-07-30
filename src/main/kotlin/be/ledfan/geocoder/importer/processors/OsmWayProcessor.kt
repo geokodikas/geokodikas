@@ -1,9 +1,11 @@
 package be.ledfan.geocoder.importer.processors
 
-import be.ledfan.geocoder.db.entity.OsmUpstreamElement
+import be.ledfan.geocoder.db.entity.OneWayRestriction
 import be.ledfan.geocoder.importer.core.BaseProcessor
 //import be.ledfan.geocoder.db.entity.OneWayRestriction
 import be.ledfan.geocoder.db.mapper.*
+import be.ledfan.geocoder.importer.core.copyVersionAndTags
+import be.ledfan.geocoder.db.entity.OsmWay as dbOsmWay
 import de.topobyte.osm4j.core.model.iface.OsmWay
 import mu.KotlinLogging
 import java.sql.Connection
@@ -12,70 +14,52 @@ import java.sql.Connection
  * Process OsmWay objects.
  */
 class OsmWayProcessor(private val osmUpstreamLineMapper: OsmUpstreamLineMapper,
-//                      private val osmUpstreamPolygonMapper: OsmUpstreamPolygonMapper,
-//                      private val osmWayMapper: OsmWayMapper,
-//                      private val wayNodeMapper: WayNodeMapper,
-//                      private val oneWayRestrictionMapper: OneWayRestrictionMapper,
+                      private val osmUpstreamPolygonMapper: OsmUpstreamPolygonMapper,
+                      private val osmWayMapper: OsmWayMapper,
+                      private val wayNodeMapper: WayNodeMapper,
+                      private val oneWayRestrictionMapper: OneWayRestrictionMapper,
 //                      private val tagParser: TagParser,
 //                      private val determineLayer: DetermineLayerWay,
                       connection: Connection) : BaseProcessor<OsmWay>(connection) {
 
-
-//    private val oneWayRestrictionObjects = ArrayList<OneWayRestriction>()
+    private val oneWayRestrictionObjects = ArrayList<OneWayRestriction>()
 
     private val logger = KotlinLogging.logger {}
 
-    override suspend fun processOneEntity(node: List<OsmWay>) {
+    override suspend fun processEntities(entities: List<OsmWay>) {
 
-        val osmIds = ArrayList<Long>()
+        val osmIds = entities.map { it.id }
+        val dbObjects: ArrayList<dbOsmWay> = ArrayList()
+        val wayNodes: ArrayList<WayNodeMapper.BulkInsertData> = ArrayList()
 
-//        val dbObjects: ArrayList<dbOsmWay> = ArrayList()
-//
-//        val wayNodes: ArrayList<WayNodeMapper.BulkInsertData> = ArrayList()
+        val upstreamLineObjects = osmUpstreamLineMapper.getByPrimaryIds(osmIds)
+        val upstreamPolygonObjects = osmUpstreamPolygonMapper.getByPrimaryIds(osmIds)
 
-        node.forEach {
-            osmIds.add(it.id)
-        }
+        loop@ for (entity in entities) {
+            val line = upstreamLineObjects[entity.id]
+            val polygon = upstreamPolygonObjects[entity.id]
 
-//        val upstreamLineObjects = osmUpstreamLineMapper.getByPrimaryIds(osmIds)
-//        val upstreamPolygonObjects = osmUpstreamPolygonMapper.getByPrimaryIds(osmIds)
+            val upObject = when {
+                line != null && polygon != null -> throw Exception("Both line and polygon found ${entity.id}")
+                line != null -> line
+                polygon != null -> polygon
+                else -> {
+                    logger.trace { "Skipping way ${entity.id} because not found in upstream db" }
+                    continue@loop
+                }
+            }
 
-        loop@ for (it in node) {
-//            val line = upstreamLineObjects[it.id]
-//            val polygon = upstreamPolygonObjects[it.id] as OsmUpstreamElement?
-//
-//            val upObject = when {
-//                line != null && polygon != null -> throw Exception("Both line and polygon found ${it.id}")
-//                line != null -> line
-//                polygon != null -> polygon
-//                else -> {
-//                    logger.trace { "Skipping way ${it.id} because not found in upstream db" }
-//                    continue@loop
-//                }
-//            }
-//
-//            val dbObject = dbOsmWay(it.id)
-//
-//            it.metadata?.version?.let {
-//                dbObject.version = it
-//            }
-//
-//            if (it.numberOfTags > 0) {
-//                for (i in 0 until it.numberOfTags) {
-//                    dbObject.tags[it.getTag(i).key] = it.getTag(i).value
-//                }
-//            }
-//
-//            dbObject.geometry = upObject.way
-//            dbObject.zOrder = upObject.zOrder
-//
-//            val nodeIds = ArrayList<Long>()
-//            for (i in 0 until it.numberOfNodes) {
-//                val nodeId = it.getNodeId(i)
-//                nodeIds.add(nodeId)
-//            }
-//
-//            try {
+            val dbObject = dbOsmWay(entity.id)
+            entity.copyVersionAndTags(dbObject)
+            dbObject.geometry = upObject.way
+            dbObject.zOrder = upObject.zOrder
+
+            val nodeIds = ArrayList<Long>()
+            for (i in 0 until entity.numberOfNodes) {
+                val nodeId = entity.getNodeId(i)
+                nodeIds.add(nodeId)
+            }
+
 //                val tags = tagParser.parse(dbObject)
 //                val layers = determineLayer.determine(dbObject, tags)
 //
@@ -95,15 +79,12 @@ class OsmWayProcessor(private val osmUpstreamLineMapper: OsmUpstreamLineMapper,
 //                    }
 //                    else -> logger.warn { "Multiple layer found for ${dbObject.id} this should NOT Happen. Way will not be imported. Layers=${layers.joinToString()}" }
 //                }
-//            } catch (e: java.lang.Exception) {
-//                logger.error(e) {}
-//            }
         }
 
-//        osmWayMapper.bulkInsert(dbObjects)
-//        wayNodeMapper.bulkInsert(wayNodes)
-//        oneWayRestrictionMapper.bulkInsert(oneWayRestrictionObjects)
-//        oneWayRestrictionObjects.clear()
+        osmWayMapper.bulkInsert(dbObjects)
+        wayNodeMapper.bulkInsert(wayNodes)
+        oneWayRestrictionMapper.bulkInsert(oneWayRestrictionObjects)
+        oneWayRestrictionObjects.clear()
     }
 
 //    private fun checkAndProcessOneWay(dbObject: be.ledfan.geocoder.db.entity.OsmWay, tags: Tags) {
