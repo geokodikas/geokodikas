@@ -1,17 +1,17 @@
 package be.ledfan.geocoder.db.entity
 
+import be.ledfan.geocoder.db.getHstore
 import org.postgis.PGgeometry
 import java.sql.ResultSet
 
 class OsmUpstreamElement(val id: Long) : Entity {
 
-
-    companion object : EntityCompanion {
+    companion object : EntityCompanion<OsmUpstreamElement> {
         override fun fillFromRow(row: ResultSet): OsmUpstreamElement {
             val r = OsmUpstreamElement(row.getLong("osm_id"))
 
             r.way = row.getObject("way") as PGgeometry
-            r.tags = row.getObject("tags") as HashMap<String, String>
+            r.tags = row.getHstore("tags")
             r.zOrder = row.getInt("z_order")
 
             return r

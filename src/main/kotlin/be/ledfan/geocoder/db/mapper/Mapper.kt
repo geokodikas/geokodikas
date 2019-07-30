@@ -1,16 +1,16 @@
 package be.ledfan.geocoder.db.mapper
 
-import be.ledfan.geocoder.db.entity.Entity
 import be.ledfan.geocoder.db.entity.EntityCompanion
 import java.sql.Connection
+import java.sql.PreparedStatement
 
-abstract class Mapper(private val con: Connection) {
+abstract class Mapper<T>(private val con: Connection) {
 
     abstract val tableName: String
 
-    abstract val entityCompanion: EntityCompanion
+    abstract val entityCompanion: EntityCompanion<T>
 
-    fun getByPrimaryId(id: Long): Entity? {
+    fun getByPrimaryId(id: Long): T? {
         val stmt = con.prepareStatement("SELECT *  FROM $tableName WHERE osm_id = ?") // TODO replace osm_id
         stmt.setLong(1, id)
         val result = stmt.executeQuery()
@@ -30,23 +30,12 @@ abstract class Mapper(private val con: Connection) {
 
     }
 
-    fun getByPrimaryIds(ids: List<Long>): HashMap<Long, Entity> {
+    fun getByPrimaryIds(ids: List<Long>): HashMap<Long, T> {
         val sql = "SELECT * FROM $tableName WHERE osm_id = ANY(?)" // TODO replace osm_id
         val array = con.createArrayOf("BIGINT", ids.toTypedArray())
         val stmt = con.prepareStatement(sql)
         stmt.setArray(1, array)
-        val result = stmt.executeQuery()
-
-        val r = HashMap<Long, Entity>()
-
-        while (result.next()) {
-            val rEntity = entityCompanion.fillFromRow(result)
-            r[result.getLong("osm_id")] = rEntity
-        }
-
-        stmt.close()
-        result.close()
-        return r
+        return executeSelect(stmt)
     }
 
     fun deleteByPrimaryId(id: Long) {
@@ -64,12 +53,16 @@ abstract class Mapper(private val con: Connection) {
         stmt.executeUpdate()
     }
 
-    fun getAll(): HashMap<Long, Entity> {
+    fun getAll(): HashMap<Long, T> {
         val sql = "SELECT * FROM $tableName WHERE"
         val stmt = con.prepareStatement(sql)
+        return executeSelect(stmt)
+    }
+
+    private fun executeSelect(stmt: PreparedStatement): HashMap<Long, T> {
         val result = stmt.executeQuery()
 
-        val r = HashMap<Long, Entity>()
+        val r = HashMap<Long, T>()
 
         while (result.next()) {
             val rEntity = entityCompanion.fillFromRow(result)
