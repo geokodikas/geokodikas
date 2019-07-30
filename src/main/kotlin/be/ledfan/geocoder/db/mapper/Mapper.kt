@@ -1,0 +1,84 @@
+package be.ledfan.geocoder.db.mapper
+
+import be.ledfan.geocoder.db.entity.Entity
+import be.ledfan.geocoder.db.entity.EntityCompanion
+import java.sql.Connection
+
+abstract class Mapper(private val con: Connection) {
+
+    abstract val tableName: String
+
+    abstract val entityCompanion: EntityCompanion
+
+    fun getByPrimaryId(id: Long): Entity? {
+        val stmt = con.prepareStatement("SELECT *  FROM $tableName WHERE osm_id = ?") // TODO replace osm_id
+        stmt.setLong(1, id)
+        val result = stmt.executeQuery()
+
+        if (!result.next()) {
+            return null
+        }
+
+        val rEntity = entityCompanion.fillFromRow(result)
+
+        if (result.next()) {
+            throw RuntimeException("More than one result found for PK=$id.")
+        }
+        stmt.close()
+        result.close()
+        return rEntity
+
+    }
+
+    fun getByPrimaryIds(ids: List<Long>): HashMap<Long, Entity> {
+        val sql = "SELECT * FROM $tableName WHERE osm_id = ANY(?)" // TODO replace osm_id
+        val array = con.createArrayOf("BIGINT", ids.toTypedArray())
+        val stmt = con.prepareStatement(sql)
+        stmt.setArray(1, array)
+        val result = stmt.executeQuery()
+
+        val r = HashMap<Long, Entity>()
+
+        while (result.next()) {
+            val rEntity = entityCompanion.fillFromRow(result)
+            r[result.getLong("osm_id")] = rEntity
+        }
+
+        stmt.close()
+        result.close()
+        return r
+    }
+
+    fun deleteByPrimaryId(id: Long) {
+        val sql = "DELETE  FROM $tableName WHERE osm_id = ?"
+        val stmt = con.prepareStatement(sql) // TODO replace osm_id
+        stmt.setLong(1, id)
+        stmt.executeUpdate()
+    }
+
+    fun deleteByPrimaryIds(ids: List<Long>) {
+        val sql = "DELETE  FROM $tableName WHERE osm_id = ANY(?)"
+        val array = con.createArrayOf("BIGINT", ids.toTypedArray())
+        val stmt = con.prepareStatement(sql) // TODO replace osm_id
+        stmt.setArray(1, array)
+        stmt.executeUpdate()
+    }
+
+    fun getAll(): HashMap<Long, Entity> {
+        val sql = "SELECT * FROM $tableName WHERE"
+        val stmt = con.prepareStatement(sql)
+        val result = stmt.executeQuery()
+
+        val r = HashMap<Long, Entity>()
+
+        while (result.next()) {
+            val rEntity = entityCompanion.fillFromRow(result)
+            r[result.getLong("osm_id")] = rEntity
+        }
+
+        stmt.close()
+        result.close()
+        return r
+    }
+
+}
