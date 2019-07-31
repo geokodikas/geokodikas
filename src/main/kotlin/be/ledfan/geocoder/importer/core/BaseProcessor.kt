@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit
  * For each OsmType a Processor is needed which for each element of that type will process it.
  * There will be multiple parallel processors for each type.
  */
-abstract class BaseProcessor<OsmType>(private val connection: Connection) {
+abstract class BaseProcessor<OsmType> {
 
     @Volatile
     private var running: Boolean = true

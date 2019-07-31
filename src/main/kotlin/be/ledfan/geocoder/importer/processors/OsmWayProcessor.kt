@@ -22,8 +22,7 @@ class OsmWayProcessor(private val osmUpstreamLineMapper: OsmUpstreamLineMapper,
                       private val wayNodeMapper: WayNodeMapper,
                       private val oneWayRestrictionMapper: OneWayRestrictionMapper,
                       private val tagParser: TagParser,
-                      private val determineLayer: DetermineLayerWay,
-                      connection: Connection) : BaseProcessor<OsmWay>(connection) {
+                      private val determineLayer: DetermineLayerWay) : BaseProcessor<OsmWay>() {
 
     private val oneWayRestrictionObjects = ArrayList<OneWayRestriction>()
 
@@ -80,14 +79,14 @@ class OsmWayProcessor(private val osmUpstreamLineMapper: OsmUpstreamLineMapper,
                         }
                     }
                 }
-                else -> logger.warn { "Multiple layer found for ${dbObject.id} this should NOT Happen. Way will not be imported. Layers=${layers.joinToString()}" }
+                else -> throw Exception("Multiple layer found for ${dbObject.id} this should NOT Happen. Way will not be imported. Layers=${layers.sorted().joinToString()}")
             }
         }
 
         osmWayMapper.bulkInsert(dbObjects)
         wayNodeMapper.bulkInsert(wayNodes)
-        oneWayRestrictionMapper.bulkInsert(oneWayRestrictionObjects)
-        oneWayRestrictionObjects.clear()
+//        oneWayRestrictionMapper.bulkInsert(oneWayRestrictionObjects)
+//        oneWayRestrictionObjects.clear()
     }
 
 //    private fun checkAndProcessOneWay(dbObject: be.ledfan.geocoder.db.entity.OsmWay, tags: Tags) {
