@@ -21,7 +21,7 @@ suspend fun main(args: Array<String>) {
 
         executeStep("step0")
         executeStep("step1")
-//        executeStep("step2")
+        executeStep("step2")
 //        executeStep("step3")
 
         finish()

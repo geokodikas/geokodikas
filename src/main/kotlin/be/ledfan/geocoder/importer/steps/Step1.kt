@@ -76,7 +76,7 @@ suspend fun step1_import_ways(): Boolean {
 }
 
 suspend fun step1_create_indexes() : Boolean {
-    logger.info { "Updating centroids of osm_relation and creating indexes" }
+    logger.info { "Updating centroids of osm_way and creating indexes" }
 
     @Language("SQL")
     val sqlQueries = listOf(

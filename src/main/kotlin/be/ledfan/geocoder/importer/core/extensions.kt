@@ -15,3 +15,16 @@ fun OsmEntity.copyVersionAndTags(into: dbOsmEntity) {
         }
     }
 }
+
+fun <T> List<T>.hasAtLeast(amount: Int, predicate: (T) -> Boolean): Boolean {
+    var cnt = 0
+    for (el in this) {
+        if (predicate(el)) {
+            cnt++
+        }
+        if (cnt == amount) {
+            return true
+        }
+    }
+    return false
+}

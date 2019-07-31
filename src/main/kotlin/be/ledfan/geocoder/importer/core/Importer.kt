@@ -39,14 +39,14 @@ class Importer {
                 Pair("step1_import_ways", ::step1_import_ways),
                 Pair("step1_create_indexes", ::step1_create_indexes))
 
-//        steps["step2"] = listOf(
-//                Pair("step2_checks", ::step2_checks),
-//                Pair("step2_import_nodes", ::step2_import_nodes),
-//                Pair("step2_create_indexes", ::step2_create_indexes),
+        steps["step2"] = listOf(
+                Pair("step2_checks", ::step2_checks),
+                Pair("step2_import_nodes", ::step2_import_nodes),
+                Pair("step2_create_indexes", ::step2_create_indexes),
 //                Pair("step2_resolve_distances_way_node", ::step2_resolve_distances_way_node),
-//                Pair("step2_prune_nodes_without_layer", ::step2_prune_nodes_without_layer),
+                Pair("step2_prune_nodes_without_layer", ::step2_prune_nodes_without_layer))
 //                Pair("step2_resolve_one_ways", ::step2_resolve_one_ways))
-//
+
 //        steps["step3"] = listOf(
 //                Pair("step3_checks", ::step3_checks),
 //                Pair("step3_import_relations", ::step3_import_relations),

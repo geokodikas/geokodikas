@@ -93,4 +93,9 @@ data class Tags(private var values: List<String>? = null, private val children: 
     fun hasValue(value: String): Boolean {
         return values?.contains(value) ?: false
     }
+
+    fun hasAnyValue(values: List<String>): Boolean {
+        return this.values?.any { values.contains(it) } ?: false
+    }
+
 }
