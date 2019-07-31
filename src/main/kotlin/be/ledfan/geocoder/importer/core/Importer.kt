@@ -28,6 +28,10 @@ class Importer {
         logger.info { "Starting import of $inputFileName" }
         logger.info { "Bootstrapping importer" }
         setMaximumThreads()
+    }
+
+    init {
+        steps["drop_tables"] = listOf(Pair("drop_tables", ::drop_tables))
 
         steps["step0"] = listOf(
                 Pair("step0_checks", ::step0_checks),
@@ -80,10 +84,11 @@ class Importer {
     }
 
     fun stopWithFatalError(message: String) {
-        synchronized(this) { // execute the stop procedure only once
+        synchronized(this) {
+            // execute the stop procedure only once
             kodein.direct.instance<StatsCollector>().finish()
 
-            logger.error{ "Stopped due to fatal error. Message: $message" }
+            logger.error { "Stopped due to fatal error. Message: $message" }
 
             println()
             println("Stopped due to fatal error. Message: $message")
@@ -92,11 +97,12 @@ class Importer {
     }
 
     fun stopWithFatalError(cause: Exception) {
-        synchronized(this) { // execute the stop procedure only once
+        synchronized(this) {
+            // execute the stop procedure only once
             kodein.direct.instance<StatsCollector>().finish()
 
             println()
-            logger.error(cause) { "Stopped due to fatal error."}
+            logger.error(cause) { "Stopped due to fatal error." }
             println("Stopped due to fatal error. Cause:")
             cause.printStackTrace()
             exitProcess(1)

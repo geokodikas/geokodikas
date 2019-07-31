@@ -16,6 +16,12 @@ suspend fun main(args: Array<String>) {
     System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, "logback.importer.xml");
 
     val importer = kodein.direct.instance<Importer>()
+
+    if (args[0] == "--drop-tables") {
+        importer.executeStep("drop_tables")
+        return
+    }
+
     importer.run {
         setup(args[0])
 
