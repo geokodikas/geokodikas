@@ -51,11 +51,11 @@ class Importer {
                 Pair("step2_prune_nodes_without_layer", ::step2_prune_nodes_without_layer))
 //                Pair("step2_resolve_one_ways", ::step2_resolve_one_ways))
 
-//        steps["step3"] = listOf(
-//                Pair("step3_checks", ::step3_checks),
-//                Pair("step3_import_relations", ::step3_import_relations),
+        steps["step3"] = listOf(
+                Pair("step3_checks", ::step3_checks),
+                Pair("step3_import_relations", ::step3_import_relations),
 //                Pair("step3_set_centroid", ::step3_set_centroid),
-//                Pair("step3_create_indexes", ::step3_create_indexes),
+                Pair("step3_create_indexes", ::step3_create_indexes))
 //                Pair("step3_prune_relations", ::step3_prune_relations),
 //                Pair("step3_resolve_hierarchies", ::step3_resolve_hierarchies))
     }
