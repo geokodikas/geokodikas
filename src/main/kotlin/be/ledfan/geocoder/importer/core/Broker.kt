@@ -48,14 +48,14 @@ class Broker<OsmType : OsmEntity>(
         logger.debug { "Starting $numProcessors processors for type: $osmTypeName ..." }
         for (i in 0 until numProcessors) {
             val job = GlobalScope.launch(Dispatchers.IO) {
-                val processor = factory() // create processor
-                processors[i] = processor
-
-                processor.queue = queue
-                processor.threadId = i
-                processor.outputThreshold = outputThreshold
-                processor.blockSize = processorBlocKSize
                 try {
+                    val processor = factory() // create processor
+                    processors[i] = processor
+
+                    processor.queue = queue
+                    processor.threadId = i
+                    processor.outputThreshold = outputThreshold
+                    processor.blockSize = processorBlocKSize
                     processor.run() // start processing
                 } catch (e: Exception) {
                     val importer = kodein.direct.instance<Importer>()

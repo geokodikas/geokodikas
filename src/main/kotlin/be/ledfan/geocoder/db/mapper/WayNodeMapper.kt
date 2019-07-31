@@ -71,7 +71,7 @@ class WayNodeMapper(private val con: Connection) : Mapper<WayNode>(con) {
 
     }
 
-    fun getLinkedWaysByNode(osmIds: ArrayList<Long>): HashMap<Long, ArrayList<Pair<Long, Layer>>> {
+    fun getLinkedWaysByNode(osmIds: List<Long>): HashMap<Long, ArrayList<Pair<Long, Layer>>> {
 
         val sql = "SELECT * FROM $tableName WHERE node_id = ANY(?)"
         val array = con.createArrayOf("BIGINT", osmIds.toTypedArray())
