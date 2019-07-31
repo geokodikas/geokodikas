@@ -30,7 +30,7 @@ val kodein = Kodein {
     bind<OsmNodeMapper>() with provider { OsmNodeMapper(instance()) }
 
 //    bind<OsmRelationMapper>() with provider { OsmRelationMapper(instance()) }
-//
+
     bind<OsmUpstreamLineMapper>() with provider { OsmUpstreamLineMapper(instance()) }
 
     bind<OsmUpstreamPointMapper>() with provider { OsmUpstreamPointMapper(instance()) }
@@ -54,9 +54,9 @@ val kodein = Kodein {
     bind<DetermineLayerWay>() with singleton { DetermineLayerWay() }
 
 //    bind<OneWayResolver>() with singleton { OneWayResolver(instance(), instance(), instance()) }
-//
+
 //    bind<RelationHierarchyResolver>() with singleton { RelationHierarchyResolver(instance()) }
-//
+
 //    bind<RelationPostProcessor>() with singleton { RelationPostProcessor(instance(), instance(), instance()) }
 
     bind<TagParser>() with singleton { TagParser() }

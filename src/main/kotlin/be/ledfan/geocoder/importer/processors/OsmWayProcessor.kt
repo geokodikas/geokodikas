@@ -8,6 +8,7 @@ import be.ledfan.geocoder.importer.core.TagParser
 import be.ledfan.geocoder.importer.core.Tags
 import be.ledfan.geocoder.importer.core.copyVersionAndTags
 import de.topobyte.osm4j.core.model.iface.OsmWay
+import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import be.ledfan.geocoder.db.entity.OsmWay as dbOsmWay
 
