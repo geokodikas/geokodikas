@@ -1,26 +1,28 @@
 package importer.processors
 
 import be.ledfan.geocoder.db.entity.OsmUpstreamElement
-import be.ledfan.geocoder.db.mapper.*
+import be.ledfan.geocoder.db.mapper.OsmUpstreamLineMapper
+import be.ledfan.geocoder.db.mapper.OsmUpstreamPolygonMapper
+import be.ledfan.geocoder.db.mapper.OsmWayMapper
+import be.ledfan.geocoder.db.mapper.WayNodeMapper
 import be.ledfan.geocoder.importer.DetermineLayerWay
 import be.ledfan.geocoder.importer.Layer
 import be.ledfan.geocoder.importer.core.TagParser
 import be.ledfan.geocoder.importer.core.Tags
 import be.ledfan.geocoder.importer.processors.OsmWayProcessor
 import com.slimjars.dist.gnu.trove.list.array.TLongArrayList
-import de.topobyte.osm4j.core.model.iface.OsmWay
 import de.topobyte.osm4j.core.model.impl.Way
-import de.topobyte.osm4j.core.model.impl.Metadata
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Test
 import org.postgis.PGgeometry
-import java.lang.Exception
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class OsmWayProcessorUnitTest {
 
@@ -40,10 +42,9 @@ class OsmWayProcessorUnitTest {
             val osmUpstreamPolygonMapper: OsmUpstreamPolygonMapper = mockk<OsmUpstreamPolygonMapper>(),
             val osmWayMapper: OsmWayMapper = mockk<OsmWayMapper>(),
             val wayNodeMapper: WayNodeMapper = mockk<WayNodeMapper>(relaxed = true),
-            val oneWayRestrictionMapper: OneWayRestrictionMapper = mockk<OneWayRestrictionMapper>(relaxed = true),
             val tagParser: TagParser = mockk<TagParser>(),
             val determineLayerWay: DetermineLayerWay = mockk<DetermineLayerWay>(),
-            val proc: OsmWayProcessor = OsmWayProcessor(osmUpstreamLineMapper, osmUpstreamPolygonMapper, osmWayMapper, wayNodeMapper, oneWayRestrictionMapper, tagParser, determineLayerWay)
+            val proc: OsmWayProcessor = OsmWayProcessor(osmUpstreamLineMapper, osmUpstreamPolygonMapper, osmWayMapper, wayNodeMapper, tagParser, determineLayerWay)
     ) {
         init {
             every { osmWayMapper.bulkInsert(any()) } returns Unit
@@ -65,7 +66,7 @@ class OsmWayProcessorUnitTest {
             mocks.proc.processEntities(ways)
         }
 
-        verify(exactly = 1) { mocks.osmWayMapper.bulkInsert(match { it.size == 1 && it[0].id == 10L }) }
+        verify(exactly = 1) { mocks.osmWayMapper.bulkInsert(match { it.size == 1 && it[0].id == 10L && !it[0].hasOneWayRestriction && !it[0].hasReversedOneWay }) }
         verify(exactly = 1) { mocks.wayNodeMapper.bulkInsert(arrayListOf()) }
     }
 
@@ -83,7 +84,7 @@ class OsmWayProcessorUnitTest {
             mocks.proc.processEntities(ways)
         }
 
-        verify(exactly = 1) { mocks.osmWayMapper.bulkInsert(match { it.size == 1 && it[0].id == 10L }) }
+        verify(exactly = 1) { mocks.osmWayMapper.bulkInsert(match { it.size == 1 && it[0].id == 10L && !it[0].hasOneWayRestriction && !it[0].hasReversedOneWay }) }
         verify(exactly = 1) { mocks.wayNodeMapper.bulkInsert(arrayListOf()) }
     }
 
@@ -137,7 +138,7 @@ class OsmWayProcessorUnitTest {
             mocks.proc.processEntities(ways)
         }
 
-        verify(exactly = 1) { mocks.osmWayMapper.bulkInsert(match { it.size == 1 && it[0].id == 10L }) }
+        verify(exactly = 1) { mocks.osmWayMapper.bulkInsert(match { it.size == 1 && it[0].id == 10L && !it[0].hasOneWayRestriction && !it[0].hasReversedOneWay }) }
         verify(exactly = 1) { mocks.wayNodeMapper.bulkInsert(arrayListOf()) }
     }
 
@@ -222,5 +223,76 @@ class OsmWayProcessorUnitTest {
                     WayNodeMapper.BulkInsertData(osmWayEntity, 3, 2))
             )
         }
+    }
+
+    @Test
+    fun basic_reverse_parsing() {
+        fun setup(tags: HashMap<String, String>): be.ledfan.geocoder.db.entity.OsmWay {
+            val mocks = Mocks()
+            val dbUpObject = create_upstream_element(10)
+            dbUpObject.tags = tags
+            every { mocks.osmUpstreamLineMapper.getByPrimaryIds(listOf(10)) } returns hashMapOf(10L to dbUpObject)
+            every { mocks.osmUpstreamPolygonMapper.getByPrimaryIds(listOf(10)) } returns hashMapOf()
+            every { mocks.determineLayerWay.determine(any(), any()) } returns hashSetOf(Layer.Address)
+
+            every { mocks.tagParser.parse(hashMapOf()) } returns TagParser().parse(tags)
+
+            every { mocks.determineLayerWay.importNodesForLayer(any()) } returns true
+
+            val ways = listOf(create_osm_way(10, listOf(1L, 2L, 3L)))
+
+            runBlocking {
+                mocks.proc.processEntities(ways)
+            }
+
+            val osmWayEntities = slot<ArrayList<be.ledfan.geocoder.db.entity.OsmWay>>()
+
+            verify(exactly = 1) { mocks.osmWayMapper.bulkInsert(capture(osmWayEntities)) }
+            assertEquals(1, osmWayEntities.captured.size)
+            val osmWayEntity = osmWayEntities.captured[0]
+            assertEquals(10L, osmWayEntity.id)
+            return osmWayEntity
+        }
+
+        var r = setup(hashMapOf("highway" to "motorway"))
+        assertTrue(r.hasOneWayRestriction)
+        assertFalse(r.hasReversedOneWay)
+
+        r = setup(hashMapOf("junction" to "roundabout"))
+        assertTrue(r.hasOneWayRestriction)
+        assertFalse(r.hasReversedOneWay)
+
+        r = setup(hashMapOf("junction" to "circular"))
+        assertTrue(r.hasOneWayRestriction)
+        assertFalse(r.hasReversedOneWay)
+
+        r = setup(hashMapOf("oneway" to "yes"))
+        assertTrue(r.hasOneWayRestriction)
+        assertFalse(r.hasReversedOneWay)
+
+        r = setup(hashMapOf("oneway" to "true"))
+        assertTrue(r.hasOneWayRestriction)
+        assertFalse(r.hasReversedOneWay)
+
+        r = setup(hashMapOf("oneway" to "1"))
+        assertTrue(r.hasOneWayRestriction)
+        assertFalse(r.hasReversedOneWay)
+
+        r = setup(hashMapOf("oneway" to "reverse"))
+        assertTrue(r.hasOneWayRestriction)
+        assertTrue(r.hasReversedOneWay)
+
+        r = setup(hashMapOf("oneway" to "-1"))
+        assertTrue(r.hasOneWayRestriction)
+        assertTrue(r.hasReversedOneWay)
+
+        r = setup(hashMapOf("junction" to "yes"))
+        assertFalse(r.hasOneWayRestriction)
+        assertFalse(r.hasReversedOneWay)
+
+        r = setup(hashMapOf("highway" to "residential"))
+        assertFalse(r.hasOneWayRestriction)
+        assertFalse(r.hasReversedOneWay)
+
     }
 }

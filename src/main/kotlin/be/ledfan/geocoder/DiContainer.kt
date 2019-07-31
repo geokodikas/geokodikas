@@ -26,8 +26,6 @@ val kodein = Kodein {
 
     bind<Importer>() with singleton { Importer() }
 
-    bind<OneWayRestrictionMapper>() with provider { OneWayRestrictionMapper(instance()) }
-
 //    bind<OsmNodeMapper>() with provider { OsmNodeMapper(instance()) }
 
 //    bind<OsmRelationMapper>() with provider { OsmRelationMapper(instance()) }
@@ -46,7 +44,7 @@ val kodein = Kodein {
 
 //    bind<OsmRelationProcessor>() with provider { OsmRelationProcessor(instance(), instance(), instance(), instance(), instance()) }
 //
-    bind<OsmWayProcessor>() with provider { OsmWayProcessor(instance(), instance(), instance(), instance(), instance(), instance(), instance()) }
+    bind<OsmWayProcessor>() with provider { OsmWayProcessor(instance(), instance(), instance(), instance(), instance(), instance()) }
 
 //    bind<DetermineLayerNode>() with singleton { DetermineLayerNode() }
 //
