@@ -2,7 +2,6 @@ import be.ledfan.geocoder.importer.core.TagParser
 import be.ledfan.geocoder.importer.core.Tags
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import kotlin.test.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import kotlin.test.assertFalse

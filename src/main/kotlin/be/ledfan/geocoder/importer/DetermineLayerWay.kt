@@ -226,8 +226,7 @@ class DetermineLayerWay {
     }
 
     fun importNodesForLayer(layer: Layer): Boolean {
-        if (layer == Layer.Venue
-                || layer == Layer.Address) {
+        if (layer == Layer.Venue || layer == Layer.Address) {
             return false
         }
 
