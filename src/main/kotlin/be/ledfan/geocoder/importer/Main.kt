@@ -25,10 +25,10 @@ suspend fun main(args: Array<String>) {
     importer.run {
         setup(args[0])
 
-        executeStep("step0")
-        executeStep("step1")
-        executeStep("step2")
-//        executeStep("step3")
+//        executeStep("step0")
+//        executeStep("step1")
+//        executeStep("step2")
+        executeStep("step3")
 
         finish()
     }

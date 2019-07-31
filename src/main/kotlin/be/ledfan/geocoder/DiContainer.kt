@@ -5,11 +5,13 @@ import be.ledfan.geocoder.config.ConfigReader
 import be.ledfan.geocoder.db.ConnectionFactory
 import be.ledfan.geocoder.db.mapper.*
 import be.ledfan.geocoder.importer.DetermineLayerNode
+import be.ledfan.geocoder.importer.DetermineLayerRelation
 import be.ledfan.geocoder.importer.DetermineLayerWay
 import be.ledfan.geocoder.importer.core.Importer
 import be.ledfan.geocoder.importer.core.StatsCollector
 import be.ledfan.geocoder.importer.core.TagParser
 import be.ledfan.geocoder.importer.processors.OsmNodeProcessor
+import be.ledfan.geocoder.importer.processors.OsmRelationProcessor
 import be.ledfan.geocoder.importer.processors.OsmWayProcessor
 import org.kodein.di.Kodein
 import org.kodein.di.generic.bind
@@ -29,7 +31,7 @@ val kodein = Kodein {
 
     bind<OsmNodeMapper>() with provider { OsmNodeMapper(instance()) }
 
-//    bind<OsmRelationMapper>() with provider { OsmRelationMapper(instance()) }
+    bind<OsmRelationMapper>() with provider { OsmRelationMapper(instance()) }
 
     bind<OsmUpstreamLineMapper>() with provider { OsmUpstreamLineMapper(instance()) }
 
@@ -43,13 +45,13 @@ val kodein = Kodein {
 
     bind<OsmNodeProcessor>() with provider { OsmNodeProcessor(instance(), instance(), instance(), instance(), instance()) }
 
-//    bind<OsmRelationProcessor>() with provider { OsmRelationProcessor(instance(), instance(), instance(), instance(), instance()) }
+    bind<OsmRelationProcessor>() with provider { OsmRelationProcessor(instance(), instance(), instance(), instance()) }
 
     bind<OsmWayProcessor>() with provider { OsmWayProcessor(instance(), instance(), instance(), instance(), instance(), instance()) }
 
     bind<DetermineLayerNode>() with singleton { DetermineLayerNode() }
 
-//    bind<DetermineLayerRelation>() with singleton { DetermineLayerRelation() }
+    bind<DetermineLayerRelation>() with singleton { DetermineLayerRelation() }
 
     bind<DetermineLayerWay>() with singleton { DetermineLayerWay() }
 
