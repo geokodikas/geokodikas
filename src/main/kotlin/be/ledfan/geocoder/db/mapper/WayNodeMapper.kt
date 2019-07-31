@@ -92,45 +92,45 @@ class WayNodeMapper(private val con: Connection) : Mapper<WayNode>(con) {
         return r
     }
 
-    fun getLinkedWaysByNode(osmNodeId: Long): HashMap<Long, Array<Long>> {
-
-        @Language("SQL")
-        val sql = """SELECT *
-                     FROM (
-                             SELECT osm_way.osm_id                                   AS way_id,
-                                    osm_way.has_one_way_restriction,
-                                    CASE
-                                        WHEN osm_way.has_one_way_restriction THEN (
-                                            (SELECT array_agg(to_node_id)
-                                             FROM one_way_restrictions
-                                             WHERE way_id = osm_way.osm_id
-                                               AND from_node_id = wn1.node_id)
-                                        )
-                                        ELSE (SELECT array_agg(DISTINCT wn2.node_id)
-                                              FROM way_node AS wn2
-                                              WHERE wn2.way_id = osm_way.osm_id) END AS nodes_id
-                             FROM way_node AS wn1
-                                      JOIN osm_way ON osm_way.osm_id = wn1.way_id
-                             WHERE wn1.node_id = ?
-                               AND (wn1.way_layer = 'Street'::Layer OR wn1.way_layer = 'Junction'::Layer OR wn1.way_layer = 'Link'::Layer)
-                             GROUP BY (osm_way.osm_id, osm_way.has_one_way_restriction, wn1.node_id)) AS dummy
-                     WHERE nodes_id IS NOT NULL""";
-
-        val stmt = con.prepareStatement(sql)
-        stmt.setLong(1, osmNodeId)
-
-        val result = stmt.executeQuery()
-
-        val r = HashMap<Long, Array<Long>>()
-
-        while (result.next()) {
-            r[result.getLong("way_id")] = result.getArray("nodes_id").array as Array<Long>
-        }
-
-        stmt.close()
-        result.close()
-        return r
-    }
+//    fun getLinkedWaysByNode(osmNodeId: Long): HashMap<Long, Array<Long>> {
+//
+//        @Language("SQL")
+//        val sql = """SELECT *
+//                     FROM (
+//                             SELECT osm_way.osm_id                                   AS way_id,
+//                                    osm_way.has_one_way_restriction,
+//                                    CASE
+//                                        WHEN osm_way.has_one_way_restriction THEN (
+//                                            (SELECT array_agg(to_node_id)
+//                                             FROM one_way_restrictions
+//                                             WHERE way_id = osm_way.osm_id
+//                                               AND from_node_id = wn1.node_id)
+//                                        )
+//                                        ELSE (SELECT array_agg(DISTINCT wn2.node_id)
+//                                              FROM way_node AS wn2
+//                                              WHERE wn2.way_id = osm_way.osm_id) END AS nodes_id
+//                             FROM way_node AS wn1
+//                                      JOIN osm_way ON osm_way.osm_id = wn1.way_id
+//                             WHERE wn1.node_id = ?
+//                               AND (wn1.way_layer = 'Street'::Layer OR wn1.way_layer = 'Junction'::Layer OR wn1.way_layer = 'Link'::Layer)
+//                             GROUP BY (osm_way.osm_id, osm_way.has_one_way_restriction, wn1.node_id)) AS dummy
+//                     WHERE nodes_id IS NOT NULL""";
+//
+//        val stmt = con.prepareStatement(sql)
+//        stmt.setLong(1, osmNodeId)
+//
+//        val result = stmt.executeQuery()
+//
+//        val r = HashMap<Long, Array<Long>>()
+//
+//        while (result.next()) {
+//            r[result.getLong("way_id")] = result.getArray("nodes_id").array as Array<Long>
+//        }
+//
+//        stmt.close()
+//        result.close()
+//        return r
+//    }
 
     fun pruneWithoutNodeLayer(): Int {
         val sql = "DELETE FROM $tableName WHERE node_layer IS NULL"
