@@ -120,15 +120,15 @@ suspend fun step0_create_schema(): Boolean {
                 parent_id bigint NOT NULL,
                 parent_layer layer NOT NULL,
                 parent_osm_type varchar(255) NOT NULL
-            );""",
-
-            """
-            CREATE TABLE IF NOT EXISTS one_way_restrictions
-            (
-                way_id       bigint NOT NULL,
-                from_node_id bigint NOT NULL,
-                to_node_id   bigint NOT NULL
             );""")
+
+//            """
+//            CREATE TABLE IF NOT EXISTS one_way_restrictions
+//            (
+//                way_id       bigint NOT NULL,
+//                from_node_id bigint NOT NULL,
+//                to_node_id   bigint NOT NULL
+//            );""")
 
 
     return executeBatchQueries(sqlQueries)
