@@ -1,7 +1,6 @@
 package importer.processors
 
 import be.ledfan.geocoder.db.entity.OsmUpstreamElement
-import be.ledfan.geocoder.db.entity.WayNode
 import be.ledfan.geocoder.db.mapper.*
 import be.ledfan.geocoder.importer.DetermineLayerNode
 import be.ledfan.geocoder.importer.Layer
