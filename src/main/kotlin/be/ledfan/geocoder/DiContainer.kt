@@ -7,6 +7,7 @@ import be.ledfan.geocoder.db.mapper.*
 import be.ledfan.geocoder.importer.DetermineLayerNode
 import be.ledfan.geocoder.importer.DetermineLayerRelation
 import be.ledfan.geocoder.importer.DetermineLayerWay
+import be.ledfan.geocoder.importer.RelationPostProcessor
 import be.ledfan.geocoder.importer.core.Importer
 import be.ledfan.geocoder.importer.core.StatsCollector
 import be.ledfan.geocoder.importer.core.TagParser
@@ -59,7 +60,7 @@ val kodein = Kodein {
 
 //    bind<RelationHierarchyResolver>() with singleton { RelationHierarchyResolver(instance()) }
 
-//    bind<RelationPostProcessor>() with singleton { RelationPostProcessor(instance(), instance(), instance()) }
+    bind<RelationPostProcessor>() with singleton { RelationPostProcessor(instance(), instance(), instance()) }
 
     bind<TagParser>() with singleton { TagParser() }
 
