@@ -59,6 +59,7 @@ class TagParserTest {
             assertTrue { it.hasValue("val1") }
             assertTrue { it.hasValue("val2") }
             assertTrue { it.hasValue("val5") }
+            assertTrue { it.hasAnyValue(listOf("val1", "val2", "val42"))}
         }
 
         assertEquals(null, expected.descendant(listOf("nested", "without", "value")).singleValueOrNull())
