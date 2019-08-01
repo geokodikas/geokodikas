@@ -1,6 +1,7 @@
 package be.ledfan.geocoder.importer.steps
 
 import be.ledfan.geocoder.config.Config
+import be.ledfan.geocoder.importer.RelationPostProcessor
 import be.ledfan.geocoder.importer.core.Broker
 import be.ledfan.geocoder.importer.core.StatsCollector
 import be.ledfan.geocoder.importer.processors.OsmRelationProcessor
@@ -72,10 +73,10 @@ suspend fun step3_import_relations(): Boolean {
 
 }
 
-//suspend fun step3_set_centroid(): Boolean {
-//    kodein.direct.instance<RelationPostProcessor>().setCentroid()
-//    return true
-//}
+suspend fun step3_set_centroid(): Boolean {
+    kodein.direct.instance<RelationPostProcessor>().setCentroid()
+    return true
+}
 
 
 suspend fun step3_create_indexes(): Boolean {
@@ -90,12 +91,12 @@ suspend fun step3_create_indexes(): Boolean {
     return executeBatchQueries(sqlQuerries)
 
 }
-//
-//suspend fun step3_prune_relations(): Boolean {
-//    kodein.direct.instance<RelationPostProcessor>().prune()
-//    return true
-//}
-//
+
+suspend fun step3_prune_relations(): Boolean {
+    kodein.direct.instance<RelationPostProcessor>().prune()
+    return true
+}
+
 //suspend fun step3_resolve_hierarchies(): Boolean {
 //    kodein.direct.instance<RelationHierarchyResolver>().run()
 //    return true
