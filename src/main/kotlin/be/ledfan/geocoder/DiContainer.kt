@@ -4,10 +4,7 @@ import be.ledfan.geocoder.config.Config
 import be.ledfan.geocoder.config.ConfigReader
 import be.ledfan.geocoder.db.ConnectionFactory
 import be.ledfan.geocoder.db.mapper.*
-import be.ledfan.geocoder.importer.DetermineLayerNode
-import be.ledfan.geocoder.importer.DetermineLayerRelation
-import be.ledfan.geocoder.importer.DetermineLayerWay
-import be.ledfan.geocoder.importer.RelationPostProcessor
+import be.ledfan.geocoder.importer.*
 import be.ledfan.geocoder.importer.core.Importer
 import be.ledfan.geocoder.importer.core.StatsCollector
 import be.ledfan.geocoder.importer.core.TagParser
@@ -26,7 +23,7 @@ val kodein = Kodein {
 
     bind<Config>() with singleton { ConfigReader.getConfig() }
 
-    bind<Connection>() with singleton(ref = threadLocal) { ConnectionFactory.createConnection() }
+    bind<Connection>() with singleton(ref = threadLocal) { ConnectionFactory.createConnection(instance()) }
 
     bind<Importer>() with singleton { Importer() }
 
@@ -56,16 +53,12 @@ val kodein = Kodein {
 
     bind<DetermineLayerWay>() with singleton { DetermineLayerWay() }
 
-//    bind<OneWayResolver>() with singleton { OneWayResolver(instance(), instance(), instance()) }
-
-//    bind<RelationHierarchyResolver>() with singleton { RelationHierarchyResolver(instance()) }
+    bind<RelationHierarchyResolver>() with singleton { RelationHierarchyResolver(instance()) }
 
     bind<RelationPostProcessor>() with singleton { RelationPostProcessor(instance(), instance(), instance()) }
 
     bind<TagParser>() with singleton { TagParser() }
 
     bind<StatsCollector>() with singleton { StatsCollector() }
-
-//    bind<DistanceResolver>() with singleton { DistanceResolver(instance(), instance()) }
 
 }

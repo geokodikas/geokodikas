@@ -1,5 +1,6 @@
 package be.ledfan.geocoder.db
 
+import be.ledfan.geocoder.config.Config
 import be.ledfan.geocoder.config.ConfigReader
 import mu.KotlinLogging
 import org.postgresql.util.PSQLException
@@ -13,9 +14,7 @@ object ConnectionFactory {
 
     private var createdConnections: Int = 0
 
-    private var config = ConfigReader.getConfig()
-
-    fun createConnection(): Connection {
+    fun createConnection(config: Config): Connection {
         val properties = Properties()
 
         with(properties) {
@@ -28,8 +27,8 @@ object ConnectionFactory {
         try {
             KotlinLogging.logger{}.trace { "Trying to get connections currently at $createdConnections connections" }
             val r = DriverManager.getConnection(config.database.jdbcUrl, properties)
-            KotlinLogging.logger{}.trace { "Got a connection currently at $createdConnections connections" }
             createdConnections++
+            KotlinLogging.logger{}.trace { "Got a connection currently at $createdConnections connections" }
             return r
         } catch (e: PSQLException) {
             println()

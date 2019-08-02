@@ -3,10 +3,14 @@
 package be.ledfan.geocoder.importer.steps
 
 import be.ledfan.geocoder.db.ConnectionFactory
+import be.ledfan.geocoder.kodein
 import mu.KotlinLogging
 import org.intellij.lang.annotations.Language
+import org.kodein.di.direct
+import org.kodein.di.generic.instance
+import java.sql.Connection
 
-private val con = ConnectionFactory.createConnection()
+private val con = kodein.direct.instance<Connection>()
 private val logger = KotlinLogging.logger {}
 
 suspend fun step0_checks(): Boolean {

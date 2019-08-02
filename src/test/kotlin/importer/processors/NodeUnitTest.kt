@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.postgis.PGgeometry
 import org.postgis.Point
-import kotlin.test.assertEquals
 
 class OsmNodeProcessorUnitTest {
 
@@ -82,7 +81,7 @@ class OsmNodeProcessorUnitTest {
 
         every { mocks.osmUpstreamPointMapper.getByPrimaryIds(listOf(10L)) } returns hashMapOf(10L to point)
         every { mocks.wayNodeMapper.getLinkedWaysByNode(listOf(10L)) } returns hashMapOf()
-        every { mocks.determineLayerNode.determine(any(), any(), any()) } returns hashSetOf(Layer.Street)
+        every { mocks.determineLayerNode.determine(any(), any()) } returns hashSetOf(Layer.Street)
 
         val nodes = listOf(create_osm_node(10, 1.0, 2.0))
 
@@ -104,7 +103,7 @@ class OsmNodeProcessorUnitTest {
 
         every { mocks.osmUpstreamPointMapper.getByPrimaryIds(listOf(10L)) } returns hashMapOf()
         every { mocks.wayNodeMapper.getLinkedWaysByNode(listOf(10L)) } returns hashMapOf(10L to arrayListOf(Pair(13L, Layer.Street)))
-        every { mocks.determineLayerNode.determine(any(), any(), any()) } returns hashSetOf(Layer.Junction)
+        every { mocks.determineLayerNode.determine(any(), any()) } returns hashSetOf(Layer.Junction)
 
         val node = create_osm_node(10, 1.0, 2.0)
         val nodes = listOf(node)
@@ -130,7 +129,7 @@ class OsmNodeProcessorUnitTest {
                 Pair(13L, Layer.Street),
                 Pair(15L, Layer.Link)
         ))
-        every { mocks.determineLayerNode.determine(any(), any(), any()) } returns hashSetOf(Layer.Junction)
+        every { mocks.determineLayerNode.determine(any(), any()) } returns hashSetOf(Layer.Junction)
 
         val node = create_osm_node(10, 1.0, 2.0)
         val nodes = listOf(node)
@@ -151,7 +150,7 @@ class OsmNodeProcessorUnitTest {
                         && it[1].nodeId == 10L && it[1].wayId == 15L
             })
         }
-        verify(exactly = 0) { mocks.determineLayerNode.determine(any(), any(), any()) } // should assume it's a junction and don't call this function
+        verify(exactly = 0) { mocks.determineLayerNode.determine(any(), any()) } // should assume it's a junction and don't call this function
     }
 
     @Test
@@ -168,7 +167,7 @@ class OsmNodeProcessorUnitTest {
                 Pair(15L, Layer.Junction),
                 Pair(18L, Layer.Venue)
         ))
-        every { mocks.determineLayerNode.determine(any(), any(), any()) } returns hashSetOf(Layer.Junction)
+        every { mocks.determineLayerNode.determine(any(), any()) } returns hashSetOf(Layer.Junction)
 
         val node = create_osm_node(10, 1.0, 2.0)
         val nodes = listOf(node)
@@ -190,7 +189,7 @@ class OsmNodeProcessorUnitTest {
                         && it[2].nodeId == 10L && it[2].wayId == 18L
             })
         }
-        verify(exactly = 0) { mocks.determineLayerNode.determine(any(), any(), any()) } // should assume it's a junction and don't call this function
+        verify(exactly = 0) { mocks.determineLayerNode.determine(any(), any()) } // should assume it's a junction and don't call this function
     }
 
     @Test
@@ -203,7 +202,7 @@ class OsmNodeProcessorUnitTest {
 
         every { mocks.osmUpstreamPointMapper.getByPrimaryIds(listOf(10L)) } returns hashMapOf(10L to point)
         every { mocks.wayNodeMapper.getLinkedWaysByNode(listOf(10L)) } returns hashMapOf()
-        every { mocks.determineLayerNode.determine(any(), any(), any()) } returns hashSetOf()
+        every { mocks.determineLayerNode.determine(any(), any()) } returns hashSetOf()
 
         val nodes = listOf(create_osm_node(10, 1.0, 2.0))
 
@@ -224,7 +223,7 @@ class OsmNodeProcessorUnitTest {
 
         every { mocks.osmUpstreamPointMapper.getByPrimaryIds(listOf(10L)) } returns hashMapOf(10L to point)
         every { mocks.wayNodeMapper.getLinkedWaysByNode(listOf(10L)) } returns hashMapOf()
-        every { mocks.determineLayerNode.determine(any(), any(), any()) } returns hashSetOf(Layer.Junction, Layer.Address, Layer.Superfluous)
+        every { mocks.determineLayerNode.determine(any(), any()) } returns hashSetOf(Layer.Junction, Layer.Address, Layer.Superfluous)
 
         val nodes = listOf(create_osm_node(10, 1.0, 2.0))
 

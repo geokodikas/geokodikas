@@ -1,5 +1,7 @@
 package be.ledfan.geocoder.config
 
+import java.io.File
+
 data class Importer(
         var outputThreshold: Int = 10_000,
         var maxQueueSze: Int = 1_000_000,
@@ -19,4 +21,7 @@ data class Runtime(
 )
 
 
-data class Config(val importer: Importer, val runtime: Runtime, val database: Database)
+data class Config(val importer: Importer,
+                  val runtime: Runtime,
+                  val database: Database,
+                  var tmpDir: File = File(System.getProperty("user.dir") + "/tmp"))

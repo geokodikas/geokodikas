@@ -73,7 +73,7 @@ class OsmNodeProcessor(private val osmNodeMapper: OsmNodeMapper,
                 logger.trace { "Assuming ${entity.id} is a junction because it has at least two linked ways" }
                 layers.add(Layer.Junction)
             } else {
-                layers = determineLayer.determine(dbObject, tags, pointAvailable)
+                layers = determineLayer.determine(dbObject, tags)
             }
 
             layers.remove(Layer.Superfluous) // Remove superfluous layers, if layers left -> not superfluous

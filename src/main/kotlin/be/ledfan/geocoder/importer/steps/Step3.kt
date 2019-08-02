@@ -1,6 +1,7 @@
 package be.ledfan.geocoder.importer.steps
 
 import be.ledfan.geocoder.config.Config
+import be.ledfan.geocoder.importer.RelationHierarchyResolver
 import be.ledfan.geocoder.importer.RelationPostProcessor
 import be.ledfan.geocoder.importer.core.Broker
 import be.ledfan.geocoder.importer.core.StatsCollector
@@ -97,7 +98,7 @@ suspend fun step3_prune_relations(): Boolean {
     return true
 }
 
-//suspend fun step3_resolve_hierarchies(): Boolean {
-//    kodein.direct.instance<RelationHierarchyResolver>().run()
-//    return true
-//}
+suspend fun step3_resolve_hierarchies(): Boolean {
+    kodein.direct.instance<RelationHierarchyResolver>().run()
+    return true
+}
