@@ -2,6 +2,7 @@ package be.ledfan.geocoder.config
 
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.JsonReader
+import java.io.File
 import java.io.FileReader
 
 object ConfigReader {
@@ -22,11 +23,16 @@ object ConfigReader {
                     when (readName) {
                         "importer" -> readImporter(importer, reader.nextObject())
                         "database" -> readDatabase(database, reader.nextObject())
+                        "tmp_dir" -> config.tmpDir = File(reader.nextString())
                     }
                 }
 
             }
 
+        }
+
+        if (!config.tmpDir.exists()) {
+            config.tmpDir.mkdirs()
         }
 
         return config

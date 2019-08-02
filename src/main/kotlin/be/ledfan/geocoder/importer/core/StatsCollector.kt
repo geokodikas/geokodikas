@@ -29,6 +29,8 @@ class StatsCollector {
 
     private var terminalWidth = 0
 
+    var suppressOutput = false
+
     init {
         try {
             val process = ProcessBuilder("/usr/bin/tput", "cols").start()
@@ -63,6 +65,7 @@ class StatsCollector {
 
 
     private fun printSingeLine(lineKey: String) {
+        if (suppressOutput) return
         val el = currentStats[lineKey] ?: return
         val elapsedSeconds = ((System.currentTimeMillis() - startTime) / 1000.0).toInt()
         val prefix = "$elapsedSeconds $lineKey".padEnd(prefixLength)
@@ -76,6 +79,7 @@ class StatsCollector {
     }
 
     private fun printStats() {
+        if (suppressOutput) return
         repeat(currentStats.size ) { print(GO_LINE_UP_CHAR) }
         currentStats.keys.forEach { printSingeLine(it) }
 

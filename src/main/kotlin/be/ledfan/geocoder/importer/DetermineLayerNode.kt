@@ -7,7 +7,7 @@ class DetermineLayerNode : DetermineLayer() {
 
     // TODO traffic_signals may be interesting
 
-    fun determine(node: OsmNode, parsedTags: Tags, pointAvailable: Boolean): HashSet<Layer> {
+    fun determine(node: OsmNode, parsedTags: Tags): HashSet<Layer> {
         return determineHelper(node, parsedTags) { layers ->
 
             parsedTags.childOrNull("junction")?.let {

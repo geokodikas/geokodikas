@@ -15,8 +15,6 @@ import org.kodein.di.direct
 import org.kodein.di.generic.instance
 import java.io.FileInputStream
 
-private val con = ConnectionFactory.createConnection()
-private val logger = KotlinLogging.logger {}
 
 suspend fun step2_checks(): Boolean {
     return ensureEmpty("osm_node") && ensureNotEmpty("osm_way") && ensureNotEmpty("way_node")

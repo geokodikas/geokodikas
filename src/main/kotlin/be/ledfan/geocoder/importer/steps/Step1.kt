@@ -17,8 +17,8 @@ import org.intellij.lang.annotations.Language
 import org.kodein.di.direct
 import org.kodein.di.generic.instance
 import java.io.FileInputStream
+import java.sql.Connection
 
-private val con = ConnectionFactory.createConnection()
 private val logger = KotlinLogging.logger {}
 
 suspend fun step1_checks(): Boolean {

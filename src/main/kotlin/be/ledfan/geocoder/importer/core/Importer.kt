@@ -56,8 +56,8 @@ class Importer {
                 Pair("step3_import_relations", ::step3_import_relations),
                 Pair("step3_set_centroid", ::step3_set_centroid),
                 Pair("step3_create_indexes", ::step3_create_indexes),
-                Pair("step3_prune_relations", ::step3_prune_relations))
-//                Pair("step3_resolve_hierarchies", ::step3_resolve_hierarchies))
+                Pair("step3_prune_relations", ::step3_prune_relations),
+                Pair("step3_resolve_hierarchies", ::step3_resolve_hierarchies))
     }
 
 

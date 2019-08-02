@@ -13,4 +13,10 @@
         <appender-ref ref="FILE-IMPORTER" />
     </root>
 
+
+    <logger name="be.ledfan.geocoder.importer.processors" level="DEBUG" additivity="false">
+        <appender-ref ref="FILE-IMPORTER"/>
+    </logger>
+
+
 </configuration>
