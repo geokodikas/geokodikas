@@ -3,11 +3,10 @@ FROM centos:7
 ARG HOST_UID
 ARG HOST_GID
 
-RUN yum update -y
-
 COPY create_users.sh .
 
-RUN bash create_users.sh && \
+RUN yum update -y && \
+    bash create_users.sh && \
     mkdir -p /workdir/input && \
     chown -R luser:users /home/luser && \
     chown -R luser:users /workdir/
@@ -15,7 +14,6 @@ RUN bash create_users.sh && \
 RUN yum install -y sudo && \
     echo "luser ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/user && \
     chmod 0440 /etc/sudoers.d/user
-
 
 # actual osm2pgsql installation
 
@@ -33,12 +31,10 @@ RUN git clone git://github.com/openstreetmap/osm2pgsql.git && \
     make -j`nproc` && \
     sudo make install && \
     cd /workdir
-#    wget https://raw.githubusercontent.com/openstreetmap/Nominatim/master/settings/import-full.style
 
 COPY empty.style /workdir/empty.style
 
 ENV OSM_ARGS "-S /workdir/empty.style -lc --hstore --keep-coastlines -G --slim"
-#ENV OSM_ARGS "-S /workdir/empty.style -lc --hstore --keep-coastlines --extra-attributes -v --slim -G"
 ENV NUM_PROC "1"
 ENV CACHE_MEM "4096"
 ENV PG_HOST "postgis"

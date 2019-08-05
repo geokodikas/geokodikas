@@ -1,5 +1,6 @@
 package importer.integration.containers
 
+import importer.integration.randomString
 import mu.KotlinLogging
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.containers.output.OutputFrame
@@ -18,12 +19,19 @@ class KPostgreSQLContainer(dockerImageName: String) : PostgreSQLContainer<KPostg
                 // contain a postgresql data directory, either as volume or with a committed container
                 .withStartupTimeout(Duration.of(60, SECONDS))
     }
+
+    override fun configure() {
+        super.configure()
+
+        setCommand("postgres", "-c", "config_file=/etc/postgresql/postgresql.conf")
+    }
 }
 
 fun postgresContainer(): PostgreSQLContainer<KPostgreSQLContainer> = postgresContainer("ledfan/postgis_hstore:latest")
 
 fun postgresContainer(existingImage: String): KPostgreSQLContainer {
     val postgresContainer = KPostgreSQLContainer(existingImage)
+            .withCreateContainerCmdModifier{ it.withName("postgis__${randomString()}") }
     postgresContainer.start()
     val logConsumer = Slf4jLogConsumer(KotlinLogging.logger { })
     postgresContainer.followOutput(logConsumer, OutputFrame.OutputType.STDERR)

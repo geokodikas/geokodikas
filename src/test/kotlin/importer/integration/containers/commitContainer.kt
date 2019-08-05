@@ -8,5 +8,4 @@ fun commitContainer(currentContainerId: String, saveAsName: String) {
             .withTimeout(360)
             .exec()
     dockerClient.commitCmd(currentContainerId).withRepository(saveAsName).exec()
-    // TODO start container again?
 }

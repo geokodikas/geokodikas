@@ -1,5 +1,6 @@
 package importer.integration.containers
 
+import importer.integration.randomString
 import mu.KotlinLogging
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.output.OutputFrame
@@ -12,11 +13,13 @@ class KGenericContainer(imageName: String) : GenericContainer<KGenericContainer>
 
 fun osm2psqlContainer(dbHost: String, dbUser: String, dbPassword: String, dbPort: Int, dbName: String, pbfFilePath: String): KGenericContainer {
     val container = KGenericContainer("ledfan/osm2pgsql")
+            .withCreateContainerCmdModifier{ it.withName("osm2_pgsql_importer__${randomString()}") }
     container.withEnv("PG_HOST", dbHost)
     container.withEnv("PG_USER", dbUser)
     container.withEnv("PG_PORT", dbPort.toString())
     container.withEnv("PG_DB", dbName)
     container.withEnv("PGPASSWORD", dbPassword)
+    container.withEnv("NUM_PROC", "8")
     container.withFileSystemBind(File(pbfFilePath).parent, "/workdir/input")
 
     println("Starting import, this will take some time")
