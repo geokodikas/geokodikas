@@ -132,3 +132,4 @@ tags
 
 *.pbf
 config.json
+tmp/

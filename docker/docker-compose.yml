@@ -1,7 +1,9 @@
 version: '3'
 services:
   postgis:
-    build: ./
+    build:
+      context: ./postgis
+      dockerfile: Dockerfile
     volumes:
       - postgres:/var/lib/postgresql/data
       - ./postgresql.conf:/etc/postgresql/postgresql.conf
@@ -12,7 +14,7 @@ services:
     command:  postgres -c 'config_file=/etc/postgresql/postgresql.conf'
   osm2pgsql:
     build:
-      context: ./
+      context: ./osm2pgsql
       dockerfile: osm2psql.Dockerfile
       args:
         HOST_GID: 100   # use `getent group users | awk -F ":" '{ print $3 }'`

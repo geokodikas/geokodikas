@@ -29,7 +29,7 @@ fun downloadAndCacheFile(url: String, destinationFileName: String, md5sum: Strin
     val config: Config = kodein.direct.instance()
     val destinationFile = File(config.tmpDir, destinationFileName)
 
-    if (destinationFile.exists() && md5sumOfFile(destinationFile) != md5sum) {
+    if (destinationFile.exists() && md5sumOfFile(destinationFile) == md5sum) {
         println("File already available with correct checksum, not downloading: $url")
         return destinationFile.absolutePath
     }
@@ -62,8 +62,16 @@ fun downloadAndCacheFile(url: String, destinationFileName: String, md5sum: Strin
             return destinationFile.absolutePath
         }
         is Result.Failure -> {
-            throw Exception("Error during download of $url")
+            throw Exception("Error during download of $url", result.getException())
         }
     }
 
+}
+
+fun randomString(stringLength: Int = 8): String {
+    val charPool = ('a'..'z') + ('0'..'9')
+    return (1..stringLength)
+            .map { kotlin.random.Random.nextInt(0, charPool.size) }
+            .map(charPool::get)
+            .joinToString("");
 }

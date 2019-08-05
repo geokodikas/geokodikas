@@ -81,6 +81,14 @@ class Importer {
 
     fun finish() {
         kodein.direct.instance<StatsCollector>().finish()
+        println()
+        println("Import results")
+
+        for (table in listOf("osm_node", "osm_relation", "osm_way", "parent", "way_node")) {
+            println("$table has ${countTable(table)} records")
+        }
+
+        println()
     }
 
     fun stopWithFatalError(message: String) {
