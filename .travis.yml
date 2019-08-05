@@ -3,6 +3,10 @@ language: java
 cache:
   directories:
     - $HOME/.m2
+    - $TRAVIS_BUILD_DIR/tmp
+
+services:
+  - docker
 
 after_success:
   - bash <(curl -s https://codecov.io/bash) -t e6313f6d-15f0-4b4d-be4b-37455c2b0ad6
