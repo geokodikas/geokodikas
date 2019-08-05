@@ -5,6 +5,9 @@ cache:
     - $HOME/.m2
     - $TRAVIS_BUILD_DIR/tmp
 
+before_install:
+  - cp config.dist.json config.json
+
 services:
   - docker
 
