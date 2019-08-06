@@ -7,7 +7,7 @@ cache:
 
 before_install:
   - cp config.dist.json config.json
-  - cp logback.travis.xml src/main/resources/
+  - cp logback.travis.xml src/main/resources/logback-test.xml
 
 services:
   - docker
