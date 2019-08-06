@@ -30,7 +30,7 @@ open class IntegrationTest(ic: IntegrationConfig) {
 
     private var logger = KotlinLogging.logger {}
     private val config = kodein.direct.instance<Config>()
-    protected lateinit var relationMapper: OsmRelationMapper
+    protected var relationMapper: OsmRelationMapper
 
     init {
         val pbfFilePath = downloadAndCacheFile(ic.pbFurl, ic.pbfName, ic.pbfCheckSum)

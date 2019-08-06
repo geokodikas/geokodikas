@@ -47,23 +47,28 @@ class BelgiumIntegrationTest : IntegrationTest(
 
         // Counties in this test
         val expectedCounties = mapOf(
-                53114L to "Antwerpen",
-                58004L to "Vlaams-Brabant",
-                416271L to "West-Vlaanderen",
-                416271L to "West-Vlaanderen",
-                53142L to "Limburg",
-                78748L to "Brabant wallon",
-                157559L to "Hainaut",
-                1407192L to "Liège",
-                1412581L to "Luxembourg",
-                1311816L to "Namur")
+                53114L to Triple("Antwerpen", belgium, flanders),
+                58004L to Triple("Vlaams-Brabant", belgium, flanders),
+                416271L to Triple("West-Vlaanderen", belgium, flanders),
+                416271L to Triple("West-Vlaanderen", belgium, flanders),
+                53142L to Triple("Limburg", belgium, flanders),
+                78748L to Triple("Brabant wallon", belgium, wallonia),
+                157559L to Triple("Hainaut", belgium, wallonia),
+                1407192L to Triple("Liège", belgium, wallonia),
+                1412581L to Triple("Luxembourg", belgium, wallonia),
+                1311816L to Triple("Namur", belgium, wallonia))
 
-        for ((id, name) in expectedCounties) {
+        for ((id, expectedData) in expectedCounties) {
+            val (name, country, macroRegion) = expectedData
             val county = relationMapper.getByPrimaryId(id)
 
             assertNotNull(county)
             assertEquals(name, county.name)
             assertEquals(Layer.County, county.layer)
+            val parents = relationMapper.getParents(county)
+            assertEquals(2, parents.size)
+            assertEquals(country.id, parents[Layer.Country]?.id)
+            assertEquals(macroRegion.id, parents[Layer.MacroRegion]?.id)
         }
     }
 

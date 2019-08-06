@@ -1,6 +1,8 @@
 package be.ledfan.geocoder.db.mapper
 
 import be.ledfan.geocoder.db.entity.OsmRelation
+import be.ledfan.geocoder.importer.Layer
+import org.intellij.lang.annotations.Language
 import java.sql.Connection
 import java.util.*
 
@@ -33,4 +35,26 @@ class OsmRelationMapper(private val con: Connection) : Mapper<OsmRelation>(con) 
         stmt.executeBatch()
         stmt.close()
     }
+
+    fun getParents(relation: OsmRelation): Map<Layer, OsmRelation> = getParents(relation.id)
+
+    fun getParents(relationId: Long): Map<Layer, OsmRelation> {
+
+        @Language("SQL")
+        val stmt = con.prepareCall("""
+            SELECT osm_relation.*
+            FROM osm_relation
+            WHERE osm_id IN (
+                SELECT unnest(array_cat(array_agg(DISTINCT p1.parent_id), array_agg(p2.parent_id))) AS parents
+                FROM parent AS p1
+                         RIGHT OUTER JOIN parent AS p2 ON p1.parent_id = p2.child_id
+                WHERE p1.child_id = ?);
+        """.trimIndent())
+
+        stmt.setLong(1, relationId)
+
+        return executeSelect(stmt).toList().associateBy({ it.second.layer }, { it.second })
+    }
+
+
 }
