@@ -9,7 +9,7 @@ class OsmRelation(id: Long) : OsmEntity(id) {
 
     companion object : EntityCompanion<OsmRelation> {
         override fun fillFromRow(row: ResultSet): OsmRelation {
-            val r = OsmRelation(row.getLong("id"))
+            val r = OsmRelation(row.getLong("osm_id"))
 
             r.version = row.getInt("version")
             r.geometry = row.getObject("geometry") as PGgeometry

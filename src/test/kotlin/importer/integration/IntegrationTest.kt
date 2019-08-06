@@ -41,14 +41,14 @@ open class IntegrationTest(ic: IntegrationConfig) {
         var doImport = true
         when {
             imageExists(fullImportedImageName) -> {
-                println("Intermediate image $fullImportedImageName already exists, starting that container")
+                println("Target image $fullImportedImageName already exists, starting that container")
                 postgresContainer = postgresContainer(fullImportedImageName)
                 println("Container with image $fullImportedImageName started")
                 doImport = false
             }
             imageExists(importedImageName) -> {
                 // start this image
-                println("Target image $importedImageName already exists, starting that container")
+                println("Intermediate image $importedImageName already exists, starting that container")
                 postgresContainer = postgresContainer(importedImageName)
             }
             else -> {
