@@ -9,6 +9,13 @@ class DetermineLayerRelation : DetermineLayer() {
     // TODO traffic_calming
 
     private fun determineLayerForBoundary(parsedTags: Tags, layers: HashSet<Layer>) {
+        if (parsedTags.childOrNull("boundary")?.hasAnyValue(listOf("political", "administrative_fraction")) == true) {
+            // completely ignore "administrative_fraction", this is e.g. "Wallonië (Franse Gemeenschap)" where
+            // we prefer Gewesten
+            layers.clear()
+            assignLayer(layers, Layer.Superfluous)
+            return
+        }
         parsedTags.childOrNull("admin_level")?.let { adminLevel ->
             when {
                 adminLevel.hasValue("1") -> assignLayer(layers, Layer.Superfluous) // only europe?

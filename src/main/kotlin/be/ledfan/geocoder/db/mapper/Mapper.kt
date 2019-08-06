@@ -59,7 +59,7 @@ abstract class Mapper<T>(private val con: Connection) {
         return executeSelect(stmt)
     }
 
-    private fun executeSelect(stmt: PreparedStatement): HashMap<Long, T> {
+    protected fun executeSelect(stmt: PreparedStatement): HashMap<Long, T> {
         val result = stmt.executeQuery()
 
         val r = HashMap<Long, T>()
