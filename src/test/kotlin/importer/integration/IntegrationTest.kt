@@ -1,28 +1,36 @@
 package importer.integration
 
 import be.ledfan.geocoder.config.Config
+import be.ledfan.geocoder.db.ConnectionFactory
+import be.ledfan.geocoder.db.mapper.OsmRelationMapper
 import be.ledfan.geocoder.importer.core.Importer
 import be.ledfan.geocoder.importer.core.StatsCollector
 import be.ledfan.geocoder.importer.steps.executeBatchQueries
 import be.ledfan.geocoder.kodein
 import importer.integration.containers.*
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.intellij.lang.annotations.Language
 import org.kodein.di.direct
+import org.kodein.di.generic.allInstances
 import org.kodein.di.generic.instance
+import org.postgresql.util.PSQLException
 import org.testcontainers.containers.PostgreSQLContainer
 import java.io.File
+import java.lang.Thread.sleep
+import java.sql.Connection
 
 data class IntegrationConfig(val pbFurl: String, val pbfName: String, val pbfCheckSum: String)
 
 
-class IntegrationTest(ic: IntegrationConfig) {
+open class IntegrationTest(ic: IntegrationConfig) {
 
     private var postgresContainer: PostgreSQLContainer<KPostgreSQLContainer>
 
     private var logger = KotlinLogging.logger {}
     private val config = kodein.direct.instance<Config>()
+    protected lateinit var relationMapper: OsmRelationMapper
 
     init {
         val pbfFilePath = downloadAndCacheFile(ic.pbFurl, ic.pbfName, ic.pbfCheckSum)
@@ -33,7 +41,7 @@ class IntegrationTest(ic: IntegrationConfig) {
         var doImport = true
         when {
             imageExists(fullImportedImageName) -> {
-                println("Target image $fullImportedImageName already exists, starting that container")
+                println("Intermediate image $fullImportedImageName already exists, starting that container")
                 postgresContainer = postgresContainer(fullImportedImageName)
                 println("Container with image $fullImportedImageName started")
                 doImport = false
@@ -64,6 +72,12 @@ class IntegrationTest(ic: IntegrationConfig) {
         config.database.password = postgresContainer.password
         config.importer.numProcessors = 8
 
+        if (ConnectionFactory.createdConnections != 0) {
+            println("Already created connections before changing config")
+        }
+
+        relationMapper = kodein.direct.instance() // bind now after conncetion can be made
+
         if (doImport) {
             kodein.direct.instance<StatsCollector>().suppressOutput = true
             val importer = kodein.direct.instance<Importer>()
@@ -77,14 +91,12 @@ class IntegrationTest(ic: IntegrationConfig) {
                 importer.finish()
             }
 
+            closeAllConnections() // connections must be closed for safe shutdown of postgres
+
             // committing container again
             println("Committing as $fullImportedImageName")
             commitContainer(postgresContainer.containerId, fullImportedImageName)
-
         }
-//        ResultSet resultSet = performQuery (postgres, "SELECT 1");
-//        int resultSetInt = resultSet . getInt (1);
-//        assertEquals("A basic SELECT query succeeds", 1, resultSetInt);
     }
 
     fun dropUpstreamTables() {
@@ -99,6 +111,22 @@ class IntegrationTest(ic: IntegrationConfig) {
                 "DROP TABLE IF EXISTS osm_up_point")
 
         executeBatchQueries(sqlQueries)
+    }
+
+    private fun closeAllConnections() {
+        // first closing all connection to the db from this process
+        val connections: List<Connection> by kodein.allInstances()
+        connections.forEach { it.close() }
+        // then terminate connections from other processes
+        val con = ConnectionFactory.createConnection(config)
+        try {
+            con.prepareStatement("select pg_terminate_backend(pid) from pg_stat_activity").execute()
+        } catch (e: PSQLException) {
+            // we probably get an exception because our connection got closed
+        } finally {
+            con.close()
+        }
+        // now all connections should be closed
     }
 
     fun exportPostgisDb(fileName: String) {

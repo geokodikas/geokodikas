@@ -6,7 +6,7 @@ class BasicIntegrationTest {
 
 
     @Test
-    fun basic_test() {
+    fun setup() {
 
         val ic = IntegrationConfig("http://download.geofabrik.de/europe/belgium-190801.osm.pbf",
                 "belgium-190801.osm.pbf",
@@ -14,11 +14,11 @@ class BasicIntegrationTest {
 
 //        val ic = IntegrationConfig("http://download.geofabrik.de/europe/liechtenstein-latest.osm.pbf",
 //                "liechtenstein-latest.osm.pbf",
-//                "d1b56be3964600e8ac1e57cac1b11e25")
+//                "342c794da60fabe59263664a7cc3377a")
 
         val x = IntegrationTest(ic)
-        x.dropUpstreamTables()
-        x.exportPostgisDb("full_import${ic.pbfName}_${ic.pbfCheckSum}")
+//        x.dropUpstreamTables()
+//        x.exportPostgisDb("full_import${ic.pbfName}_${ic.pbfCheckSum}")
 
     }
 
