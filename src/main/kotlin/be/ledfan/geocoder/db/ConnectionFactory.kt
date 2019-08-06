@@ -12,7 +12,7 @@ import kotlin.system.exitProcess
 
 object ConnectionFactory {
 
-    private var createdConnections: Int = 0
+    var createdConnections: Int = 0
 
     fun createConnection(config: Config): Connection {
         val properties = Properties()
@@ -33,7 +33,7 @@ object ConnectionFactory {
         } catch (e: PSQLException) {
             println()
             println("Can't connect to PostGIS")
-            println(e.message)
+            e.printStackTrace()
             exitProcess(1)
         }
     }
