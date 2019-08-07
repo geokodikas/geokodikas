@@ -2,6 +2,7 @@ package importer.integration
 
 import be.ledfan.geocoder.importer.Layer
 import be.ledfan.geocoder.importer.steps.countTable
+import org.intellij.lang.annotations.Language
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -119,6 +120,31 @@ class BelgiumIntegrationTest : IntegrationTest(
         val actualNeighbourhoods = relationMapper.getByLayer(Layer.Neighbourhood).map { it.value.name }.filterNotNull().sorted()
 
         assertEquals(expectedNeighbourhoods, actualNeighbourhoods)
+    }
+
+    @Test
+    fun `there are no nodes without a parent`() {
+        // FIXME
+        @Language("SQL")
+        val stmt = """SELECT child.osm_id
+            FROM osm_node AS child
+            WHERE NOT EXISTS(SELECT *
+                             FROM parent AS p1
+                             WHERE p1.child_id = child.osm_id)
+              -- If the node would have two parents, than it's fine it doesn't have any parent
+              -- this is the case for nodes on the boundary of two LocalAdmins
+              AND NOT (SELECT COUNT(*)
+                       FROM osm_relation AS parent
+                       where st_intersects(child.centroid, parent.geometry)
+                         and parent.layer = 'LocalAdmin'::Layer) > 1
+              -- Ignore points outside Belgium, they are used e.g. on roads crossing the boundary
+              AND st_contains((SELECT geometry FROM osm_relation WHERE osm_id = 52411).geometry, child.centroid)
+            """
+
+        val ids = selectIds(stmt)
+
+        assertEquals(arrayListOf<Long>(), ids)
+
     }
 
 }

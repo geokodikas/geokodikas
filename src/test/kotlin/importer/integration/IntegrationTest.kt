@@ -31,6 +31,7 @@ open class IntegrationTest(ic: IntegrationConfig) {
     private var logger = KotlinLogging.logger {}
     private val config = kodein.direct.instance<Config>()
     protected var relationMapper: OsmRelationMapper
+    protected var con: Connection
 
     init {
         val pbfFilePath = downloadAndCacheFile(ic.pbFurl, ic.pbfName, ic.pbfCheckSum)
@@ -77,6 +78,7 @@ open class IntegrationTest(ic: IntegrationConfig) {
         }
 
         relationMapper = kodein.direct.instance() // bind now after conncetion can be made
+        con = kodein.direct.instance()
 
         if (doImport) {
             kodein.direct.instance<StatsCollector>().suppressOutput = true
@@ -140,6 +142,22 @@ open class IntegrationTest(ic: IntegrationConfig) {
 
         postgresContainer.copyFileFromContainer("/tmp/db.postgres", File(config.tmpDir, fileName).absolutePath)
 
+    }
+
+    fun selectIds(query: String): ArrayList<Long> {
+        val stmt = con.prepareStatement(query)
+        val result = stmt.executeQuery()
+
+        val ids = arrayListOf<Long>()
+
+        while (result.next()) {
+            ids.add(result.getLong("osm_id"))
+        }
+
+        stmt.close()
+        result.close()
+
+        return ids
     }
 
 
