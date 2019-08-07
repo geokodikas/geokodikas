@@ -31,7 +31,7 @@ class RelationPostProcessor(private val config: Config,
              FROM osm_relation AS o
              WHERE o.centroid IS NOT NULL
               AND osm_id <> 52411
-              AND NOT st_contains((SELECT geometry FROM osm_relation WHERE osm_id = ?).geometry, st_centroid(o.centroid));
+              AND NOT st_contains((SELECT geometry FROM osm_relation WHERE osm_id = ?).geometry, ST_PointOnSurface(o.geometry));
             """
 
         val stmt = con.prepareStatement(sql)
