@@ -1,24 +1,17 @@
 <configuration debug="false">
 
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <!-- encoders are assigned the type
-             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+    <appender name="FILE-IMPORTER" class="ch.qos.logback.core.FileAppender">
+        <file>logs/importer.log</file>
+        <append>false</append>
         <encoder>
-            <pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
+        <immediateFlush>true</immediateFlush>
     </appender>
 
-    <root level="DEBUG">
-        <appender-ref ref="STDOUT" />
+    <root level="TRACE">
+    <!--<root level="DEBUG">-->
+        <appender-ref ref="FILE-IMPORTER" />
     </root>
-
-    <logger name="be.ledfan.geocoder.importer.processors" level="DEBUG" additivity="false">
-        <appender-ref ref="FILE-IMPORTER"/>
-    </logger>
-
-    <logger name="org.testcontainers" level="DEBUG" additivity="false">
-        <appender-ref ref="FILE-IMPORTER"/>
-    </logger>
-
 
 </configuration>
