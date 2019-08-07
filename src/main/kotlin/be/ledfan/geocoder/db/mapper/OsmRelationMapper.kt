@@ -5,6 +5,7 @@ import be.ledfan.geocoder.importer.Layer
 import org.intellij.lang.annotations.Language
 import java.sql.Connection
 import java.util.*
+import kotlin.collections.HashMap
 
 class OsmRelationMapper(private val con: Connection) : Mapper<OsmRelation>(con) {
 
@@ -39,7 +40,6 @@ class OsmRelationMapper(private val con: Connection) : Mapper<OsmRelation>(con) 
     fun getParents(relation: OsmRelation): Map<Layer, OsmRelation> = getParents(relation.id)
 
     fun getParents(relationId: Long): Map<Layer, OsmRelation> {
-
         @Language("SQL")
         val stmt = con.prepareCall("""
             SELECT osm_relation.*
@@ -56,5 +56,17 @@ class OsmRelationMapper(private val con: Connection) : Mapper<OsmRelation>(con) 
         return executeSelect(stmt).toList().associateBy({ it.second.layer }, { it.second })
     }
 
+    fun getByLayer(layer: Layer): HashMap<Long, OsmRelation> {
+        @Language("SQL")
+        val stmt = con.prepareCall("""
+            SELECT *
+            FROM osm_relation
+            WHERE layer = ?::Layer
+        """.trimIndent())
+
+        stmt.setString(1, layer.toString())
+
+        return executeSelect(stmt)
+    }
 
 }

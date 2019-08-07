@@ -6,6 +6,7 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
+
 class BelgiumIntegrationTest : IntegrationTest(
         IntegrationConfig("http://download.geofabrik.de/europe/belgium-190801.osm.pbf",
                 "belgium-190801.osm.pbf",
@@ -22,7 +23,6 @@ class BelgiumIntegrationTest : IntegrationTest(
 
     @Test
     fun main_relations() {
-
         // Countries in this test
         val belgium = relationMapper.getByPrimaryId(52411L)
         assertNotNull(belgium)
@@ -70,6 +70,55 @@ class BelgiumIntegrationTest : IntegrationTest(
             assertEquals(country.id, parents[Layer.Country]?.id)
             assertEquals(macroRegion.id, parents[Layer.MacroRegion]?.id)
         }
+    }
+
+    @Test
+    fun relation_count_by_layer() {
+        assertEquals(1, relationMapper.getByLayer(Layer.Country).size)
+        assertEquals(3, relationMapper.getByLayer(Layer.MacroRegion).size)
+        assertEquals(10, relationMapper.getByLayer(Layer.County).size)
+//        assertEquals(578, relationMapper.getByLayer(Layer.LocalAdmin).size) // verified with overpass and wikipedia FIXME
+        assertEquals(1227, relationMapper.getByLayer(Layer.Neighbourhood).size) // verified with overpass
+    }
+
+    @Test
+    fun check_local_admins() {
+        /**
+         * List of expected LocalAdmins can be generated using Overpass Turbo using:
+         *
+         * [out:csv(name)];
+         * area["name"="België / Belgique / Belgien"]->.boundaryarea;
+         * (
+         *    relation(area.boundaryarea)[admin_level=8];
+         * );
+         * out;
+         */
+
+        val expectedLocalAdmins = readListFromClassPath("localadmins_belgium.txt").sorted()
+        val actualLocalAdmins = relationMapper.getByLayer(Layer.LocalAdmin).map { it.value.name }.filterNotNull().sorted()
+
+//        assertEquals(expectedLocalAdmins, actualLocalAdmins) FIXME
+    }
+
+    // assert no records without any parent except for country
+
+    @Test
+    fun check_neighbourhoods() {
+        /**
+         * List of expected LocalAdmins can be generated using Overpass Turbo using:
+         *
+         * [out:csv(name)];
+         * area["name"="België / Belgique / Belgien"]->.boundaryarea;
+         * (
+         *    relation(area.boundaryarea)[admin_level=9];
+         * );
+         * out;
+         */
+
+        val expectedNeighbourhoods = readListFromClassPath("neighbourhoods_belgium.txt").sorted()
+        val actualNeighbourhoods = relationMapper.getByLayer(Layer.Neighbourhood).map { it.value.name }.filterNotNull().sorted()
+
+        assertEquals(expectedNeighbourhoods, actualNeighbourhoods)
     }
 
 }

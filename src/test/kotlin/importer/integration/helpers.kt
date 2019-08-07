@@ -75,3 +75,8 @@ fun randomString(stringLength: Int = 8): String {
             .map(charPool::get)
             .joinToString("");
 }
+
+fun readListFromClassPath(resourceName: String): List<String> {
+    val url =  object: Any() {}.javaClass.classLoader.getResource(resourceName)?: throw Exception("Resource '$resourceName' not found")
+    return File(url.file).readLines()
+}
