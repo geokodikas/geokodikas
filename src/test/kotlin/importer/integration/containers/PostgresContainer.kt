@@ -22,8 +22,14 @@ class KPostgreSQLContainer(dockerImageName: String) : PostgreSQLContainer<KPostg
 
     override fun configure() {
         super.configure()
+        val logger = KotlinLogging.logger {  }
 
-        setCommand("postgres", "-c", "config_file=/etc/postgresql/postgresql.conf")
+        if (System.getenv("POSTGIS_LOW_MEM") != null) {
+            logger.warn("Using Postgis with low memory configuration")
+            setCommand("postgres", "-c", "config_file=/etc/postgresql/postgresql-1GB.conf")
+        } else {
+            setCommand("postgres", "-c", "config_file=/etc/postgresql/postgresql.conf")
+        }
     }
 }
 
@@ -31,7 +37,7 @@ fun postgresContainer(): PostgreSQLContainer<KPostgreSQLContainer> = postgresCon
 
 fun postgresContainer(existingImage: String): KPostgreSQLContainer {
     val postgresContainer = KPostgreSQLContainer(existingImage)
-            .withCreateContainerCmdModifier{ it.withName("postgis__${randomString()}") }
+            .withCreateContainerCmdModifier { it.withName("postgis__${randomString()}") }
     postgresContainer.start()
     val logConsumer = Slf4jLogConsumer(KotlinLogging.logger { })
     postgresContainer.followOutput(logConsumer, OutputFrame.OutputType.STDERR)

@@ -4,6 +4,7 @@ import be.ledfan.geocoder.config.Config
 import be.ledfan.geocoder.kodein
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.result.Result
+import mu.KotlinLogging
 import org.kodein.di.direct
 import org.kodein.di.generic.instance
 import java.io.File
@@ -26,15 +27,16 @@ fun md5sumOfFile(file: File): String {
 }
 
 fun downloadAndCacheFile(url: String, destinationFileName: String, md5sum: String): String {
+    val logger = KotlinLogging.logger {  }
     val config: Config = kodein.direct.instance()
     val destinationFile = File(config.tmpDir, destinationFileName)
 
     if (destinationFile.exists() && md5sumOfFile(destinationFile) == md5sum) {
-        println("File already available with correct checksum, not downloading: $url")
+        logger.info("File already available with correct checksum, not downloading: $url")
         return destinationFile.absolutePath
     }
 
-    println("Downloading: $url to ${destinationFile.absolutePath}")
+    logger.info("Downloading: $url to ${destinationFile.absolutePath}")
 
     val progressLock = Any()
     var previousProgress = 0
@@ -45,7 +47,7 @@ fun downloadAndCacheFile(url: String, destinationFileName: String, md5sum: Strin
                 synchronized(progressLock) {
                     val progress = (readBytes.toFloat() / totalBytes.toFloat() * 100).toInt()
                     if (progress % 5 == 0 && progress != previousProgress) {
-                        println("Downloading $url: $progress%")
+                        logger.info("Downloading $url: $progress%")
                         previousProgress = progress
                     }
                 }
@@ -58,7 +60,7 @@ fun downloadAndCacheFile(url: String, destinationFileName: String, md5sum: Strin
             if (actualCheckSum != md5sum) {
                 throw Exception("Download of $url failed, expected : $md5sum, but download file has $actualCheckSum")
             }
-            println("File successfully downloaded, checksum: ${md5sumOfFile(destinationFile)}")
+            logger.info("File successfully downloaded, checksum: ${md5sumOfFile(destinationFile)}")
             return destinationFile.absolutePath
         }
         is Result.Failure -> {

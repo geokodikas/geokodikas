@@ -42,19 +42,19 @@ open class IntegrationTest(ic: IntegrationConfig) {
         var doImport = true
         when {
             imageExists(fullImportedImageName) -> {
-                println("Target image $fullImportedImageName already exists, starting that container")
+                logger.info("Target image $fullImportedImageName already exists, starting that container")
                 postgresContainer = postgresContainer(fullImportedImageName)
-                println("Container with image $fullImportedImageName started")
+                logger.info("Container with image $fullImportedImageName started")
                 doImport = false
             }
             imageExists(importedImageName) -> {
                 // start this image
-                println("Intermediate image $importedImageName already exists, starting that container")
+                logger.info("Intermediate image $importedImageName already exists, starting that container")
                 postgresContainer = postgresContainer(importedImageName)
             }
             else -> {
                 // create and save image
-                println("Target image $importedImageName does not exists, creating that image first")
+                logger.info("Target image $importedImageName does not exists, creating that image first")
                 postgresContainer = postgresContainer()
 
                 osm2psqlContainer(postgresContainer.currentContainerInfo.networkSettings.ipAddress,
@@ -64,7 +64,7 @@ open class IntegrationTest(ic: IntegrationConfig) {
                 // osm2psql has imported the data into the container, storing as new image
                 val committed = commitContainer(postgresContainer.containerId, importedImageName)
                 if (committed) {
-                    print("Start container from built image")
+                    logger.info("Start container from built image")
                     postgresContainer = postgresContainer(importedImageName)
                 }
             }
@@ -76,7 +76,7 @@ open class IntegrationTest(ic: IntegrationConfig) {
         config.importer.numProcessors = 8
 
         if (ConnectionFactory.createdConnections != 0) {
-            println("Already created connections before changing config")
+            logger.warn("Already created connections before changing config")
         }
 
         relationMapper = kodein.direct.instance() // bind now after conncetion can be made
@@ -89,9 +89,9 @@ open class IntegrationTest(ic: IntegrationConfig) {
 
             runBlocking {
                 importer.executeStep("step0")
-//                importer.executeStep("step1")
-//                importer.executeStep("step2")
-//                importer.executeStep("step3")
+                importer.executeStep("step1")
+                importer.executeStep("step2")
+                importer.executeStep("step3")
                 importer.finish()
             }
 
