@@ -5,6 +5,9 @@ cache:
     - $HOME/.m2
     - $TRAVIS_BUILD_DIR/tmp
 
+env:
+  - DO_NOT_COMMIT_CONTAINER=yes
+
 before_install:
   - cp config.dist.json config.json
   - cp logback.travis.xml src/main/resources/logback-test.xml

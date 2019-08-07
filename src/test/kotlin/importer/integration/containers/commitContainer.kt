@@ -8,7 +8,14 @@ import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import org.testcontainers.DockerClientFactory
 
-fun commitContainer(currentContainerId: String, saveAsName: String) {
+fun commitContainer(currentContainerId: String, saveAsName: String): Boolean {
+    if (System.getenv("DO_NOT_COMMIT_CONTAINER") != null) {
+        println("Not committing, because DO_NOT_COMMIT_CONTAINER env is set")
+        return false
+    }
+
+    println("Committing $currentContainerId as $saveAsName")
+
     val dockerClient = DockerClientFactory.instance().client()
     dockerClient.killContainerCmd(currentContainerId)
             .withSignal("SIGINT")
@@ -22,4 +29,6 @@ fun commitContainer(currentContainerId: String, saveAsName: String) {
     }
 
     dockerClient.commitCmd(currentContainerId).withRepository(saveAsName).exec()
+
+    return true
 }
