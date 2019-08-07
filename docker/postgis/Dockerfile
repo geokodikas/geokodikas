@@ -16,6 +16,7 @@ RUN mkdir -p /docker-entrypoint-initdb.d
 COPY ./initdb-postgis.sh /docker-entrypoint-initdb.d/postgis.sh
 COPY ./update-postgis.sh /usr/local/bin
 COPY ./postgres.conf /etc/postgresql/postgresql.conf
+COPY ./postgres-1GB.conf /etc/postgresql/postgresql-1GB.conf
 
 # override data dir so it's stored into the image when doing a commit
 ENV PGDATA /var/lib/geocoder_posgres/data

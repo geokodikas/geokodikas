@@ -22,7 +22,9 @@ fun osm2psqlContainer(dbHost: String, dbUser: String, dbPassword: String, dbPort
     container.withEnv("NUM_PROC", "8")
     container.withFileSystemBind(File(pbfFilePath).parent, "/workdir/input")
 
-    println("Starting import, this will take some time")
+    val logger = KotlinLogging.logger {  }
+    logger.info("Starting import, this will take some time")
+
     container.start()
 
     val logConsumer = Slf4jLogConsumer(KotlinLogging.logger {  })
@@ -45,7 +47,7 @@ fun osm2psqlContainer(dbHost: String, dbUser: String, dbPassword: String, dbPort
     // wait until fully finished
     consumer.waitUntilEnd()
 
-    println("Finished importing")
+    logger.info("Finished importing")
 
     // data should be imported now
     return container
