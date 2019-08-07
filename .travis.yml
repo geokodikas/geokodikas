@@ -6,8 +6,7 @@ cache:
     - $TRAVIS_BUILD_DIR/tmp
 
 env:
-  - DO_NOT_COMMIT_CONTAINER=yes
-  - POSTGIS_LOW_MEM=yes
+  - DO_NOT_COMMIT_CONTAINER=yes POSTGIS_LOW_MEM=yes
 
 before_install:
   - cp config.dist.json config.json
