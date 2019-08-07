@@ -62,9 +62,11 @@ open class IntegrationTest(ic: IntegrationConfig) {
                         5432, postgresContainer.databaseName, pbfFilePath)
 
                 // osm2psql has imported the data into the container, storing as new image
-                commitContainer(postgresContainer.containerId, importedImageName)
-                print("Start container from built image")
-                postgresContainer = postgresContainer(importedImageName)
+                val committed = commitContainer(postgresContainer.containerId, importedImageName)
+                if (committed) {
+                    print("Start container from built image")
+                    postgresContainer = postgresContainer(importedImageName)
+                }
             }
         }
 
@@ -87,16 +89,15 @@ open class IntegrationTest(ic: IntegrationConfig) {
 
             runBlocking {
                 importer.executeStep("step0")
-                importer.executeStep("step1")
-                importer.executeStep("step2")
-                importer.executeStep("step3")
+//                importer.executeStep("step1")
+//                importer.executeStep("step2")
+//                importer.executeStep("step3")
                 importer.finish()
             }
 
             closeAllConnections() // connections must be closed for safe shutdown of postgres
 
             // committing container again
-            println("Committing as $fullImportedImageName")
             commitContainer(postgresContainer.containerId, fullImportedImageName)
         }
     }
