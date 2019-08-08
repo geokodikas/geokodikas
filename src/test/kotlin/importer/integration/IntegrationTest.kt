@@ -8,7 +8,6 @@ import be.ledfan.geocoder.importer.core.StatsCollector
 import be.ledfan.geocoder.importer.steps.executeBatchQueries
 import be.ledfan.geocoder.kodein
 import importer.integration.containers.*
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.intellij.lang.annotations.Language
@@ -18,7 +17,6 @@ import org.kodein.di.generic.instance
 import org.postgresql.util.PSQLException
 import org.testcontainers.containers.PostgreSQLContainer
 import java.io.File
-import java.lang.Thread.sleep
 import java.sql.Connection
 
 data class IntegrationConfig(val pbFurl: String, val pbfName: String, val pbfCheckSum: String)
@@ -161,5 +159,21 @@ open class IntegrationTest(ic: IntegrationConfig) {
         return ids
     }
 
+    fun selectString(query: String, columnName: String): ArrayList<String> {
+        val stmt = con.prepareStatement(query)
+        val result = stmt.executeQuery()
+
+        val strings = arrayListOf<String>()
+
+        while (result.next()) {
+            strings.add(result.getString(columnName))
+        }
+
+        stmt.close()
+        result.close()
+
+        return strings
+
+    }
 
 }

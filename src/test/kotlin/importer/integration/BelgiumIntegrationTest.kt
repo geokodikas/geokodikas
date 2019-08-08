@@ -147,4 +147,111 @@ class BelgiumIntegrationTest : IntegrationTest(
 
     }
 
+    @Test
+    fun `osm_node may only contain specific layers`() {
+        @Language("SQL")
+        val stmt = "SELECT DISTINCT layer, layer_order from osm_node"
+
+        val layers = selectString(stmt, "layer").sorted()
+
+        assertEquals(arrayListOf(
+                "Address",
+                "Junction",
+                "PhysicalTrafficFlow",
+                "Venue",
+                "VirtualTrafficFlow"
+        ), layers)
+    }
+
+    @Test
+    fun `osm_relation may only contain specific layers`() {
+        @Language("SQL")
+        val stmt = "SELECT DISTINCT layer, layer_order from osm_relation"
+
+        val layers = selectString(stmt, "layer").sorted()
+
+        assertEquals(arrayListOf(
+                "Address", // TODO we probably don't want this in the osm_relation table
+                "Venue", // TODO ^
+                "Neighbourhood",
+                "MacroRegion",
+                "LocalAdmin",
+                "County",
+                "Country"
+        ), layers)
+    }
+
+    @Test
+    fun `osm_way may only contain specific layers`() {
+        @Language("SQL")
+        val stmt = "SELECT DISTINCT layer, layer_order from osm_way"
+
+        val layers = selectString(stmt, "layer").sorted()
+
+        assertEquals(arrayListOf(
+                "Address", // TODO we maybe don't want this in the osm_relation table
+                "Junction",
+                "Link",
+                "Street",
+                "Venue", // TODO ^
+                "VirtualTrafficFlow"
+        ), layers)
+    }
+
+    @Test
+    fun `way_node should have the same layers as in osm_way`() {
+        @Language("SQL")
+        val stmt = """
+            SELECT osm_way.osm_id
+                    FROM osm_way
+                    JOIN way_node ON osm_way.osm_id = way_node.way_id
+                    WHERE way_node.way_layer <> osm_way.layer
+            or way_node.way_layer_order <> osm_way.layer_order
+            """
+
+        val ids = selectIds(stmt)
+        assertEquals(listOf<Long>(), ids)
+    }
+
+    @Test
+    fun `way_node should have the same layers as in osm_node`() {
+        @Language("SQL")
+        val stmt = """
+            SELECT osm_node.osm_id
+                    FROM osm_node
+                    JOIN way_node ON osm_node.osm_id = way_node.node_id
+                    WHERE way_node.node_layer <> osm_node.layer
+            or way_node.node_layer_order <> osm_node.layer_order
+            """
+
+        val ids = selectIds(stmt)
+        assertEquals(listOf<Long>(), ids)
+    }
+
+    @Test
+    fun `nodes related to ways which are of type street has some specific layers`() {
+        @Language("SQL")
+        val stmt = """SELECT way_node.* FROM osm_way
+            JOIN way_node ON osm_way.osm_id = way_node.way_id
+            WHERE layer = 'Street'::Layer
+                AND way_node.node_layer NOT IN ('Junction'::Layer, 'VirtualTrafficFlow'::Layer, 'PhysicalTrafficFlow'::Layer)
+            """
+
+        val ids = selectIds(stmt)
+        assertEquals(listOf<Long>(), ids)
+    }
+
+    @Test
+    fun `streets should only contain node of some specific layers`() {
+        @Language("SQL")
+        val stmt = """SELECT way_node.*
+            FROM osm_way
+                 JOIN way_node ON osm_way.osm_id = way_node.way_id
+            WHERE layer = 'Street'::Layer
+              AND way_node.node_layer NOT IN ('Junction'::Layer, 'VirtualTrafficFlow'::Layer, 'PhysicalTrafficFlow'::Layer)"""
+
+        val ids = selectIds(stmt)
+        assertEquals(listOf<Long>(), ids)
+    }
+
 }
