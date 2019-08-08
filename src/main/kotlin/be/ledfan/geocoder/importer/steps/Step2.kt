@@ -82,9 +82,9 @@ suspend fun step2_prune_nodes_without_layer(): Boolean {
 
     statsCollector.updateStatistics("Step 2 --> Prune way_node", "Pruned", pruneCount)
 
-    val prunceCount2 = wayNodeMapper.pruneWayNodesRelatedToArealStreets()
+    val pruneRelationCount = wayNodeMapper.pruneWayNodesRelatedToArealStreets()
 
-    statsCollector.updateStatistics("Step 2 --> Prune way_node", "Pruned area", prunceCount2)
+    statsCollector.updateStatistics("Step 2 --> Prune way_node", "Pruned relation", pruneRelationCount)
     return true
 }
 
