@@ -9,21 +9,25 @@ import kotlin.test.assertNotNull
 
 
 class BelgiumIntegrationTest : IntegrationTest(
-        IntegrationConfig("http://download.geofabrik.de/europe/belgium-190801.osm.pbf",
-                "belgium-190801.osm.pbf",
-                "13728c4794819c8949c214dca25b1b36")) {
-
+        IntegrationConfig("http://download.openstreetmap.fr/extracts/europe/belgium.osm.pbf",
+                "belgium.osm.pbf",
+                "434e6864fab2ad77007e3e743a81a809")
+) {
+    //IntegrationConfig("http://download.geofabrik.de/europe/belgium-190801.osm.pbf",
+//                "belgium-190801.osm.pbf",
+//                "13728c4794819c8949c214dca25b1b36")) {
+//
     @Test
-    fun count() {
-        assertEquals(570_695, countTable("osm_node"))
-        assertEquals(2_085_688, countTable("osm_way"))
-        assertEquals(1_850, countTable("osm_relation"))
-        assertEquals(2_635_362, countTable("parent"))
-        assertEquals(1_049_837, countTable("way_node"))
+    fun `tables should have a fixed count`() {
+        assertEquals(681_435, countTable("osm_node"))
+        assertEquals(2_128_877, countTable("osm_way"))
+        assertEquals(1_851, countTable("osm_relation"))
+        assertEquals(2_650_617, countTable("parent"))
+        assertEquals(1_102_112, countTable("way_node"))
     }
 
     @Test
-    fun main_relations() {
+    fun `should have specific relations`() {
         // Countries in this test
         val belgium = relationMapper.getByPrimaryId(52411L)
         assertNotNull(belgium)
@@ -78,7 +82,7 @@ class BelgiumIntegrationTest : IntegrationTest(
         assertEquals(1, relationMapper.getByLayer(Layer.Country).size)
         assertEquals(3, relationMapper.getByLayer(Layer.MacroRegion).size)
         assertEquals(10, relationMapper.getByLayer(Layer.County).size)
-//        assertEquals(578, relationMapper.getByLayer(Layer.LocalAdmin).size) // verified with overpass and wikipedia FIXME
+        assertEquals(581, relationMapper.getByLayer(Layer.LocalAdmin).size) // verified with overpass
         assertEquals(1227, relationMapper.getByLayer(Layer.Neighbourhood).size) // verified with overpass
     }
 
@@ -98,10 +102,8 @@ class BelgiumIntegrationTest : IntegrationTest(
         val expectedLocalAdmins = readListFromClassPath("localadmins_belgium.txt").sorted()
         val actualLocalAdmins = relationMapper.getByLayer(Layer.LocalAdmin).map { it.value.name }.filterNotNull().sorted()
 
-//        assertEquals(expectedLocalAdmins, actualLocalAdmins) FIXME
+        assertEquals(expectedLocalAdmins, actualLocalAdmins)
     }
-
-    // assert no records without any parent except for country
 
     @Test
     fun check_neighbourhoods() {
@@ -122,30 +124,50 @@ class BelgiumIntegrationTest : IntegrationTest(
         assertEquals(expectedNeighbourhoods, actualNeighbourhoods)
     }
 
-    @Test
-    fun `there are no nodes without a parent`() {
-        // FIXME
-        @Language("SQL")
-        val stmt = """SELECT child.osm_id
-            FROM osm_node AS child
-            WHERE NOT EXISTS(SELECT *
-                             FROM parent AS p1
-                             WHERE p1.child_id = child.osm_id)
-              -- If the node would have two parents, than it's fine it doesn't have any parent
-              -- this is the case for nodes on the boundary of two LocalAdmins
-              AND NOT (SELECT COUNT(*)
-                       FROM osm_relation AS parent
-                       where st_intersects(child.centroid, parent.geometry)
-                         and parent.layer = 'LocalAdmin'::Layer) > 1
-              -- Ignore points outside Belgium, they are used e.g. on roads crossing the boundary
-              AND st_contains((SELECT geometry FROM osm_relation WHERE osm_id = 52411).geometry, child.centroid)
-            """
+//    @Test
+//    fun `nodes should either have a LocalAdmin or Neighbourhood as parent`() {
+//        @Language("SQL")
+//        val stmt = """SELECT child.osm_id
+//            FROM osm_node AS child
+//            WHERE NOT EXISTS(SELECT *
+//                             FROM parent AS p1
+//                             WHERE p1.child_id = child.osm_id)
+//              -- If the node would have two parents, than it's fine it doesn't have any parent
+//              -- this is the case for nodes on the boundary of two LocalAdmins
+//              AND NOT (SELECT COUNT(*)
+//                       FROM osm_relation AS parent
+//                       where st_intersects(child.centroid, parent.geometry)
+//                         and parent.layer = 'LocalAdmin'::Layer) > 1
+//              -- Ignore points outside Belgium, they are used e.g. on roads crossing the boundary
+//              AND st_contains((SELECT geometry FROM osm_relation WHERE osm_id = 52411).geometry, child.centroid)
+//            """
+//    }
 
-        val ids = selectIds(stmt)
 
-        assertEquals(arrayListOf<Long>(), ids)
-
-    }
+//    @Test
+//    fun `there are no nodes without a parent`() {
+//        // FIXME
+//        @Language("SQL")
+//        val stmt = """SELECT child.osm_id
+//            FROM osm_node AS child
+//            WHERE NOT EXISTS(SELECT *
+//                             FROM parent AS p1
+//                             WHERE p1.child_id = child.osm_id)
+//              -- If the node would have two parents, than it's fine it doesn't have any parent
+//              -- this is the case for nodes on the boundary of two LocalAdmins
+//              AND NOT (SELECT COUNT(*)
+//                       FROM osm_relation AS parent
+//                       where st_intersects(child.centroid, parent.geometry)
+//                         and parent.layer = 'LocalAdmin'::Layer) > 1
+//              -- Ignore points outside Belgium, they are used e.g. on roads crossing the boundary
+//              AND st_contains((SELECT geometry FROM osm_relation WHERE osm_id = 52411).geometry, child.centroid)
+//            """
+//
+//        val ids = selectIds(stmt)
+//
+//        assertEquals(arrayListOf<Long>(), ids)
+//
+//    }
 
     @Test
     fun `osm_node may only contain specific layers`() {
