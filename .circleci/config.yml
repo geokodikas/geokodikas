@@ -17,10 +17,8 @@ jobs:
     working_directory: ~/repo
 
     environment:
-        DO_NOT_COMMIT_CONTAINER: yes
-        POSTGIS_LOW_MEM: yes
-
-    environment:
+      DO_NOT_COMMIT_CONTAINER: yes
+      POSTGIS_LOW_MEM: yes
       # Customize the JVM maximum heap limit
       MAVEN_OPTS: -Xmx3200m
 

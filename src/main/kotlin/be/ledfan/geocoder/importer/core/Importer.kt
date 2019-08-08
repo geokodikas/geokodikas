@@ -41,14 +41,18 @@ class Importer {
         steps["step1"] = listOf(
                 Pair("step1_checks", ::step1_checks),
                 Pair("step1_import_ways", ::step1_import_ways),
-                Pair("step1_create_indexes", ::step1_create_indexes))
+                Pair("step1_create_indexes", ::step1_create_indexes),
+                Pair("step1_prune", ::step1_prune))
+
 
         steps["step2"] = listOf(
                 Pair("step2_checks", ::step2_checks),
                 Pair("step2_import_nodes", ::step2_import_nodes),
                 Pair("step2_create_indexes", ::step2_create_indexes),
 //                Pair("step2_resolve_distances_way_node", ::step2_resolve_distances_way_node),
-                Pair("step2_prune_nodes_without_layer", ::step2_prune_nodes_without_layer))
+                Pair("step2_prune_nodes_without_layer", ::step2_prune_nodes_without_layer),
+                Pair("step2_prune", ::step2_prune))
+
 //                Pair("step2_resolve_one_ways", ::step2_resolve_one_ways))
 
         steps["step3"] = listOf(

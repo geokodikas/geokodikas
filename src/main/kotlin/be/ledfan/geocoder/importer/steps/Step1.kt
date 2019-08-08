@@ -4,6 +4,8 @@ package be.ledfan.geocoder.importer.steps
 
 import be.ledfan.geocoder.config.Config
 import be.ledfan.geocoder.db.ConnectionFactory
+import be.ledfan.geocoder.importer.RegionPruner
+import be.ledfan.geocoder.importer.RelationHierarchyResolver
 import be.ledfan.geocoder.importer.core.Broker
 import be.ledfan.geocoder.importer.processors.OsmWayProcessor
 import be.ledfan.geocoder.importer.core.StatsCollector
@@ -29,7 +31,7 @@ suspend fun step1_checks(): Boolean {
 
 suspend fun step1_import_ways(): Boolean {
 
-    val config : Config = kodein.direct.instance()
+    val config: Config = kodein.direct.instance()
     val inputFileName = config.runtime.inputFileName
     val statsCollector: StatsCollector = kodein.direct.instance()
 
@@ -75,17 +77,23 @@ suspend fun step1_import_ways(): Boolean {
     return true
 }
 
-suspend fun step1_create_indexes() : Boolean {
+suspend fun step1_create_indexes(): Boolean {
     logger.info { "Updating centroids of osm_way and creating indexes" }
 
     @Language("SQL")
     val sqlQueries = listOf(
-        "UPDATE osm_way SET centroid=st_centroid(geometry)",
-        "CREATE UNIQUE INDEX IF NOT EXISTS osm_way_osm_id_index ON osm_way (osm_id)",
-        "CREATE INDEX IF NOT EXISTS way_node_node_id_index ON way_node (node_id)",
-        "CREATE INDEX IF NOT EXISTS way_node_way_id_index ON way_node (way_id)",
-        "CREATE INDEX IF NOT EXISTS osm_way_centroid_index ON osm_way USING GIST(centroid)")
+            "UPDATE osm_way SET centroid=st_centroid(geometry)",
+            "CREATE UNIQUE INDEX IF NOT EXISTS osm_way_osm_id_index ON osm_way (osm_id)",
+            "CREATE INDEX IF NOT EXISTS way_node_node_id_index ON way_node (node_id)",
+            "CREATE INDEX IF NOT EXISTS way_node_way_id_index ON way_node (way_id)",
+            "CREATE INDEX IF NOT EXISTS osm_way_centroid_index ON osm_way USING GIST(centroid)",
+            "CREATE INDEX IF NOT EXISTS osm_way_geometry_index ON osm_way USING GIST(geometry)")
 //        "CREATE INDEX IF NOT EXISTS one_way_restrictions_way_id_from_node_id_index ON one_way_restrictions (way_id, from_node_id)")
 
     return executeBatchQueries(sqlQueries)
+}
+
+suspend fun step1_prune(): Boolean {
+    kodein.direct.instance<RegionPruner>().pruneWays()
+    return true
 }

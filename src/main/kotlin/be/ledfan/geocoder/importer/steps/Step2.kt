@@ -3,6 +3,7 @@ package be.ledfan.geocoder.importer.steps
 import be.ledfan.geocoder.config.Config
 import be.ledfan.geocoder.db.ConnectionFactory
 import be.ledfan.geocoder.db.mapper.WayNodeMapper
+import be.ledfan.geocoder.importer.RegionPruner
 import be.ledfan.geocoder.importer.core.Broker
 import be.ledfan.geocoder.importer.core.StatsCollector
 import be.ledfan.geocoder.importer.processors.OsmNodeProcessor
@@ -85,6 +86,11 @@ suspend fun step2_prune_nodes_without_layer(): Boolean {
     val pruneRelationCount = wayNodeMapper.pruneWayNodesRelatedToArealStreets()
 
     statsCollector.updateStatistics("Step 2 --> Prune way_node", "Pruned relation", pruneRelationCount)
+    return true
+}
+
+suspend fun step2_prune(): Boolean {
+    kodein.direct.instance<RegionPruner>().pruneNodes()
     return true
 }
 

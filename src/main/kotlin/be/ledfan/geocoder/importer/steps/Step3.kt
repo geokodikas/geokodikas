@@ -1,6 +1,7 @@
 package be.ledfan.geocoder.importer.steps
 
 import be.ledfan.geocoder.config.Config
+import be.ledfan.geocoder.importer.RegionPruner
 import be.ledfan.geocoder.importer.RelationHierarchyResolver
 import be.ledfan.geocoder.importer.RelationPostProcessor
 import be.ledfan.geocoder.importer.core.Broker
@@ -94,7 +95,7 @@ suspend fun step3_create_indexes(): Boolean {
 }
 
 suspend fun step3_prune_relations(): Boolean {
-    kodein.direct.instance<RelationPostProcessor>().prune()
+    kodein.direct.instance<RegionPruner>().pruneRelations()
     return true
 }
 

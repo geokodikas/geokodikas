@@ -57,6 +57,8 @@ val kodein = Kodein {
 
     bind<RelationPostProcessor>() with singleton { RelationPostProcessor(instance(), instance(), instance()) }
 
+    bind<RegionPruner>() with singleton { RegionPruner(instance(), instance(), instance(), instance(), instance()) }
+
     bind<TagParser>() with singleton { TagParser() }
 
     bind<StatsCollector>() with singleton { StatsCollector() }

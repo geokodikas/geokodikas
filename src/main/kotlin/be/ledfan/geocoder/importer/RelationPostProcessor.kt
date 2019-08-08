@@ -23,33 +23,4 @@ class RelationPostProcessor(private val config: Config,
         logger.info { "Updated centroids of osm_relation" }
     }
 
-    fun prune() {
-
-        @Language("SQL")
-        val sql = """
-            SELECT osm_id
-             FROM osm_relation AS o
-             WHERE o.centroid IS NOT NULL
-              AND osm_id <> 52411
-              AND NOT st_contains((SELECT geometry FROM osm_relation WHERE osm_id = ?).geometry, ST_PointOnSurface(o.geometry));
-            """
-
-        val stmt = con.prepareStatement(sql)
-        stmt.setLong(1, config.importer.countryId)
-        val result = stmt.executeQuery()
-
-        val ids = ArrayList<Long>()
-
-        while (result.next()) {
-            ids.add(result.getLong("osm_id"))
-        }
-        result.close()
-        stmt.close()
-
-        logger.info { "Pruning ${ids.size} relations" }
-        logger.debug { "Pruned relations with id ${ids.joinToString()}" }
-
-        osmRelationMapper.deleteByPrimaryIds(ids)
-    }
-
 }
