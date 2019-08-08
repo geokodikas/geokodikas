@@ -140,4 +140,19 @@ class WayNodeMapper(private val con: Connection) : Mapper<WayNode>(con) {
         return result
     }
 
+
+    fun pruneWayNodesRelatedToArealStreets(): Int {
+        @Language("SQL")
+        val sql = """
+            DELETE FROM way_node
+            WHERE way_layer = 'Street'::Layer
+              AND node_layer IN ('Address'::Layer, 'Venue'::Layer)
+              AND EXISTS(SELECT osm_id FROM osm_way WHERE osm_way.osm_id = way_node.way_id)
+        """.trimIndent()
+        val stmt = con.prepareStatement(sql)
+        val result = stmt.executeUpdate()
+        stmt.close()
+        return result
+    }
+
 }

@@ -56,7 +56,10 @@ class DetermineLayerNode : DetermineLayer() {
             }
 
             if (parsedTags.hasChild("addr") && !parsedTags.hasChild("zone")) {
-                if (parsedTags.hasChild("name")) {
+                if (parsedTags.child("addr").hasChild("street") && parsedTags.child("addr").amountOfChildren == 1) {
+                    // if this node only contains a addr:street tag it is not an Address or Venue
+                    // other code will determine the correct layer
+                } else if (parsedTags.hasChild("name")) {
                     assignLayer(layers, Layer.Venue)
                 } else {
                     assignLayer(layers, Layer.Address)

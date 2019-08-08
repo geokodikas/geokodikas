@@ -4,6 +4,9 @@ import java.lang.Exception
 
 data class Tags(private var values: List<String>? = null, private val children: HashMap<String, Tags> = HashMap()) {
 
+    val amountOfChildren: Int
+        get() = children.size
+
     fun setValues(value: String) {
         if (values != null) {
             throw Exception("Already contains a value")
