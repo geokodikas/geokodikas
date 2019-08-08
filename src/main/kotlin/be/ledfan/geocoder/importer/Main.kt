@@ -1,8 +1,6 @@
 package be.ledfan.geocoder.importer
 
 import be.ledfan.geocoder.importer.core.Importer
-import be.ledfan.geocoder.importer.steps.step1_prune
-import be.ledfan.geocoder.importer.steps.step2_prune
 import be.ledfan.geocoder.kodein
 import ch.qos.logback.classic.util.ContextInitializer
 import org.kodein.di.direct

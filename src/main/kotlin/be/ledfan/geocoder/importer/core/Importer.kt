@@ -41,8 +41,7 @@ class Importer {
         steps["step1"] = listOf(
                 Pair("step1_checks", ::step1_checks),
                 Pair("step1_import_ways", ::step1_import_ways),
-                Pair("step1_create_indexes", ::step1_create_indexes),
-                Pair("step1_prune", ::step1_prune))
+                Pair("step1_create_indexes", ::step1_create_indexes))
 
 
         steps["step2"] = listOf(
@@ -50,8 +49,7 @@ class Importer {
                 Pair("step2_import_nodes", ::step2_import_nodes),
                 Pair("step2_create_indexes", ::step2_create_indexes),
 //                Pair("step2_resolve_distances_way_node", ::step2_resolve_distances_way_node),
-                Pair("step2_prune_nodes_without_layer", ::step2_prune_nodes_without_layer),
-                Pair("step2_prune", ::step2_prune))
+                Pair("step2_prune_nodes_without_layer", ::step2_prune_nodes_without_layer))
 
 //                Pair("step2_resolve_one_ways", ::step2_resolve_one_ways))
 
@@ -60,7 +58,7 @@ class Importer {
                 Pair("step3_import_relations", ::step3_import_relations),
                 Pair("step3_set_centroid", ::step3_set_centroid),
                 Pair("step3_create_indexes", ::step3_create_indexes),
-                Pair("step3_prune_relations", ::step3_prune_relations),
+                Pair("step3_prune_regions", ::step3_prune_regions),
                 Pair("step3_resolve_hierarchies", ::step3_resolve_hierarchies))
     }
 

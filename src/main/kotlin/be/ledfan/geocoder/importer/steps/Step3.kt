@@ -94,8 +94,8 @@ suspend fun step3_create_indexes(): Boolean {
 
 }
 
-suspend fun step3_prune_relations(): Boolean {
-    kodein.direct.instance<RegionPruner>().pruneRelations()
+suspend fun step3_prune_regions(): Boolean {
+    kodein.direct.instance<RegionPruner>().prune()
     return true
 }
 

@@ -89,10 +89,6 @@ suspend fun step2_prune_nodes_without_layer(): Boolean {
     return true
 }
 
-suspend fun step2_prune(): Boolean {
-    kodein.direct.instance<RegionPruner>().pruneNodes()
-    return true
-}
 
 //suspend fun step2_resolve_one_ways(): Boolean {
 //

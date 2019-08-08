@@ -93,7 +93,3 @@ suspend fun step1_create_indexes(): Boolean {
     return executeBatchQueries(sqlQueries)
 }
 
-suspend fun step1_prune(): Boolean {
-    kodein.direct.instance<RegionPruner>().pruneWays()
-    return true
-}

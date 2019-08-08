@@ -17,7 +17,13 @@ class RegionPruner(private val config: Config,
 
     private val logger = KotlinLogging.logger {}
 
-    fun pruneRelations() {
+    fun prune() {
+        pruneNodes()
+        pruneWays()
+        pruneRelations()
+    }
+
+    private fun pruneRelations() {
         @Language("SQL")
         val sql = """
             SELECT osm_id
@@ -35,7 +41,7 @@ class RegionPruner(private val config: Config,
         osmRelationMapper.deleteByPrimaryIds(ids)
     }
 
-    fun pruneNodes() {
+    private fun pruneNodes() {
         @Language("SQL")
         val sql = """
             SELECT osm_id
@@ -57,7 +63,7 @@ class RegionPruner(private val config: Config,
         osmNodeMapper.deleteByPrimaryIds(ids)
     }
 
-    fun pruneWays() {
+    private fun pruneWays() {
         @Language("SQL")
         val sql = """
             SELECT osm_id
