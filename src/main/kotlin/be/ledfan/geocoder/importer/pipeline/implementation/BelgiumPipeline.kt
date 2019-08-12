@@ -12,7 +12,7 @@ import org.junit.Test
 class BelgiumPipeline : AbstractPipeline(
         IntegrationConfig("http://download.openstreetmap.fr/extracts/europe/belgium.osm.pbf",
                 "belgium.osm.pbf",
-                "434e6864fab2ad77007e3e743a81a809")
+                "49700d24ff9754bc491806feeb539d38")
 ) {
 
 

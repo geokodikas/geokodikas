@@ -27,19 +27,35 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
 
-      - run: mvn dependency:go-offline
+      - run:
+          name: Package
+          command: |
+            cp config.dist.json config.json
+            cp logback.travis.xml src/main/resources/logback-test.xml
+            cp logback.travis.xml src/main/resources/logback.xml
+            mvn package
+
+      # run tests!
+      - run:
+          name: Test
+          command: |
+            mvn test
+            mkdir artifacts
+            cp target/*.jar artifacts
 
       - save_cache:
           paths:
             - ~/.m2
           key: v1-dependencies-{{ checksum "pom.xml" }}
 
-      # run tests!
-      - run:
-          command: |
-            cp config.dist.json config.json
-            cp logback.travis.xml src/main/resources/logback-test.xml
-            mvn test
+      - persist_to_workspace:
+          root: ~/repo
+          paths:
+            - target
+            - config.json
+
+      - store_artifacts:
+          path: ~/repo/artifacts
 
   belgium-pipeline:
     machine:
@@ -54,28 +70,9 @@ jobs:
       MAVEN_OPTS: -Xmx3200m
 
     steps:
-      - checkout
-
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "pom.xml" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
-
-      - run: mvn dependency:go-offline
-
-      - save_cache:
-          paths:
-            - ~/.m2
-          key: v1-dependencies-{{ checksum "pom.xml" }}
-
-      # run tests!
-      - run:
-          command: |
-            cp config.dist.json config.json
-            cp logback.travis.xml src/main/resources/logback-test.xml
-            mvn package
+      - attach_workspace:
+          # Must be absolute path or relative path from working_directory
+          at: ~/repo
 
       - run:
           command: |
@@ -89,14 +86,14 @@ jobs:
 
 workflows:
   version: 2
-  nightly:
-    triggers:
-      - schedule:
-          cron: "0 0 * * *"
-#          filters:
-#            branches:
-#              only:
-#                - master FIXME
+  build-and-importers:
 
-  jobs:
-    - belgium-pipeline
+    jobs:
+      - build-and-test
+      - hold:
+          type: approval
+          requires:
+            - build-and-test
+      - belgium-pipeline:
+          requires:
+            - hold
