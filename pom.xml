@@ -103,7 +103,7 @@
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-main</artifactId>
-            <version>RELEASE</version>
+            <version>8.8-ENTERPRISE</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
