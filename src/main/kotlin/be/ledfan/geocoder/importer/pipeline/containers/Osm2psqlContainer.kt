@@ -1,6 +1,5 @@
-package importer.integration.containers
+package be.ledfan.geocoder.importer.pipeline.containers
 
-import importer.integration.randomString
 import mu.KotlinLogging
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.output.OutputFrame

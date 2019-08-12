@@ -5,14 +5,9 @@
 version: 2
 executorType: machine
 jobs:
-  build:
+  build-and-test:
     machine:
       image: ubuntu-1604:201903-01
-
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/postgres:9.4
 
     working_directory: ~/repo
 
@@ -44,6 +39,64 @@ jobs:
           command: |
             cp config.dist.json config.json
             cp logback.travis.xml src/main/resources/logback-test.xml
-            mvn integration-test
+            mvn test
+
+  belgium-pipeline:
+    machine:
+      image: ubuntu-1604:201903-01
+
+    working_directory: ~/repo
+
+    environment:
+      DO_NOT_COMMIT_CONTAINER: yes
+      POSTGIS_LOW_MEM: yes
+      # Customize the JVM maximum heap limit
+      MAVEN_OPTS: -Xmx3200m
+
+    steps:
+      - checkout
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "pom.xml" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+
+      - run: mvn dependency:go-offline
+
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: v1-dependencies-{{ checksum "pom.xml" }}
+
+      # run tests!
+      - run:
+          command: |
+            cp config.dist.json config.json
+            cp logback.travis.xml src/main/resources/logback-test.xml
+            mvn package
+
+      - run:
+          command: |
+            java -jar target/import-pipeline-jar-with-dependencies.jar
+            mkdir -p tmp/exports
+            cp tmp/full_import* tmp/exports
+
+      - store_artifacts:
+          path: tmp/exports
 
 
+workflows:
+  version: 2
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+#          filters:
+#            branches:
+#              only:
+#                - master FIXME
+
+  jobs:
+    - belgium-pipeline

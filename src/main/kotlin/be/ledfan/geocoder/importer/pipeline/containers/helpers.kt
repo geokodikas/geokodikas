@@ -1,5 +1,4 @@
-package importer.integration
-
+package be.ledfan.geocoder.importer.pipeline.containers
 import be.ledfan.geocoder.config.Config
 import be.ledfan.geocoder.kodein
 import com.github.kittinunf.fuel.Fuel

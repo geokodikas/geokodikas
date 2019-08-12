@@ -1,13 +1,15 @@
-package importer.integration
-
+package be.ledfan.geocoder.importer.pipeline
+import KPostgreSQLContainer
 import be.ledfan.geocoder.config.Config
 import be.ledfan.geocoder.db.ConnectionFactory
 import be.ledfan.geocoder.db.mapper.OsmRelationMapper
 import be.ledfan.geocoder.importer.core.Importer
 import be.ledfan.geocoder.importer.core.StatsCollector
+import be.ledfan.geocoder.importer.pipeline.containers.downloadAndCacheFile
+import be.ledfan.geocoder.importer.pipeline.containers.imageExists
 import be.ledfan.geocoder.importer.steps.executeBatchQueries
 import be.ledfan.geocoder.kodein
-import importer.integration.containers.*
+import commitContainer
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.intellij.lang.annotations.Language
@@ -16,22 +18,24 @@ import org.kodein.di.generic.allInstances
 import org.kodein.di.generic.instance
 import org.postgresql.util.PSQLException
 import org.testcontainers.containers.PostgreSQLContainer
+import be.ledfan.geocoder.importer.pipeline.containers.osm2psqlContainer
+import be.ledfan.geocoder.importer.pipeline.containers.randomString
+import setupPostgresContainer
 import java.io.File
 import java.sql.Connection
 
 data class IntegrationConfig(val pbFurl: String, val pbfName: String, val pbfCheckSum: String)
 
 
-open class IntegrationTest(ic: IntegrationConfig) {
+open class AbstractPipeline(private val ic: IntegrationConfig) {
 
-    private var postgresContainer: PostgreSQLContainer<KPostgreSQLContainer>
+    private lateinit var postgresContainer: PostgreSQLContainer<KPostgreSQLContainer>
 
     private var logger = KotlinLogging.logger {}
     private val config = kodein.direct.instance<Config>()
-    protected var relationMapper: OsmRelationMapper
-    protected var con: Connection
 
-    init {
+    fun import() {
+
         val pbfFilePath = downloadAndCacheFile(ic.pbFurl, ic.pbfName, ic.pbfCheckSum)
         val importedImageName = "postgis_${ic.pbfName}_${ic.pbfCheckSum}"
         val fullImportedImageName = "full_import${ic.pbfName}_${ic.pbfCheckSum}"
@@ -41,19 +45,19 @@ open class IntegrationTest(ic: IntegrationConfig) {
         when {
             imageExists(fullImportedImageName) -> {
                 logger.info("Target image $fullImportedImageName already exists, starting that container")
-                postgresContainer = postgresContainer(fullImportedImageName)
+                postgresContainer = setupPostgresContainer(fullImportedImageName)
                 logger.info("Container with image $fullImportedImageName started")
                 doImport = false
             }
             imageExists(importedImageName) -> {
                 // start this image
                 logger.info("Intermediate image $importedImageName already exists, starting that container")
-                postgresContainer = postgresContainer(importedImageName)
+                postgresContainer = setupPostgresContainer(importedImageName)
             }
             else -> {
                 // create and save image
                 logger.info("Target image $importedImageName does not exists, creating that image first")
-                postgresContainer = postgresContainer()
+                postgresContainer = setupPostgresContainer()
 
                 osm2psqlContainer(postgresContainer.currentContainerInfo.networkSettings.ipAddress,
                         postgresContainer.username, postgresContainer.password,
@@ -63,7 +67,7 @@ open class IntegrationTest(ic: IntegrationConfig) {
                 val committed = commitContainer(postgresContainer.containerId, importedImageName)
                 if (committed) {
                     logger.info("Start container from built image")
-                    postgresContainer = postgresContainer(importedImageName)
+                    postgresContainer = setupPostgresContainer(importedImageName)
                 }
             }
         }
@@ -77,8 +81,8 @@ open class IntegrationTest(ic: IntegrationConfig) {
             logger.warn("Already created connections before changing config")
         }
 
-        relationMapper = kodein.direct.instance() // bind now after conncetion can be made
-        con = kodein.direct.instance()
+//        relationMapper = kodein.direct.instance() // bind now after conncetion can be made
+//        con = kodein.direct.instance()
 
         if (doImport) {
             kodein.direct.instance<StatsCollector>().suppressOutput = true
@@ -97,7 +101,13 @@ open class IntegrationTest(ic: IntegrationConfig) {
 
             // committing container again
             commitContainer(postgresContainer.containerId, fullImportedImageName)
+
         }
+    }
+
+    inline fun <reified V : AbstractValidator> validate() {
+        val validator = V::class.java.newInstance()
+        validator.validate()
     }
 
     fun dropUpstreamTables() {
@@ -114,6 +124,20 @@ open class IntegrationTest(ic: IntegrationConfig) {
         executeBatchQueries(sqlQueries)
     }
 
+    fun export() {
+        val fileName = "full_import${ic.pbfName}_${ic.pbfCheckSum}__${randomString()}"
+
+        println("Going to export db")
+        val res = postgresContainer.execInContainer("pg_dump", "-U", "test", "--verbose", "-Fc", "test", "-f", "/tmp/db.postgres")
+        if (res.exitCode != 0) {
+            throw Exception("Export postgis db failed")
+        } else {
+            println("Export postgis db succeeded")
+        }
+
+        postgresContainer.copyFileFromContainer("/tmp/db.postgres", File(config.tmpDir, fileName).absolutePath)
+    }
+
     private fun closeAllConnections() {
         // first closing all connection to the db from this process
         val connections: List<Connection> by kodein.allInstances()
@@ -128,52 +152,6 @@ open class IntegrationTest(ic: IntegrationConfig) {
             con.close()
         }
         // now all connections should be closed
-    }
-
-    fun exportPostgisDb(fileName: String) {
-        println("Going to export db")
-        val res = postgresContainer.execInContainer("pg_dump", "-U", "test", "--verbose", "-Fc", "test", "-f", "/tmp/db.postgres")
-        if (res.exitCode != 0) {
-            throw Exception("Export postgis db failed")
-        } else {
-            println("Export postgis db succeeded")
-        }
-
-        postgresContainer.copyFileFromContainer("/tmp/db.postgres", File(config.tmpDir, fileName).absolutePath)
-
-    }
-
-    fun selectIds(query: String): ArrayList<Long> {
-        val stmt = con.prepareStatement(query)
-        val result = stmt.executeQuery()
-
-        val ids = arrayListOf<Long>()
-
-        while (result.next()) {
-            ids.add(result.getLong("osm_id"))
-        }
-
-        stmt.close()
-        result.close()
-
-        return ids
-    }
-
-    fun selectString(query: String, columnName: String): ArrayList<String> {
-        val stmt = con.prepareStatement(query)
-        val result = stmt.executeQuery()
-
-        val strings = arrayListOf<String>()
-
-        while (result.next()) {
-            strings.add(result.getString(columnName))
-        }
-
-        stmt.close()
-        result.close()
-
-        return strings
-
     }
 
 }

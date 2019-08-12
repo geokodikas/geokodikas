@@ -1,14 +1,12 @@
-package importer.processors
+package be.ledfan.geocoder.importer.processors
 
 import be.ledfan.geocoder.db.entity.OsmRelation
 import be.ledfan.geocoder.db.entity.OsmUpstreamElement
-import be.ledfan.geocoder.db.entity.OsmWay
 import be.ledfan.geocoder.db.mapper.*
 import be.ledfan.geocoder.importer.DetermineLayerRelation
 import be.ledfan.geocoder.importer.Layer
 import be.ledfan.geocoder.importer.core.TagParser
 import be.ledfan.geocoder.importer.core.Tags
-import be.ledfan.geocoder.importer.processors.OsmRelationProcessor
 import com.slimjars.dist.gnu.trove.list.array.TLongArrayList
 import de.topobyte.osm4j.core.model.impl.Node
 import de.topobyte.osm4j.core.model.impl.Relation

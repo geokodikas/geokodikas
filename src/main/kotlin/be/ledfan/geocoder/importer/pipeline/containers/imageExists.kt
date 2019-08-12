@@ -1,4 +1,4 @@
-package importer.integration.containers
+package be.ledfan.geocoder.importer.pipeline.containers
 
 import org.testcontainers.DockerClientFactory
 

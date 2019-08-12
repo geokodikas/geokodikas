@@ -1,4 +1,4 @@
-package importer.processors
+package be.ledfan.geocoder.importer.processors
 
 import be.ledfan.geocoder.db.entity.OsmUpstreamElement
 import be.ledfan.geocoder.db.mapper.OsmUpstreamLineMapper
@@ -9,7 +9,6 @@ import be.ledfan.geocoder.importer.DetermineLayerWay
 import be.ledfan.geocoder.importer.Layer
 import be.ledfan.geocoder.importer.core.TagParser
 import be.ledfan.geocoder.importer.core.Tags
-import be.ledfan.geocoder.importer.processors.OsmWayProcessor
 import com.slimjars.dist.gnu.trove.list.array.TLongArrayList
 import de.topobyte.osm4j.core.model.impl.Way
 import io.mockk.every

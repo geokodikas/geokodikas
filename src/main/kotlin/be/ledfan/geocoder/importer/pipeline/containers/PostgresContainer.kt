@@ -1,6 +1,4 @@
-package importer.integration.containers
-
-import importer.integration.randomString
+import be.ledfan.geocoder.importer.pipeline.containers.randomString
 import mu.KotlinLogging
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.containers.output.OutputFrame
@@ -33,9 +31,9 @@ class KPostgreSQLContainer(dockerImageName: String) : PostgreSQLContainer<KPostg
     }
 }
 
-fun postgresContainer(): PostgreSQLContainer<KPostgreSQLContainer> = postgresContainer("ledfan/postgis_hstore:latest")
+fun setupPostgresContainer(): PostgreSQLContainer<KPostgreSQLContainer> = setupPostgresContainer("ledfan/postgis_hstore:latest")
 
-fun postgresContainer(existingImage: String): KPostgreSQLContainer {
+fun setupPostgresContainer(existingImage: String): KPostgreSQLContainer {
     val postgresContainer = KPostgreSQLContainer(existingImage)
             .withCreateContainerCmdModifier { it.withName("postgis__${randomString()}") }
     postgresContainer.start()
