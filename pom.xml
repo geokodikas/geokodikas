@@ -224,46 +224,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire.version}</version>
-                <!--                <configuration>-->
-                <!--                    <skipTests>false</skipTests>-->
-                <!--                    <includes>-->
-                <!--                        <include>**/*UnitTest.java</include>-->
-                <!--                    </includes>-->
-                <!--                </configuration>-->
-                <!--                <configuration>-->
-                <!--                    <skipTests>true</skipTests>-->
-                <!--                </configuration>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>unit-tests</id>-->
-<!--                        <phase>test</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>test</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <skipTests>false</skipTests>-->
-<!--                            <includes>-->
-<!--                                <include>**/*UnitTest.java</include>-->
-<!--                            </includes>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--&lt;!&ndash;                    <execution>&ndash;&gt;-->
-<!--&lt;!&ndash;                        <id>integration-tests</id>&ndash;&gt;-->
-<!--&lt;!&ndash;                        <phase>integration-test</phase>&ndash;&gt;-->
-<!--&lt;!&ndash;                        <goals>&ndash;&gt;-->
-<!--&lt;!&ndash;                            <goal>test</goal>&ndash;&gt;-->
-<!--&lt;!&ndash;                        </goals>&ndash;&gt;-->
-<!--&lt;!&ndash;                        <configuration>&ndash;&gt;-->
-<!--&lt;!&ndash;                            <skipTests>false</skipTests>&ndash;&gt;-->
-<!--&lt;!&ndash;                            <includes>&ndash;&gt;-->
-<!--&lt;!&ndash;                                <include>**/*IntegrationTest.java</include>&ndash;&gt;-->
-<!--&lt;!&ndash;                            </includes>&ndash;&gt;-->
-<!--&lt;!&ndash;                        </configuration>&ndash;&gt;-->
-<!--&lt;!&ndash;                    </execution>&ndash;&gt;-->
-<!--                </executions>-->
             </plugin>
         </plugins>
     </build>
-
-
 </project>
