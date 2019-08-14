@@ -6,9 +6,8 @@
     "processor_block_size": 10000
   },
   "database": {
-    "username": "postgres",
-    "password": "random",
-    "jdbc_url": "jdbc:postgresql://127.0.0.1/postgres"
+    "username": "geokodikas",
+    "password": "geokodikas",
+    "jdbc_url": "jdbc:postgresql://127.0.0.1/geokodikas"
   }
-
 }

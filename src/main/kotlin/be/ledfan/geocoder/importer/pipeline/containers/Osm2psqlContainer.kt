@@ -10,7 +10,7 @@ import java.io.File
 
 class KGenericContainer(imageName: String) : GenericContainer<KGenericContainer>(imageName)
 
-fun osm2psqlContainer(dbHost: String, dbUser: String, dbPassword: String, dbPort: Int, dbName: String, pbfFilePath: String): KGenericContainer {
+fun osm2psqlContainer(dbHost: String, dbUser: String, dbPassword: String, dbPort: Int, dbName: String, pbfFilePath: String, numProc: String): KGenericContainer {
     val container = KGenericContainer("ledfan/osm2pgsql")
             .withCreateContainerCmdModifier{ it.withName("osm2_pgsql_importer__${randomString()}") }
     container.withEnv("PG_HOST", dbHost)
@@ -18,7 +18,7 @@ fun osm2psqlContainer(dbHost: String, dbUser: String, dbPassword: String, dbPort
     container.withEnv("PG_PORT", dbPort.toString())
     container.withEnv("PG_DB", dbName)
     container.withEnv("PGPASSWORD", dbPassword)
-    container.withEnv("NUM_PROC", "8")
+    container.withEnv("NUM_PROC", numProc)
     container.withFileSystemBind(File(pbfFilePath).parent, "/workdir/input")
 
     val logger = KotlinLogging.logger {  }

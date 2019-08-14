@@ -11,16 +11,19 @@ import java.util.concurrent.TimeUnit
 class KPostgreSQLContainer(dockerImageName: String) : PostgreSQLContainer<KPostgreSQLContainer>(dockerImageName) {
 
     init {
-        this.waitStrategy = org.testcontainers.containers.wait.LogMessageWaitStrategy()
+        waitStrategy = org.testcontainers.containers.wait.LogMessageWaitStrategy()
                 .withRegEx(".*database system is ready to accept connections.*\\s")
                 .withTimes(1) // Very important that this is 1 instead of 2 for containers which already
                 // contain a postgresql data directory, either as volume or with a committed container
                 .withStartupTimeout(Duration.of(60, SECONDS))
+        withEnv("POSTGRES_USER", "geokodikas")
+        withEnv("POSTGRES_USER", "geokodikas")
+        withEnv("POSTGRES_DB", "geokodikas")
     }
 
     override fun configure() {
         super.configure()
-        val logger = KotlinLogging.logger {  }
+        val logger = KotlinLogging.logger { }
 
         if (System.getenv("POSTGIS_LOW_MEM") != null) {
             logger.warn("Using Postgis with low memory configuration")

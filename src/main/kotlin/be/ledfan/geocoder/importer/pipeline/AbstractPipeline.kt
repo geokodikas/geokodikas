@@ -61,7 +61,7 @@ abstract class AbstractPipeline(private val ic: IntegrationConfig) {
 
                 osm2psqlContainer(postgresContainer.currentContainerInfo.networkSettings.ipAddress,
                         postgresContainer.username, postgresContainer.password,
-                        5432, postgresContainer.databaseName, pbfFilePath)
+                        5432, postgresContainer.databaseName, pbfFilePath, config.importer.numProcessors.toString())
 
                 // osm2psql has imported the data into the container, storing as new image
                 val committed = commitContainer(postgresContainer.containerId, importedImageName)
@@ -152,7 +152,6 @@ abstract class AbstractPipeline(private val ic: IntegrationConfig) {
         config.database.jdbcUrl = postgresContainer.jdbcUrl
         config.database.username = postgresContainer.username
         config.database.password = postgresContainer.password
-        config.importer.numProcessors = 8
 
         val connections: List<ConnectionWrapper> by kodein.allInstances()
         connections.forEach { it.reConnect() }
