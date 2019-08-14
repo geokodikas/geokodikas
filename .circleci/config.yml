@@ -4,18 +4,40 @@
 #
 version: 2
 executorType: machine
+environment: &environment
+  DO_NOT_COMMIT_CONTAINER: yes
+  POSTGIS_LOW_MEM: yes
+  # Customize the JVM maximum heap limit
+  MAVEN_OPTS: -Xmx3200m
+
+base-pipeline: &base-pipeline
+  machine:
+    image: ubuntu-1604:201903-01
+
+  working_directory: ~/repo
+
+  steps:
+    - attach_workspace:
+        # Must be absolute path or relative path from working_directory
+        at: ~/repo
+
+    - run:
+        name: Run Pipeline
+        command: |
+          set +x
+          env
+          java -jar target/import-pipeline-jar-with-dependencies.jar $COUNTRY
+          mkdir -p tmp/exports
+          cp tmp/full_import* tmp/exports
+
+    - store_artifacts:
+        path: tmp/exports
 jobs:
   build-and-test:
     machine:
       image: ubuntu-1604:201903-01
 
     working_directory: ~/repo
-
-    environment:
-      DO_NOT_COMMIT_CONTAINER: yes
-      POSTGIS_LOW_MEM: yes
-      # Customize the JVM maximum heap limit
-      MAVEN_OPTS: -Xmx3200m
 
     steps:
       - checkout
@@ -33,7 +55,7 @@ jobs:
             cp config.dist.json config.json
             cp logback.travis.xml src/main/resources/logback-test.xml
             cp logback.travis.xml src/main/resources/logback.xml
-            mvn package
+            mvn package -DskipTests
 
       # run tests!
       - run:
@@ -58,31 +80,16 @@ jobs:
           path: ~/repo/artifacts
 
   belgium-pipeline:
-    machine:
-      image: ubuntu-1604:201903-01
-
-    working_directory: ~/repo
-
+    <<: *base-pipeline
     environment:
-      DO_NOT_COMMIT_CONTAINER: yes
-      POSTGIS_LOW_MEM: yes
-      # Customize the JVM maximum heap limit
-      MAVEN_OPTS: -Xmx3200m
+      <<: *environment
+      COUNTRY: Belgium
 
-    steps:
-      - attach_workspace:
-          # Must be absolute path or relative path from working_directory
-          at: ~/repo
-
-      - run:
-          command: |
-            java -jar target/import-pipeline-jar-with-dependencies.jar
-            mkdir -p tmp/exports
-            cp tmp/full_import* tmp/exports
-
-      - store_artifacts:
-          path: tmp/exports
-
+  monaco-pipeline:
+    <<: *base-pipeline
+    environment:
+      <<: *environment
+      COUNTRY: Monaco
 
 workflows:
   version: 2
@@ -95,5 +102,8 @@ workflows:
           requires:
             - build-and-test
       - belgium-pipeline:
+          requires:
+            - hold
+      - monaco-pipeline:
           requires:
             - hold

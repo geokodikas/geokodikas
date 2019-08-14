@@ -6,8 +6,7 @@ import be.ledfan.geocoder.importer.pipeline.IntegrationConfig
 class BelgiumPipeline : AbstractPipeline(
         IntegrationConfig("http://download.openstreetmap.fr/extracts/europe/belgium.osm.pbf",
                 "belgium.osm.pbf",
-                "49700d24ff9754bc491806feeb539d38")
+                "a02f17ea9a4bd5d60d0a86bfe304faf1")
 ) {
-
 
 }
