@@ -6,6 +6,7 @@ import be.ledfan.geocoder.kodein
 import mu.KotlinLogging
 import org.kodein.di.direct
 import org.kodein.di.generic.instance
+import java.lang.reflect.InvocationTargetException
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 import kotlin.reflect.KFunction
@@ -47,7 +48,9 @@ internal fun assertFalse(actual: Boolean) {
 
 @ExperimentalContracts
 internal fun assertEquals(expected: Any, actual: Any?) {
-    assertTrue(expected == actual)
+    if (expected != actual) {
+        throw ValidationException("Assertion equals failed:\n expected:\n $expected \n Actual:\n $actual")
+    }
 }
 
 open class AbstractValidator {
@@ -59,19 +62,21 @@ open class AbstractValidator {
     fun validate(): Boolean {
         val validators = getValidators()
         val totalValidators = validators.size
-        var failure = false
+        var valid = true
 
         for ((idx, validator) in validators.withIndex()) {
             try {
                 validator.call(this)
-                logger.info { "[$idx/$totalValidators] ${validator.name} OK" }
-            } catch (e: ValidationException) {
-                logger.error { "[$idx/$totalValidators] ${validator.name} ERROR" }
-                failure = true
+                logger.info { "[${idx+1}/$totalValidators] ${validator.name} OK" }
+            } catch (e: InvocationTargetException) {
+                if (e.cause is ValidationException) {
+                    logger.error(e.cause) { "[${idx+1}/$totalValidators] ${validator.name} ERROR" }
+                    valid = false
+                }
             }
         }
 
-        return failure
+        return valid
     }
 
 
@@ -94,36 +99,35 @@ open class AbstractValidator {
     annotation class Validator
 
     protected fun selectIds(query: String): ArrayList<Long> {
-//        val stmt = con.prepareStatement(query)
-//        val result = stmt.executeQuery()
-//
+        val stmt = con.prepareStatement(query)
+        val result = stmt.executeQuery()
+
         val ids = arrayListOf<Long>()
-//
-//        while (result.next()) {
-//            ids.add(result.getLong("osm_id"))
-//        }
-//
-//        stmt.close()
-//        result.close()
-//
+
+        while (result.next()) {
+            ids.add(result.getLong("osm_id"))
+        }
+
+        stmt.close()
+        result.close()
+
         return ids
     }
 
     protected fun selectString(query: String, columnName: String): ArrayList<String> {
-//        val stmt = con.prepareStatement(query)
-//        val result = stmt.executeQuery()
-//
-        val strings = arrayListOf<String>()
-//
-//        while (result.next()) {
-//            strings.add(result.getString(columnName))
-//        }
-//
-//        stmt.close()
-//        result.close()
-//
-        return strings
+        val stmt = con.prepareStatement(query)
+        val result = stmt.executeQuery()
 
+        val strings = arrayListOf<String>()
+
+        while (result.next()) {
+            strings.add(result.getString(columnName))
+        }
+
+        stmt.close()
+        result.close()
+
+        return strings
     }
 
 }

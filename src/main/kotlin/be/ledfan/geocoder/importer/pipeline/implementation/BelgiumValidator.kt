@@ -14,11 +14,11 @@ class BelgiumValidator : AbstractValidator() {
 
     @Validator
     fun `tables should have a fixed count`() {
-        assertEquals(681_435L, countTable("osm_node"))
-        assertEquals(2_128_877L, countTable("osm_way"))
+        assertEquals(389_656L, countTable("osm_node"))
+        assertEquals(2_132_223L, countTable("osm_way"))
         assertEquals(1_851L, countTable("osm_relation"))
-        assertEquals(2_650_617L, countTable("parent"))
-        assertEquals(1_102_112L, countTable("way_node"))
+        assertEquals(2_482_814L, countTable("parent"))
+        assertEquals(680_780L, countTable("way_node"))
     }
 
     @Validator
@@ -143,12 +143,12 @@ class BelgiumValidator : AbstractValidator() {
 
         assertEquals(arrayListOf(
                 "Address", // TODO we probably don't want this in the osm_relation table
-                "Venue", // TODO ^
-                "Neighbourhood",
-                "MacroRegion",
-                "LocalAdmin",
+                "Country",
                 "County",
-                "Country"
+                "LocalAdmin",
+                "MacroRegion",
+                "Neighbourhood",
+                "Venue" // TODO ^
         ), layers)
     }
 

@@ -1,4 +1,5 @@
 package be.ledfan.geocoder.importer.pipeline.containers
+
 import be.ledfan.geocoder.config.Config
 import be.ledfan.geocoder.kodein
 import com.github.kittinunf.fuel.Fuel
@@ -6,9 +7,13 @@ import com.github.kittinunf.result.Result
 import mu.KotlinLogging
 import org.kodein.di.direct
 import org.kodein.di.generic.instance
+import java.io.BufferedReader
 import java.io.File
+import java.io.InputStreamReader
 import java.security.MessageDigest
 import java.math.BigInteger
+import java.nio.charset.StandardCharsets
+import java.util.stream.Collectors
 
 
 fun md5sumOfFile(file: File): String {
@@ -26,7 +31,7 @@ fun md5sumOfFile(file: File): String {
 }
 
 fun downloadAndCacheFile(url: String, destinationFileName: String, md5sum: String): String {
-    val logger = KotlinLogging.logger {  }
+    val logger = KotlinLogging.logger { }
     val config: Config = kodein.direct.instance()
     val destinationFile = File(config.tmpDir, destinationFileName)
 
@@ -78,6 +83,8 @@ fun randomString(stringLength: Int = 8): String {
 }
 
 fun readListFromClassPath(resourceName: String): List<String> {
-    val url =  object: Any() {}.javaClass.classLoader.getResource(resourceName)?: throw Exception("Resource '$resourceName' not found")
-    return File(url.file).readLines()
+    val iS = object : Any() {}.javaClass.classLoader.getResourceAsStream(resourceName)
+            ?: throw Exception("Resource '$resourceName' not found")
+
+    return BufferedReader(InputStreamReader(iS, StandardCharsets.UTF_8)).lines().collect(Collectors.toList())
 }
