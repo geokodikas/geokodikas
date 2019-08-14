@@ -1,27 +1,79 @@
 package be.ledfan.geocoder.importer.pipeline
 
+import be.ledfan.geocoder.db.ConnectionWrapper
+import be.ledfan.geocoder.db.mapper.OsmRelationMapper
+import be.ledfan.geocoder.kodein
+import mu.KotlinLogging
+import org.kodein.di.direct
+import org.kodein.di.generic.instance
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 import kotlin.reflect.KFunction
 import kotlin.reflect.full.functions
 
+class ValidationException(s: String) : java.lang.Exception(s)
+
+@ExperimentalContracts
+internal fun assertNull(actual: Any?) {
+    contract { returns() implies (actual == null) }
+    if (actual == null) {
+        throw ValidationException("Assertion null failed")
+    }
+}
+
+@ExperimentalContracts
+internal fun assertNotNull(actual: Any?) {
+    contract { returns() implies (actual != null) }
+    if (actual == null) {
+        throw ValidationException("Assertion not null failed")
+    }
+}
+
+@ExperimentalContracts
+internal fun assertTrue(actual: Boolean) {
+    contract { returns() implies (actual) }
+    if (!actual) {
+        throw ValidationException("Assertion true failed")
+    }
+}
+
+@ExperimentalContracts
+internal fun assertFalse(actual: Boolean) {
+    contract { returns() implies (!actual) }
+    if (actual) {
+        throw ValidationException("Assertion false failed")
+    }
+}
+
+@ExperimentalContracts
+internal fun assertEquals(expected: Any, actual: Any?) {
+    assertTrue(expected == actual)
+}
+
 open class AbstractValidator {
 
+    protected var relationMapper: OsmRelationMapper = kodein.direct.instance()
+    private var con: ConnectionWrapper = kodein.direct.instance()
+    private var logger = KotlinLogging.logger {}
 
     fun validate(): Boolean {
         val validators = getValidators()
         val totalValidators = validators.size
+        var failure = false
 
         for ((idx, validator) in validators.withIndex()) {
-            val r = validator.call(this) as? Boolean ?: throw Exception("Expected valiator ${validator.name }to return Boolean")
-
-            if (r) {
-                println("[$idx/$totalValidators] ${validator.name} OK")
-            } else {
-                println("[$idx/$totalValidators] ${validator.name} ERROR")
+            try {
+                validator.call(this)
+                logger.info { "[$idx/$totalValidators] ${validator.name} OK" }
+            } catch (e: ValidationException) {
+                logger.error { "[$idx/$totalValidators] ${validator.name} ERROR" }
+                failure = true
             }
         }
 
-        return true
+        return failure
     }
+
 
     private fun getValidators(): ArrayList<KFunction<*>> {
         val validators = ArrayList<KFunction<*>>()
@@ -57,7 +109,7 @@ open class AbstractValidator {
         return ids
     }
 
-    protected  fun selectString(query: String, columnName: String): ArrayList<String> {
+    protected fun selectString(query: String, columnName: String): ArrayList<String> {
 //        val stmt = con.prepareStatement(query)
 //        val result = stmt.executeQuery()
 //

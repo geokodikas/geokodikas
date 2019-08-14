@@ -24,8 +24,6 @@ base-pipeline: &base-pipeline
     - run:
         name: Run Pipeline
         command: |
-          set +x
-          env
           java -jar target/import-pipeline-jar-with-dependencies.jar $COUNTRY
           mkdir -p tmp/exports
           cp tmp/full_import* tmp/exports

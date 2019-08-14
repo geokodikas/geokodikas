@@ -10,4 +10,9 @@ class MonacoPipeline : AbstractPipeline(
                 "e74914f076d0c5a2e36302bfee1a01e2")
 ) {
 
+    override fun validate(): Boolean {
+        val validator = MonacoValidator()
+        return validator.validate()
+    }
+
 }

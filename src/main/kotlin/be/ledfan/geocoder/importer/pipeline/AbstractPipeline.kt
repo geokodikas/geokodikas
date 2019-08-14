@@ -1,4 +1,5 @@
 package be.ledfan.geocoder.importer.pipeline
+
 import KPostgreSQLContainer
 import be.ledfan.geocoder.config.Config
 import be.ledfan.geocoder.db.ConnectionFactory
@@ -26,7 +27,7 @@ import java.io.File
 data class IntegrationConfig(val pbFurl: String, val pbfName: String, val pbfCheckSum: String)
 
 
-open class AbstractPipeline(private val ic: IntegrationConfig) {
+abstract class AbstractPipeline(private val ic: IntegrationConfig) {
 
     private lateinit var postgresContainer: PostgreSQLContainer<KPostgreSQLContainer>
 
@@ -73,8 +74,6 @@ open class AbstractPipeline(private val ic: IntegrationConfig) {
 
         reConnectAllConnections()
 
-//        relationMapper = kodein.direct.instance() // bind now after conncetion can be made
-//        con = kodein.direct.instance()
 
         if (doImport) {
             kodein.direct.instance<StatsCollector>().suppressOutput = true
@@ -101,10 +100,7 @@ open class AbstractPipeline(private val ic: IntegrationConfig) {
         }
     }
 
-    inline fun <reified V : AbstractValidator> validate() {
-        val validator = V::class.java.newInstance()
-        validator.validate()
-    }
+    abstract fun validate(): Boolean
 
     fun dropUpstreamTables() {
         @Language("SQL")

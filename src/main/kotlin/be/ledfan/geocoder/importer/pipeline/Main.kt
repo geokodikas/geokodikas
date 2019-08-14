@@ -31,8 +31,13 @@ fun main(args: Array<String>) {
 
     val pipeline = pipelineFactory()
     pipeline.import()
-//    pipeline.validate<BelgiumValidator>()
-    pipeline.dropUpstreamTables()
-    pipeline.export()
+
+    if (pipeline.validate()) {
+        pipeline.dropUpstreamTables()
+        pipeline.export()
+    } else {
+        println("Validation errors, not exporting")
+        exitProcess(2)
+    }
 
 }
