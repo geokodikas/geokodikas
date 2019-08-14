@@ -1,10 +1,11 @@
 package be.ledfan.geocoder.importer
 
+import be.ledfan.geocoder.db.ConnectionWrapper
 import mu.KotlinLogging
 import org.intellij.lang.annotations.Language
 import java.sql.Connection
 
-class RelationHierarchyResolver(private val con: Connection) {
+class RelationHierarchyResolver(private val con: ConnectionWrapper) {
 
     private var logger = KotlinLogging.logger {}
 

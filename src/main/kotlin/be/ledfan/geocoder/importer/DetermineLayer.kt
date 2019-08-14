@@ -1,7 +1,6 @@
 package be.ledfan.geocoder.importer
 
 import be.ledfan.geocoder.db.entity.OsmEntity
-import be.ledfan.geocoder.db.entity.OsmNode
 import be.ledfan.geocoder.importer.core.Tags
 import mu.KotlinLogging
 
@@ -14,38 +13,43 @@ open class DetermineLayer {
     protected val logger = KotlinLogging.logger {}
 
     protected fun assignLayer(currentLayers: HashSet<Layer>, newLayer: Layer) {
-        if ((currentLayers.contains(Layer.Street) || currentLayers.contains(Layer.Junction) || currentLayers.contains(Layer.Link))
-                && (newLayer == Layer.PhysicalTrafficFlow || newLayer == Layer.VirtualTrafficFlow)) {
+        fun resolveableConflict(loosingLayers: List<Layer>, winningLayer: List<Layer>): Boolean {
+            if (
+                    currentLayers.any { loosingLayers.contains(it) } // if we currently contain a loosing layer
+                    && winningLayer.contains(newLayer) // and the newLayer is a winning layer
+            ) {
+                currentLayers.removeAll(loosingLayers) // remove all
+                return true // conflict resolved, layer will be added later
+            }
+
+            if (currentLayers.any { winningLayer.contains(it) } // if we currently contain a winning layer
+                    && loosingLayers.contains(newLayer)) { // and the newLayer is a loosing layer
+                // then not interested in new layer
+                return false
+            }
+
+            return true // interested in this layer
+        }
+
+        if (!resolveableConflict(listOf(Layer.Street, Layer.Junction, Layer.Link),
+                        listOf(Layer.PhysicalTrafficFlow, Layer.VirtualTrafficFlow))) {
             // Street, Link and Junction will implicit contains Physical and Virtual traffic flow
             return
         }
 
-        if ((currentLayers.contains(Layer.Address) || currentLayers.contains(Layer.Venue))
-                && (newLayer == Layer.PhysicalTrafficFlow || newLayer == Layer.VirtualTrafficFlow)) {
+        if (!resolveableConflict(listOf(Layer.Address, Layer.Venue),
+                        listOf(Layer.PhysicalTrafficFlow, Layer.VirtualTrafficFlow))) {
             // not interested in speed limits on addresses (buildings, parkings etc) and or venues
             return
         }
 
-        if (currentLayers.contains(Layer.PhysicalTrafficFlow)
-                && newLayer == Layer.VirtualTrafficFlow) {
+        if (!resolveableConflict(listOf(Layer.PhysicalTrafficFlow), listOf(Layer.VirtualTrafficFlow))) {
             // PhysicalTrafficFlow implies VirtualTrafficFlow
             return
         }
 
-        if (currentLayers.contains(Layer.VirtualTrafficFlow)
-                && newLayer == Layer.PhysicalTrafficFlow) {
-            // PhysicalTrafficFlow implies virtualTrafficFlow
-            currentLayers.remove(Layer.VirtualTrafficFlow)
-            currentLayers.add(Layer.PhysicalTrafficFlow)
-            return
-        }
-
-        if ((currentLayers.contains(Layer.Street) || currentLayers.contains(Layer.Link))
-                && (newLayer == Layer.Junction)) {
+        if (!resolveableConflict(listOf(Layer.Street, Layer.Link), listOf(Layer.Junction))) {
             // The fact that it is a Junction is more import than the fact that it is a Street
-            currentLayers.remove(Layer.Street)
-            currentLayers.remove(Layer.Link)
-            currentLayers.add(newLayer)
             return
         }
 

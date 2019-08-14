@@ -1,6 +1,7 @@
 package be.ledfan.geocoder.importer
 
 import be.ledfan.geocoder.config.Config
+import be.ledfan.geocoder.db.ConnectionWrapper
 import be.ledfan.geocoder.db.mapper.OsmNodeMapper
 import be.ledfan.geocoder.db.mapper.OsmRelationMapper
 import be.ledfan.geocoder.db.mapper.OsmWayMapper
@@ -9,7 +10,7 @@ import org.intellij.lang.annotations.Language
 import java.sql.Connection
 
 class RegionPruner(private val config: Config,
-                   private val con: Connection,
+                   private val con: ConnectionWrapper,
                    private val osmRelationMapper: OsmRelationMapper,
                    private val osmNodeMapper: OsmNodeMapper,
                    private val osmWayMapper: OsmWayMapper
@@ -36,7 +37,7 @@ class RegionPruner(private val config: Config,
         val ids = collect(sql)
 
         logger.info { "Pruning ${ids.size} relations" }
-        logger.debug { "Pruned relations with id ${ids.joinToString()}" }
+        logger.trace { "Pruned relations with id ${ids.joinToString()}" }
 
         osmRelationMapper.deleteByPrimaryIds(ids)
     }
@@ -58,7 +59,7 @@ class RegionPruner(private val config: Config,
         val ids = collect(sql)
 
         logger.info { "Pruning ${ids.size} nodes" }
-        logger.debug { "Pruned nodes with id ${ids.joinToString()}" }
+        logger.trace { "Pruned nodes with id ${ids.joinToString()}" }
 
         osmNodeMapper.deleteByPrimaryIds(ids)
     }
@@ -75,7 +76,7 @@ class RegionPruner(private val config: Config,
         val ids = collect(sql)
 
         logger.info { "Pruning ${ids.size} ways" }
-        logger.debug { "Pruned ways with id ${ids.joinToString()}" }
+        logger.trace { "Pruned ways with id ${ids.joinToString()}" }
 
         osmWayMapper.deleteByPrimaryIds(ids)
     }

@@ -1,13 +1,12 @@
 package be.ledfan.geocoder.db.mapper
 
+import be.ledfan.geocoder.db.ConnectionWrapper
 import be.ledfan.geocoder.db.entity.OsmRelation
 import be.ledfan.geocoder.importer.Layer
 import org.intellij.lang.annotations.Language
-import java.sql.Connection
 import java.util.*
-import kotlin.collections.HashMap
 
-class OsmRelationMapper(private val con: Connection) : Mapper<OsmRelation>(con) {
+class OsmRelationMapper(private val con: ConnectionWrapper) : Mapper<OsmRelation>(con) {
 
     override val entityCompanion = OsmRelation.Companion
 

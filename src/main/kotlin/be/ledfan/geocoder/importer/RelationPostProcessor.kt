@@ -1,13 +1,14 @@
 package be.ledfan.geocoder.importer
 
 import be.ledfan.geocoder.config.Config
+import be.ledfan.geocoder.db.ConnectionWrapper
 import be.ledfan.geocoder.db.mapper.OsmRelationMapper
 import mu.KotlinLogging
 import org.intellij.lang.annotations.Language
 import java.sql.Connection
 
 class RelationPostProcessor(private val config: Config,
-                            private val con: Connection,
+                            private val con: ConnectionWrapper,
                             private val osmRelationMapper: OsmRelationMapper) {
 
     private val logger = KotlinLogging.logger {}

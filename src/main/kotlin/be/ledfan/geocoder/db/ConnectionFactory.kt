@@ -25,10 +25,10 @@ object ConnectionFactory {
 
         // Open a connection to the database
         try {
-            KotlinLogging.logger{}.trace { "Trying to get connections currently at $createdConnections connections" }
+            KotlinLogging.logger {}.trace { "Trying to get connections currently at $createdConnections connections" }
             val r = DriverManager.getConnection(config.database.jdbcUrl, properties)
             createdConnections++
-            KotlinLogging.logger{}.trace { "Got a connection currently at $createdConnections connections" }
+            KotlinLogging.logger {}.trace { "Got a connection currently at $createdConnections connections" }
             return r
         } catch (e: PSQLException) {
             println()
@@ -37,4 +37,7 @@ object ConnectionFactory {
             exitProcess(1)
         }
     }
+
+    fun createWrappedConnection(config: Config) = ConnectionWrapper(createConnection(config))
+
 }

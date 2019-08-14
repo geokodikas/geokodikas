@@ -1,13 +1,12 @@
 package be.ledfan.geocoder.importer.steps
 
-import be.ledfan.geocoder.db.ConnectionFactory
+import be.ledfan.geocoder.db.ConnectionWrapper
 import be.ledfan.geocoder.kodein
 import mu.KotlinLogging
 import org.kodein.di.direct
 import org.kodein.di.generic.instance
-import java.sql.Connection
 
-private val con = kodein.direct.instance<Connection>()
+private val con = kodein.direct.instance<ConnectionWrapper>()
 private val logger = KotlinLogging.logger {}
 
 fun countTable(tableName: String): Long {

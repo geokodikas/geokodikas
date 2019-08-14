@@ -1,10 +1,10 @@
 package be.ledfan.geocoder.db.mapper
 
+import be.ledfan.geocoder.db.ConnectionWrapper
 import be.ledfan.geocoder.db.entity.OsmWay
-import java.sql.Connection
 import java.util.*
 
-class OsmWayMapper(private val con: Connection) : Mapper<OsmWay>(con) {
+class OsmWayMapper(private val con: ConnectionWrapper) : Mapper<OsmWay>(con) {
 
     override val entityCompanion = OsmWay.Companion
 

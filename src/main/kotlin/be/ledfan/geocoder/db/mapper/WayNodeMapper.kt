@@ -1,13 +1,12 @@
 package be.ledfan.geocoder.db.mapper
 
-import be.ledfan.geocoder.db.entity.OsmNode
+import be.ledfan.geocoder.db.ConnectionWrapper
 import be.ledfan.geocoder.db.entity.OsmWay
 import be.ledfan.geocoder.db.entity.WayNode
 import be.ledfan.geocoder.importer.Layer
 import org.intellij.lang.annotations.Language
-import java.sql.Connection
 
-class WayNodeMapper(private val con: Connection) : Mapper<WayNode>(con) {
+class WayNodeMapper(private val con: ConnectionWrapper) : Mapper<WayNode>(con) {
 
     override val entityCompanion = WayNode.Companion
 

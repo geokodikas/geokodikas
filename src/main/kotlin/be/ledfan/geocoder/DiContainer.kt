@@ -3,6 +3,7 @@ package be.ledfan.geocoder
 import be.ledfan.geocoder.config.Config
 import be.ledfan.geocoder.config.ConfigReader
 import be.ledfan.geocoder.db.ConnectionFactory
+import be.ledfan.geocoder.db.ConnectionWrapper
 import be.ledfan.geocoder.db.mapper.*
 import be.ledfan.geocoder.importer.*
 import be.ledfan.geocoder.importer.core.Importer
@@ -17,13 +18,12 @@ import org.kodein.di.generic.instance
 import org.kodein.di.generic.provider
 import org.kodein.di.generic.singleton
 import org.kodein.di.threadLocal
-import java.sql.Connection
 
 val kodein = Kodein {
 
     bind<Config>() with singleton { ConfigReader.getConfig() }
 
-    bind<Connection>() with singleton(ref = threadLocal) { ConnectionFactory.createConnection(instance()) }
+    bind<ConnectionWrapper>() with singleton(ref = threadLocal) { ConnectionFactory.createWrappedConnection(instance()) }
 
     bind<Importer>() with singleton { Importer() }
 

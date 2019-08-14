@@ -2,11 +2,13 @@ package be.ledfan.geocoder.importer.pipeline
 import KPostgreSQLContainer
 import be.ledfan.geocoder.config.Config
 import be.ledfan.geocoder.db.ConnectionFactory
-import be.ledfan.geocoder.db.mapper.OsmRelationMapper
+import be.ledfan.geocoder.db.ConnectionWrapper
 import be.ledfan.geocoder.importer.core.Importer
 import be.ledfan.geocoder.importer.core.StatsCollector
 import be.ledfan.geocoder.importer.pipeline.containers.downloadAndCacheFile
 import be.ledfan.geocoder.importer.pipeline.containers.imageExists
+import be.ledfan.geocoder.importer.pipeline.containers.osm2psqlContainer
+import be.ledfan.geocoder.importer.pipeline.containers.randomString
 import be.ledfan.geocoder.importer.steps.executeBatchQueries
 import be.ledfan.geocoder.kodein
 import commitContainer
@@ -18,11 +20,8 @@ import org.kodein.di.generic.allInstances
 import org.kodein.di.generic.instance
 import org.postgresql.util.PSQLException
 import org.testcontainers.containers.PostgreSQLContainer
-import be.ledfan.geocoder.importer.pipeline.containers.osm2psqlContainer
-import be.ledfan.geocoder.importer.pipeline.containers.randomString
 import setupPostgresContainer
 import java.io.File
-import java.sql.Connection
 
 data class IntegrationConfig(val pbFurl: String, val pbfName: String, val pbfCheckSum: String)
 
@@ -72,14 +71,7 @@ open class AbstractPipeline(private val ic: IntegrationConfig) {
             }
         }
 
-        config.database.jdbcUrl = postgresContainer.jdbcUrl
-        config.database.username = postgresContainer.username
-        config.database.password = postgresContainer.password
-        config.importer.numProcessors = 8
-
-        if (ConnectionFactory.createdConnections != 0) {
-            logger.warn("Already created connections before changing config")
-        }
+        reConnectAllConnections()
 
 //        relationMapper = kodein.direct.instance() // bind now after conncetion can be made
 //        con = kodein.direct.instance()
@@ -100,8 +92,12 @@ open class AbstractPipeline(private val ic: IntegrationConfig) {
             closeAllConnections() // connections must be closed for safe shutdown of postgres
 
             // committing container again
-            commitContainer(postgresContainer.containerId, fullImportedImageName)
-
+            val commited = commitContainer(postgresContainer.containerId, fullImportedImageName)
+            if (commited) {
+                logger.info("Start container from built image")
+                postgresContainer = setupPostgresContainer(fullImportedImageName)
+            }
+            reConnectAllConnections()
         }
     }
 
@@ -127,20 +123,22 @@ open class AbstractPipeline(private val ic: IntegrationConfig) {
     fun export() {
         val fileName = "full_import${ic.pbfName}_${ic.pbfCheckSum}__${randomString()}"
 
-        println("Going to export db")
+        logger.info("Going to export db into $fileName")
         val res = postgresContainer.execInContainer("pg_dump", "-U", "test", "--verbose", "-Fc", "test", "-f", "/tmp/db.postgres")
         if (res.exitCode != 0) {
             throw Exception("Export postgis db failed")
         } else {
-            println("Export postgis db succeeded")
+            logger.info("Export db succeeded")
         }
 
-        postgresContainer.copyFileFromContainer("/tmp/db.postgres", File(config.tmpDir, fileName).absolutePath)
+        val finalPath = File(config.tmpDir, fileName).absolutePath
+        postgresContainer.copyFileFromContainer("/tmp/db.postgres", finalPath)
+        logger.info("Db export available at $finalPath")
     }
 
     private fun closeAllConnections() {
         // first closing all connection to the db from this process
-        val connections: List<Connection> by kodein.allInstances()
+        val connections: List<ConnectionWrapper> by kodein.allInstances()
         connections.forEach { it.close() }
         // then terminate connections from other processes
         val con = ConnectionFactory.createConnection(config)
@@ -152,6 +150,16 @@ open class AbstractPipeline(private val ic: IntegrationConfig) {
             con.close()
         }
         // now all connections should be closed
+    }
+
+    private fun reConnectAllConnections() {
+        config.database.jdbcUrl = postgresContainer.jdbcUrl
+        config.database.username = postgresContainer.username
+        config.database.password = postgresContainer.password
+        config.importer.numProcessors = 8
+
+        val connections: List<ConnectionWrapper> by kodein.allInstances()
+        connections.forEach { it.reConnect() }
     }
 
 }

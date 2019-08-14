@@ -1,10 +1,10 @@
 package be.ledfan.geocoder.db.mapper
 
+import be.ledfan.geocoder.db.ConnectionWrapper
 import be.ledfan.geocoder.db.entity.EntityCompanion
-import java.sql.Connection
 import java.sql.PreparedStatement
 
-abstract class Mapper<T>(private val con: Connection) {
+abstract class Mapper<T>(private val con: ConnectionWrapper) {
 
     abstract val tableName: String
 
