@@ -16,9 +16,10 @@ class KPostgreSQLContainer(dockerImageName: String) : PostgreSQLContainer<KPostg
                 .withTimes(1) // Very important that this is 1 instead of 2 for containers which already
                 // contain a postgresql data directory, either as volume or with a committed container
                 .withStartupTimeout(Duration.of(60, SECONDS))
-        withEnv("POSTGRES_USER", "geokodikas")
-        withEnv("POSTGRES_USER", "geokodikas")
-        withEnv("POSTGRES_DB", "geokodikas")
+
+        withDatabaseName("geokodikas")
+        withUsername("geokodikas")
+        withPassword("geokodikas")
     }
 
     override fun configure() {
