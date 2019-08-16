@@ -17,7 +17,7 @@ services:
   osm2pgsql:
     build:
       context: ./osm2pgsql
-      dockerfile: osm2psql.Dockerfile
+      dockerfile: osm2pgsql/Dockerfile
       args:
         HOST_GID: 100   # use `getent group users | awk -F ":" '{ print $3 }'`
         HOST_UID: 1000  # use `id -u`

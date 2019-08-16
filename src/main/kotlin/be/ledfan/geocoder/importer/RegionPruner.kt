@@ -66,6 +66,7 @@ class RegionPruner(private val config: Config,
 
     private fun pruneWays() {
         @Language("SQL")
+        // TODO this only works for the bounding box
         val sql = """
             SELECT osm_id
             FROM osm_way AS o

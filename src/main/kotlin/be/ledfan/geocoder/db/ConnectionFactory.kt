@@ -23,10 +23,12 @@ object ConnectionFactory {
         }
 
 
+        val jdbcUrl = "jdbc:postgresql://${config.database.host}/${config.database.dbName}"
+
         // Open a connection to the database
         try {
             KotlinLogging.logger {}.trace { "Trying to get connections currently at $createdConnections connections" }
-            val r = DriverManager.getConnection(config.database.jdbcUrl, properties)
+            val r = DriverManager.getConnection(jdbcUrl, properties)
             createdConnections++
             KotlinLogging.logger {}.trace { "Got a connection currently at $createdConnections connections" }
             return r

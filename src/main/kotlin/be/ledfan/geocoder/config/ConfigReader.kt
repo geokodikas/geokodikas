@@ -12,7 +12,8 @@ object ConfigReader {
 
         val importer = Importer()
         val database = Database()
-        val config = Config(importer, Runtime(), database)
+        val importFromExport = ImportFromExport()
+        val config = Config(importer, Runtime(), database, importFromExport)
 
         JsonReader(FileReader("config.json")).use { reader ->
 
@@ -24,6 +25,7 @@ object ConfigReader {
                         "importer" -> readImporter(importer, reader.nextObject())
                         "database" -> readDatabase(database, reader.nextObject())
                         "tmp_dir" -> config.tmpDir = File(reader.nextString())
+                        "import_from_export" -> readImportFromExport(importFromExport, reader.nextObject())
                     }
                 }
 
@@ -63,10 +65,22 @@ object ConfigReader {
         data.string("password")?.let {
             database.password = it
         }
-        data.string("jdbc_url")?.let {
-            database.jdbcUrl = it
+        data.string("db_name")?.let {
+            database.dbName = it
+        }
+        data.string("host")?.let {
+            database.host = it
         }
     }
 
+    private fun readImportFromExport(importFromExport: ImportFromExport, data: JsonObject) {
+        data.string("file_location")?.let {
+            importFromExport.fileLocation = it
+        }
+
+        data.string("file_md5sum")?.let {
+            importFromExport.fileMd5Sum = it
+        }
+    }
 
 }

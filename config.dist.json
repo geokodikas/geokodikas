@@ -8,6 +8,7 @@
   "database": {
     "username": "geokodikas",
     "password": "geokodikas",
-    "jdbc_url": "jdbc:postgresql://127.0.0.1/geokodikas"
+    "db_name": "geokodikas",
+    "host": "127.0.0.1"
   }
 }
