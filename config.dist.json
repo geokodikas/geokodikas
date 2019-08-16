@@ -1,0 +1,14 @@
+{
+  "importer": {
+    "output_threshold": 10000,
+    "max_queue_size": 1000000,
+    "num_processors": 4,
+    "processor_block_size": 10000
+  },
+  "database": {
+    "username": "geokodikas",
+    "password": "geokodikas",
+    "db_name": "geokodikas",
+    "host": "127.0.0.1"
+  }
+}
