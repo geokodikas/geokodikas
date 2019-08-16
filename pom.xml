@@ -14,8 +14,10 @@
         <importer.main.class>be.ledfan.geocoder.importer.MainKt</importer.main.class>
         <import-pipeline.main.class>be.ledfan.geocoder.importer.pipeline.MainKt</import-pipeline.main.class>
         <import-from-export.main.class>be.ledfan.geocoder.importer.import_from_export.MainKt</import-from-export.main.class>
+        <rest-api.main.class>be.ledfan.geocoder.httpapi.MainKt</rest-api.main.class>
         <junit.jupiter.version>5.5.1</junit.jupiter.version>
         <surefire.version>2.22.2</surefire.version>
+        <ktor.version>1.2.3</ktor.version>
     </properties>
 
     <repositories>
@@ -110,6 +112,11 @@
             <version>6.3.3</version>
         </dependency>
         <dependency>
+            <groupId>org.kodein.di</groupId>
+            <artifactId>kodein-di-framework-ktor-server-jvm</artifactId>
+            <version>6.3.3</version>
+        </dependency>
+        <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-main</artifactId>
             <version>8.8-ENTERPRISE</version>
@@ -145,6 +152,31 @@
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
             <version>1.11.3</version>
+        </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-server-core</artifactId>
+            <version>${ktor.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-locations</artifactId>
+            <version>${ktor.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-server-netty</artifactId>
+            <version>${ktor.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-jackson</artifactId>
+            <version>${ktor.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kodein.di</groupId>
+            <artifactId>kodein-di-conf-jvm</artifactId>
+            <version>5.0.1</version>
         </dependency>
     </dependencies>
 
@@ -235,6 +267,24 @@
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
                             <finalName>import-from-export</finalName>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>rest-api</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <mainClass>${rest-api.main.class}</mainClass>
+                                </manifest>
+                            </archive>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <finalName>rest-api</finalName>
                         </configuration>
                     </execution>
                 </executions>
