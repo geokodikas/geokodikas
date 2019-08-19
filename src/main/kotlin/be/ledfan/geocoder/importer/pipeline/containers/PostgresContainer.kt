@@ -48,7 +48,7 @@ fun setupPostgresContainer(existingImage: String): KPostgreSQLContainer {
     postgresContainer.followOutput(waitingConsumer, OutputFrame.OutputType.STDERR)
     waitingConsumer.waitUntil({ frame ->
         frame.utf8String.contains("database system is ready to accept connections")
-    }, 180, TimeUnit.SECONDS, 1)
+    }, 360, TimeUnit.SECONDS, 1)
 
     return postgresContainer
 }

@@ -121,7 +121,7 @@ abstract class AbstractPipeline(private val ic: IntegrationConfig) {
         val fileName = "full_import${ic.pbfName}_${ic.pbfCheckSum}__${randomString()}"
 
         logger.info("Going to export db into $fileName")
-        val res = postgresContainer.execInContainer("pg_dump", "-U", "test", "--verbose", "-Fc", "test", "-f", "/tmp/db.postgres")
+        val res = postgresContainer.execInContainer("pg_dump", "-U", "geokodikas", "--verbose", "-Fc", "geokodikas", "-f", "/tmp/db.postgres")
         if (res.exitCode != 0) {
             throw Exception("Export postgis db failed")
         } else {
