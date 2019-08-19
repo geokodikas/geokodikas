@@ -31,19 +31,19 @@ open class DetermineLayer {
             return true // interested in this layer
         }
 
-        if (!resolveableConflict(listOf(Layer.Street, Layer.Junction, Layer.Link),
-                        listOf(Layer.PhysicalTrafficFlow, Layer.VirtualTrafficFlow))) {
+        if (!resolveableConflict(listOf(Layer.PhysicalTrafficFlow, Layer.VirtualTrafficFlow),
+                        listOf(Layer.Street, Layer.Junction, Layer.Link))) {
             // Street, Link and Junction will implicit contains Physical and Virtual traffic flow
             return
         }
 
-        if (!resolveableConflict(listOf(Layer.Address, Layer.Venue),
-                        listOf(Layer.PhysicalTrafficFlow, Layer.VirtualTrafficFlow))) {
+        if (!resolveableConflict(listOf(Layer.PhysicalTrafficFlow, Layer.VirtualTrafficFlow),
+                        listOf(Layer.Address, Layer.Venue))) {
             // not interested in speed limits on addresses (buildings, parkings etc) and or venues
             return
         }
 
-        if (!resolveableConflict(listOf(Layer.PhysicalTrafficFlow), listOf(Layer.VirtualTrafficFlow))) {
+        if (!resolveableConflict(listOf(Layer.VirtualTrafficFlow), listOf(Layer.PhysicalTrafficFlow))) {
             // PhysicalTrafficFlow implies VirtualTrafficFlow
             return
         }
