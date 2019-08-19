@@ -24,7 +24,7 @@ suspend fun step3_checks(): Boolean {
 
 
 suspend fun step3_import_relations(): Boolean {
-    val config : Config = kodein.direct.instance()
+    val config: Config = kodein.direct.instance()
     val inputFileName = config.runtime.inputFileName
     val statsCollector: StatsCollector = kodein.direct.instance()
 
@@ -87,7 +87,11 @@ suspend fun step3_create_indexes(): Boolean {
     val sqlQuerries = listOf(
             "CREATE INDEX IF NOT EXISTS osm_relation_geometry_index ON osm_relation USING GIST(geometry)",
             "CREATE INDEX IF NOT EXISTS osm_relation_centroid_index ON osm_relation USING GIST(centroid)",
-            "CREATE INDEX IF NOT EXISTS osm_relation_osm_id_index ON osm_relation(osm_id)")
+            "CREATE INDEX IF NOT EXISTS osm_relation_osm_id_index ON osm_relation(osm_id)",
+            "CREATE INDEX IF NOT EXISTS parent_child_id_index ON parent (child_id)",
+            "CREATE INDEX IF NOT EXISTS parent_parent_id_index ON parent (parent_id)"
+
+    )
 
 
     return executeBatchQueries(sqlQuerries)
