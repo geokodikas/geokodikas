@@ -2,6 +2,7 @@ package be.ledfan.geocoder.db.entity
 
 //import be.ledfan.geocoder.geocoder.INameResolvable
 import be.ledfan.geocoder.db.getHstore
+import be.ledfan.geocoder.db.getLayer
 import be.ledfan.geocoder.importer.Layer
 import org.postgis.PGgeometry
 import java.sql.ResultSet
@@ -17,7 +18,7 @@ class OsmWay(id: Long) : OsmEntity(id) {
             r.geometry = row.getObject("geometry") as PGgeometry
             r.tags = row.getHstore("tags")
             r.zOrder = row.getInt("z_order")
-            r.layer = Layer.valueOf(row.getString("layer"))
+            r.layer = row.getLayer()
             r.hasOneWayRestriction = row.getBoolean("has_one_way_restriction")
             r.hasReversedOneWay = row.getBoolean("has_reversed_oneway")
 

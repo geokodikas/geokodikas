@@ -178,6 +178,22 @@
             <artifactId>kodein-di-conf-jvm</artifactId>
             <version>5.0.1</version>
         </dependency>
+        <dependency>
+            <groupId>be.ledfan</groupId>
+            <artifactId>kotlin-geojson-dsl</artifactId>
+            <version>0.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-freemarker</artifactId>
+            <version>${ktor.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-html-jvm</artifactId>
+            <version>0.6.12</version>
+        </dependency>
     </dependencies>
 
     <build>

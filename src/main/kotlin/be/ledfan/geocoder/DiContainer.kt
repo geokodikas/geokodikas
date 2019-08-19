@@ -5,6 +5,7 @@ import be.ledfan.geocoder.config.ConfigReader
 import be.ledfan.geocoder.db.ConnectionFactory
 import be.ledfan.geocoder.db.ConnectionWrapper
 import be.ledfan.geocoder.db.mapper.*
+import be.ledfan.geocoder.httpapi.OsmEntityController
 import be.ledfan.geocoder.importer.*
 import be.ledfan.geocoder.importer.core.Importer
 import be.ledfan.geocoder.importer.core.StatsCollector
@@ -48,6 +49,8 @@ val kodein = ConfigurableKodein().also {
 
         bind<WayNodeMapper>() with provider { WayNodeMapper(instance()) }
 
+        bind<OsmParentMapper>() with provider { OsmParentMapper(instance()) }
+
         /**
          * Importer
          */
@@ -86,6 +89,7 @@ val kodein = ConfigurableKodein().also {
          */
         bind<OverviewController>() with singleton { OverviewController(this@singleton.kodein) }
         bind<ReverseController>() with singleton { ReverseController(this@singleton.kodein) }
+        bind<OsmEntityController>() with singleton { OsmEntityController(this@singleton.kodein) }
 
     }
 }
