@@ -11,11 +11,17 @@ object Routes {
     object Reverse : TypedRoute
 
     object OsmEntity {
+        open class OsmEntityRoute(open val id: String, open val formatting: String = "json") : TypedRoute
+
         @Location("/api/v1/osm_entity/way/{id}")
-        data class Way(val id: String, val formatting: String = "json") : TypedRoute
+        data class Way(override val id: String, override val formatting: String = "json") : OsmEntityRoute(id, formatting)
 
         @Location("/api/v1/osm_entity/relation/{id}")
-        data class Relation(val id: String, val formatting: String = "json") : TypedRoute
+        data class Relation(override val id: String, override val formatting: String = "json") : OsmEntityRoute(id, formatting)
+
+        @Location("/api/v1/osm_entity/node/{id}")
+        data class Node(override val id: String, override val formatting: String = "json") : OsmEntityRoute(id, formatting)
+
     }
 
     val definedRoutes = arrayListOf<TypedRoute>().also {

@@ -26,4 +26,5 @@ abstract class KodeinController(override val kodein: Kodein) : KodeinAware {
      * Method that subtypes must override to register the handled [Routing] routes.
      */
     abstract fun Routing.registerRoutes()
+
 }

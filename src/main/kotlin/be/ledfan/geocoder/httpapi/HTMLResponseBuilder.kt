@@ -1,6 +1,8 @@
 package be.ledfan.geocoder.httpapi
 
+import be.ledfan.geocoder.db.entity.OsmNode
 import be.ledfan.geocoder.db.entity.OsmRelation
+import be.ledfan.geocoder.db.entity.OsmWay
 import be.ledfan.geocoder.importer.core.TagParser
 import be.ledfan.geocoder.importer.core.Tags
 import io.ktor.application.Application
@@ -134,8 +136,114 @@ class HTMLResponseBuilder {
 
             }
         }
-
     }
 
+    fun buildWay(entities: HashMap<Long, OsmWay>, parents: HashMap<Long, ArrayList<OsmRelation>>): String {
+        return buildTabs(
+                entities.mapValues { (_, entity) ->
+                    createHTML().div {
+                        ul {
+                            classes = setOf("list-group")
+
+                            li {
+                                classes = setOf("list-group-item", "list-group-item-primary")
+                                +"${entity.id}"
+                            }
+
+                            li {
+                                classes = setOf("list-group-item")
+                                +"Way"
+                            }
+
+                            li {
+                                classes = setOf("list-group-item")
+                                +"Layer is ${entity.layer}"
+                            }
+
+                            li {
+                                if (entity.hasOneWayRestriction) {
+                                    classes = setOf("list-group-item", "list-group-item-success")
+                                    +"Has one way restriction"
+                                } else {
+                                    classes = setOf("list-group-item", "list-group-item-danger")
+                                    +"No one way restriction"
+                                }
+                            }
+                        }
+
+                        br()
+                        unsafe { +buildParentTable(parents[entity.id]) }
+                        br()
+                        unsafe { +buildTagTable(entity.tags) }
+                    }
+                })
+    }
+
+    fun buildNode(entities: java.util.HashMap<Long, OsmNode>, parents: HashMap<Long, ArrayList<OsmRelation>>): String {
+        return buildTabs(
+                entities.mapValues { (_, entity) ->
+                    createHTML().div {
+                        ul {
+                            classes = setOf("list-group")
+
+                            li {
+                                classes = setOf("list-group-item", "list-group-item-primary")
+                                +"${entity.id}"
+                            }
+
+                            li {
+                                classes = setOf("list-group-item")
+                                +"Node"
+                            }
+
+                            li {
+                                classes = setOf("list-group-item")
+                                +"Layer is ${entity.layer}"
+                            }
+                        }
+
+                        br()
+                        unsafe { +buildParentTable(parents[entity.id]) }
+                        br()
+                        unsafe { +buildTagTable(entity.tags) }
+                    }
+                })
+    }
+
+    fun buildRelation(entities: java.util.HashMap<Long, OsmRelation>, parents: HashMap<Long, ArrayList<OsmRelation>>): String {
+        return buildTabs(
+                entities.mapValues { (_, entity) ->
+                    createHTML().div {
+                        ul {
+                            classes = setOf("list-group")
+
+                            li {
+                                classes = setOf("list-group-item", "list-group-item-primary")
+                                +"${entity.id}"
+                            }
+
+                            li {
+                                classes = setOf("list-group-item", "list-group-item-primary")
+                                +"${entity.name}"
+                            }
+
+                            li {
+                                classes = setOf("list-group-item")
+                                +"Relation"
+                            }
+
+                            li {
+                                classes = setOf("list-group-item")
+                                +"Layer is ${entity.layer}"
+                            }
+                        }
+
+                        br()
+                        unsafe { +buildParentTable(parents[entity.id]) }
+                        br()
+                        unsafe { +buildTagTable(entity.tags) }
+                    }
+                })
+    }
 
 }
