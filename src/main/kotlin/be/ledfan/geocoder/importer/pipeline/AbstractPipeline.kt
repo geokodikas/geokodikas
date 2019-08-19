@@ -21,6 +21,7 @@ import org.kodein.di.generic.allInstances
 import org.kodein.di.generic.instance
 import org.postgresql.util.PSQLException
 import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.containers.PostgreSQLContainer.POSTGRESQL_PORT
 import setupPostgresContainer
 import java.io.File
 
@@ -149,9 +150,11 @@ abstract class AbstractPipeline(private val ic: IntegrationConfig) {
     }
 
     private fun reConnectAllConnections() {
-        config.database.jdbcUrl = postgresContainer.jdbcUrl
         config.database.username = postgresContainer.username
         config.database.password = postgresContainer.password
+        config.database.host = postgresContainer.containerIpAddress
+        config.database.dbName = postgresContainer.databaseName
+        config.database.port = postgresContainer.getMappedPort(POSTGRESQL_PORT)
 
         val connections: List<ConnectionWrapper> by kodein.allInstances()
         connections.forEach { it.reConnect() }

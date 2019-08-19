@@ -23,7 +23,7 @@ object ConnectionFactory {
         }
 
 
-        val jdbcUrl = "jdbc:postgresql://${config.database.host}/${config.database.dbName}"
+        val jdbcUrl = "jdbc:postgresql://${config.database.host}:${config.database.port}/${config.database.dbName}"
 
         // Open a connection to the database
         try {
