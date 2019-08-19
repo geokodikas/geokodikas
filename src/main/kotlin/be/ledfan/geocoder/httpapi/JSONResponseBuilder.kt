@@ -7,7 +7,7 @@ import be.ledfan.geojsondsl.feature
 import be.ledfan.geojsondsl.featureCollection
 import com.beust.klaxon.JsonObject
 
-class ResponseBuilder {
+class JSONResponseBuilder {
 
     private val osmEntities = ArrayList<OsmEntity>()
 
@@ -20,7 +20,7 @@ class ResponseBuilder {
     }
 
 
-    fun buildAsSingleFeautre(): JsonObject {
+    fun buildAsSingleFeature(): JsonObject {
         if (osmEntities.size > 1) {
             throw Exception("More than 1 feature, cannot build signle feautre")
         }

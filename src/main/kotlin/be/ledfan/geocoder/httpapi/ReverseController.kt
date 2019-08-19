@@ -22,7 +22,7 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
 
         val entities = osmWayMapper.getByPrimaryIds(listOf(90582796, 90582719, 90582967))
 
-        val responseBuilder = ResponseBuilder()
+        val responseBuilder = JSONResponseBuilder()
         entities.forEach { responseBuilder.addEntity(it.value) }
 
         call.respond(responseBuilder.buildAsCollection())

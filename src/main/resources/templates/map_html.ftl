@@ -47,28 +47,26 @@
         </div>
         <div class="col-6">
             <br>
-            <a class="btn btn-primary" href="${as_json_link}" role="button">JSON</a>
-            <br><br>
             <details>
                 <pre><code>${geojson}</code></pre>
             </details>
             <br>
-            <ul class="list-group">
-                <li class="list-group-item list-group-item-primary">${osm_id?c}</li>
-                <li class="list-group-item">Type is "${osm_type}"</li>
-                <li class="list-group-item">Layer is "${layer}"</li>
-                <li class="list-group-item list-group-item-${has_one_way_restriction?string('success', 'danger')}">${has_one_way_restriction?string('Has one way restirction', 'No one way restiction')}</li>
-                <li class="list-group-item list-group-item-${has_reversed_one_way?string('success', 'danger')}">${has_reversed_one_way?string('One way is reversed', 'One way is not reversed')}</li>
-            </ul>
-            <br>
-            ${parent_html}
-            <br>
-            ${tags_html}
+            ${tabs}
         </div>
     </div>
+
 </div>
 
 
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
 <script>
     let geojsonFeature = ${geojson};
 

@@ -12,16 +12,16 @@ object Routes {
 
     object OsmEntity {
         @Location("/api/v1/osm_entity/way/{id}")
-        data class Way(val id: Long, val formatting: String = "json") : TypedRoute
+        data class Way(val id: String, val formatting: String = "json") : TypedRoute
 
         @Location("/api/v1/osm_entity/relation/{id}")
-        data class Relation(val id: Long, val formatting: String = "json") : TypedRoute
+        data class Relation(val id: String, val formatting: String = "json") : TypedRoute
     }
 
     val definedRoutes = arrayListOf<TypedRoute>().also {
         it.add(Root)
         it.add(Reverse)
-        it.add(OsmEntity.Way(0))
+        it.add(OsmEntity.Way("0"))
     }
 
 }
