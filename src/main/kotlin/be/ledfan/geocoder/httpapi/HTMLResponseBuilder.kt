@@ -138,7 +138,7 @@ class HTMLResponseBuilder {
         }
     }
 
-    fun buildWay(entities: HashMap<Long, OsmWay>, parents: HashMap<Long, ArrayList<OsmRelation>>): String {
+    fun buildWay(entities: HashMap<Long, OsmWay>, parents: HashMap<Long, ArrayList<OsmRelation>>, nodes: Map<Long, List<OsmNode>>): String {
         return buildTabs(
                 entities.mapValues { (_, entity) ->
                     createHTML().div {
@@ -172,11 +172,37 @@ class HTMLResponseBuilder {
                         }
 
                         br()
+                        unsafe { +buildNodesTable(nodes[entity.id]) }
+
+                        br()
                         unsafe { +buildParentTable(parents[entity.id]) }
+
                         br()
                         unsafe { +buildTagTable(entity.tags) }
                     }
                 })
+    }
+
+    private fun buildNodesTable(relatedNodes: List<OsmNode>?): String {
+        return if (relatedNodes != null) {
+            createHTML().table {
+                classes = setOf("table", "table-striped", "table-sm")
+                relatedNodes.forEach { node ->
+                    tr {
+                        td {
+                            text(node.layer.toString())
+                        }
+                        td {
+                            a(application.locations.href(Routes.OsmEntity.Node(node.id.toString(), "html"))) {
+                                text(node.id)
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            ""
+        }
     }
 
     fun buildNode(entities: java.util.HashMap<Long, OsmNode>, parents: HashMap<Long, ArrayList<OsmRelation>>): String {

@@ -20,6 +20,7 @@ class OsmEntityController(override val kodein: Kodein) : KodeinController(kodein
     private val osmWayMapper: OsmWayMapper by instance()
     private val osmParentMapper: OsmParentMapper by instance()
     private val osmRelationMapper: OsmRelationMapper by instance()
+    private val wayNodeMapper: WayNodeMapper by instance()
 
     private suspend fun <T : OsmEntity> get(mapper: Mapper<T>, route: Routes.OsmEntity.OsmEntityRoute, call: ApplicationCall,
                                             buildHtml: (HashMap<Long, T>, HashMap<Long, ArrayList<OsmRelation>>) -> String) {
@@ -48,7 +49,10 @@ class OsmEntityController(override val kodein: Kodein) : KodeinController(kodein
     override fun Routing.registerRoutes() {
         get<Routes.OsmEntity.Way> { route ->
             val htmlResponseBuilder = HTMLResponseBuilder()
-            get(osmWayMapper, route, this.call, htmlResponseBuilder::buildWay)
+            get(osmWayMapper, route, this.call) { entities, parents ->
+                val nodes = wayNodeMapper.getLinkedNodesByWay(entities.values)
+                htmlResponseBuilder.buildWay(entities, parents, nodes)
+            }
         }
         get<Routes.OsmEntity.Node> { route ->
             val htmlResponseBuilder = HTMLResponseBuilder()

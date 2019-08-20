@@ -8,6 +8,6 @@ fun ResultSet.getHstore(key: String): HashMap<String, String> {
     return getObject(key) as HashMap<String, String>
 }
 
-fun ResultSet.getLayer(): Layer {
-    return Layer.valueOf(getString("layer"))
+fun ResultSet.getLayer(key: String = "layer"): Layer {
+    return Layer.valueOf(getString(key))
 }

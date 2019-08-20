@@ -1,8 +1,10 @@
 package be.ledfan.geocoder.db.mapper
 
 import be.ledfan.geocoder.db.ConnectionWrapper
+import be.ledfan.geocoder.db.entity.OsmNode
 import be.ledfan.geocoder.db.entity.OsmWay
 import be.ledfan.geocoder.db.entity.WayNode
+import be.ledfan.geocoder.db.getLayer
 import be.ledfan.geocoder.importer.Layer
 import org.intellij.lang.annotations.Language
 
@@ -90,6 +92,33 @@ class WayNodeMapper(private val con: ConnectionWrapper) : Mapper<WayNode>(con) {
         result.close()
         return r
     }
+
+    fun getLinkedNodesByWay(osmWays: MutableCollection<OsmWay>): Map<Long, List<OsmNode>> {
+        @Language("SQL")
+        val sql = """SELECT way_id, node_id, node_layer, "order" from way_node where way_id= ANY(?)"""
+        val stmt = con.prepareStatement(sql)
+        val array = con.createArrayOf("BIGINT", osmWays.map { it.id }.toTypedArray())
+        stmt.setArray(1, array)
+
+        val result = stmt.executeQuery()
+
+        val r = HashMap<Long, ArrayList<Pair<Int, OsmNode>>>()
+
+        osmWays.forEach { r[it.id] = ArrayList() }
+
+        while (result.next()) {
+            val rel = OsmNode.create(result.getLong("node_id"), result.getLayer("node_layer"))
+
+            val childId = result.getLong("way_id")
+            r[childId]?.add(Pair(result.getInt("order"), rel))
+        }
+
+        stmt.close()
+        result.close()
+
+        return r.mapValues { (_, nodes) -> nodes.sortedBy { it.first }.map { it.second } }
+    }
+
 
     fun getLinkedWaysByNode(osmNodeId: Long): HashMap<Long, Array<Long>> {
 

@@ -20,6 +20,14 @@ class OsmNode(id: Long) : OsmEntity(id) {
 
             return r
         }
+
+        fun create(id: Long, layer: Layer): OsmNode {
+            val r = OsmNode(id)
+
+            r.layer = layer
+
+            return r
+        }
     }
 
     lateinit var centroid: PGgeometry
