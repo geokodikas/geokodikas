@@ -106,7 +106,20 @@
 
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
         highlightFeature(parseInt(e.target.id.substr(8)));
-    })
+    });
+
+    mymap.on('contextmenu', function (e) {
+        var coord = e.latlng;
+        var lat = coord.lat;
+        var lon = coord.lng;
+
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set("lat", lat);
+        urlParams.set("lon", lon);
+        console.log(urlParams.toString());
+
+        window.location = "/api/v1/reverse?" + urlParams.toString();
+    });
 </script>
 </body>
 </html>

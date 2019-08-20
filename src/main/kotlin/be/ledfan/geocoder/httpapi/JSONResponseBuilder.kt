@@ -12,7 +12,6 @@ import com.beust.klaxon.JsonObject
 
 class JSONResponseBuilder {
 
-    //    private val osmEntities = ArrayList<OsmEntity>()
     private val featureCollection = featureCollection()
 
     /**
