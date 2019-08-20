@@ -62,7 +62,8 @@ abstract class AbstractPipeline(private val ic: IntegrationConfig) {
 
                 osm2psqlContainer(postgresContainer.currentContainerInfo.networkSettings.ipAddress,
                         postgresContainer.username, postgresContainer.password,
-                        5432, postgresContainer.databaseName, pbfFilePath, config.importer.numProcessors.toString())
+                        POSTGRESQL_PORT,
+                        postgresContainer.databaseName, pbfFilePath, config.importer.numProcessors.toString())
 
                 // osm2psql has imported the data into the container, storing as new image
                 val committed = commitContainer(postgresContainer.containerId, importedImageName)

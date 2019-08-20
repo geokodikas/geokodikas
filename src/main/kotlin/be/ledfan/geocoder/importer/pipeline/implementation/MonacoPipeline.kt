@@ -7,7 +7,7 @@ import be.ledfan.geocoder.importer.pipeline.IntegrationConfig
 class MonacoPipeline : AbstractPipeline(
         IntegrationConfig("http://download.openstreetmap.fr/extracts/europe/monaco.osm.pbf",
                 "monaco.osm.pbf",
-                "e74914f076d0c5a2e36302bfee1a01e2")
+                "de4a5103baffad4863bf7922798928a4")
 ) {
 
     override fun validate(): Boolean {
