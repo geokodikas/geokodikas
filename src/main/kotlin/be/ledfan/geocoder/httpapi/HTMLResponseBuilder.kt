@@ -59,7 +59,7 @@ class HTMLResponseBuilder {
             }
         }
 
-        val parsedTags = TagParser().parse(tags) // TODO DI
+        val parsedTags = TagParser().parse(tags)
         return recurse(parsedTags.children)
     }
 

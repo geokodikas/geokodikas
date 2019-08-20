@@ -17,7 +17,9 @@ class JSONResponseBuilder {
      * Order matters!
      */
     fun addEntity(osmEntity: OsmEntity) {
-        // TODO check for duplicate
+        if (osmEntities.contains(osmEntity)) {
+            return
+        }
         osmEntities.add(osmEntity)
     }
 
