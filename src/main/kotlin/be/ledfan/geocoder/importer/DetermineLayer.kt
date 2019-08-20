@@ -48,8 +48,8 @@ open class DetermineLayer {
             return
         }
 
-        if (!resolveableConflict(listOf(Layer.Street, Layer.Link), listOf(Layer.Junction))) {
-            // The fact that it is a Junction is more import than the fact that it is a Street
+        if (!resolveableConflict(listOf(Layer.Junction), listOf(Layer.Street, Layer.Link))) {
+            // A Street and Link implicitly are a Junction, prefer Junction for nodes
             return
         }
 

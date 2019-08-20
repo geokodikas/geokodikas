@@ -82,7 +82,7 @@ class DetermineLayerWay : DetermineLayer() {
                         || highway.hasChild("future")) {
                     assignLayer(layers, Layer.Superfluous)
                 } else if (highway.hasValue("junction")) {
-                    assignLayer(layers, Layer.Link)
+                    assignLayer(layers, Layer.Junction)
                 } else {
                     logger.warn { "Found highway with unknown layer ${way.id}, ${parsedTags.toString(0)}" }
                     assignLayer(layers, Layer.Superfluous)
@@ -161,7 +161,7 @@ class DetermineLayerWay : DetermineLayer() {
             }
 
             if (parsedTags.hasChild("junction")) {
-                assignLayer(layers, Layer.Link)
+                assignLayer(layers, Layer.Junction)
             }
 
             if (parsedTags.childOrNull("zone")?.hasChild("traffic") == true
