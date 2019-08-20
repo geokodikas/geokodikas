@@ -56,7 +56,10 @@ class OsmEntityController(override val kodein: Kodein) : KodeinController(kodein
         }
         get<Routes.OsmEntity.Node> { route ->
             val htmlResponseBuilder = HTMLResponseBuilder()
-            get(osmNodeMapper, route, this.call, htmlResponseBuilder::buildNode)
+            get(osmNodeMapper, route, this.call) { entities, parents ->
+                val ways = wayNodeMapper.getLinkedWaysByNodes(entities.values.toList())
+                htmlResponseBuilder.buildNode(entities, parents, ways)
+            }
         }
         get<Routes.OsmEntity.Relation> { route ->
             val htmlResponseBuilder = HTMLResponseBuilder()

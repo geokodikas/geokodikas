@@ -72,20 +72,24 @@ class WayNodeMapper(private val con: ConnectionWrapper) : Mapper<WayNode>(con) {
 
     }
 
-    fun getLinkedWaysByNode(osmIds: List<Long>): HashMap<Long, ArrayList<Pair<Long, Layer>>> {
+    fun getLinkedWaysByNodes(osmNodes: List<OsmNode>): HashMap<Long, ArrayList<OsmWay>> = getLinkedWaysByNodesIds(osmNodes.map { it.id })
 
-        val sql = "SELECT * FROM $tableName WHERE node_id = ANY(?)"
-        val array = con.createArrayOf("BIGINT", osmIds.toTypedArray())
+    fun getLinkedWaysByNodesIds(osmNodes: List<Long>): HashMap<Long, ArrayList<OsmWay>> {
+
+        val sql = "SELECT node_id, way_id, way_layer FROM way_node WHERE node_id = ANY(?)"
+        val array = con.createArrayOf("BIGINT", osmNodes.toTypedArray())
         val stmt = con.prepareStatement(sql)
         stmt.setArray(1, array)
         val result = stmt.executeQuery()
 
-        val r = HashMap<Long, ArrayList<Pair<Long, Layer>>>() // node_id -> list of <way_ids,way_layer>
+        val r = HashMap<Long, ArrayList<OsmWay>>() // node_id -> list of <way_ids,way_layer>
+        osmNodes.forEach { r[it] = ArrayList() }
 
         while (result.next()) {
-            r.getOrPut(result.getLong("node_id")) { ArrayList() }.add(
-                    Pair(result.getLong("way_id"), Layer.valueOf(result.getString("way_layer")))
-            )
+            val way = OsmWay.create(result.getLong("way_id"), result.getLayer("way_layer"))
+
+            val nodeId = result.getLong("node_id")
+            r[nodeId]?.add(way)
         }
 
         stmt.close()
@@ -120,6 +124,7 @@ class WayNodeMapper(private val con: ConnectionWrapper) : Mapper<WayNode>(con) {
     }
 
 
+    // TODO where is this used and is it correct?
     fun getLinkedWaysByNode(osmNodeId: Long): HashMap<Long, Array<Long>> {
 
         @Language("SQL")

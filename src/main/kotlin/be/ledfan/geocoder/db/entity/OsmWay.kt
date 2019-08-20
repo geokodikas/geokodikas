@@ -25,6 +25,13 @@ class OsmWay(id: Long) : OsmEntity(id) {
             return r
         }
 
+        fun create(id: Long, layer: Layer): OsmWay {
+            val r = OsmWay(id)
+            r.layer = layer
+
+            return r
+        }
+
     }
 
     lateinit var geometry: PGgeometry
