@@ -21,6 +21,7 @@ import org.kodein.di.generic.allInstances
 import org.kodein.di.generic.instance
 import org.postgresql.util.PSQLException
 import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.containers.PostgreSQLContainer.POSTGRESQL_PORT
 import setupPostgresContainer
 import java.io.File
 
@@ -61,7 +62,8 @@ abstract class AbstractPipeline(private val ic: IntegrationConfig) {
 
                 osm2psqlContainer(postgresContainer.currentContainerInfo.networkSettings.ipAddress,
                         postgresContainer.username, postgresContainer.password,
-                        5432, postgresContainer.databaseName, pbfFilePath, config.importer.numProcessors.toString())
+                        POSTGRESQL_PORT,
+                        postgresContainer.databaseName, pbfFilePath, config.importer.numProcessors.toString())
 
                 // osm2psql has imported the data into the container, storing as new image
                 val committed = commitContainer(postgresContainer.containerId, importedImageName)
@@ -120,7 +122,7 @@ abstract class AbstractPipeline(private val ic: IntegrationConfig) {
         val fileName = "full_import${ic.pbfName}_${ic.pbfCheckSum}__${randomString()}"
 
         logger.info("Going to export db into $fileName")
-        val res = postgresContainer.execInContainer("pg_dump", "-U", "test", "--verbose", "-Fc", "test", "-f", "/tmp/db.postgres")
+        val res = postgresContainer.execInContainer("pg_dump", "-U", "geokodikas", "--verbose", "-Fc", "geokodikas", "-f", "/tmp/db.postgres")
         if (res.exitCode != 0) {
             throw Exception("Export postgis db failed")
         } else {
@@ -149,9 +151,11 @@ abstract class AbstractPipeline(private val ic: IntegrationConfig) {
     }
 
     private fun reConnectAllConnections() {
-        config.database.jdbcUrl = postgresContainer.jdbcUrl
         config.database.username = postgresContainer.username
         config.database.password = postgresContainer.password
+        config.database.host = postgresContainer.containerIpAddress
+        config.database.dbName = postgresContainer.databaseName
+        config.database.port = postgresContainer.getMappedPort(POSTGRESQL_PORT)
 
         val connections: List<ConnectionWrapper> by kodein.allInstances()
         connections.forEach { it.reConnect() }

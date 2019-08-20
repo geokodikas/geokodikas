@@ -34,7 +34,7 @@ class OsmNodeProcessor(private val osmNodeMapper: OsmNodeMapper,
         val dbObjects: ArrayList<dbOsmNode> = ArrayList()
 
         val upstreamObjects = osmUpstreamPointMapper.getByPrimaryIds(osmIds)
-        val linkedWaysByNode = wayNodeMapper.getLinkedWaysByNode(osmIds)
+        val linkedWaysByNode = wayNodeMapper.getLinkedWaysByNodesIds(osmIds)
 
         val updatedLinkedWays = ArrayList<WayNode>()
 
@@ -68,7 +68,7 @@ class OsmNodeProcessor(private val osmNodeMapper: OsmNodeMapper,
             var layers = HashSet<Layer>()
             // if at least two ways with layer Street or Link -> assume this is a Junction
             // TODO check if it isn't the same highway
-            if (linkedWays != null && linkedWays.hasAtLeast(2) { way -> way.second == Layer.Street || way.second == Layer.Link || way.second == Layer.Junction }) {
+            if (linkedWays != null && linkedWays.hasAtLeast(2) { way -> way.layer == Layer.Street || way.layer == Layer.Link || way.layer == Layer.Junction }) {
                 // assume it's a junction
                 logger.trace { "Assuming ${entity.id} is a junction because it has at least two linked ways" }
                 layers.add(Layer.Junction)
@@ -87,7 +87,7 @@ class OsmNodeProcessor(private val osmNodeMapper: OsmNodeMapper,
 
                     if (linkedWays != null) {
                         for (linkedWay in linkedWays) {
-                            val wayNode = WayNode.create(linkedWay.first, dbObject.id)
+                            val wayNode = WayNode.create(linkedWay.id, dbObject.id)
                             wayNode.nodeLayer = dbObject.layer
                             updatedLinkedWays.add(wayNode)
                         }

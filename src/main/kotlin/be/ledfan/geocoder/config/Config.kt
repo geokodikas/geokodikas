@@ -18,10 +18,11 @@ data class ImportFromExport(
 data class Database(
         var username: String = "",
         var password: String = "",
-        var jdbcUrl: String = "",
         var host: String = "",
-        var dbName: String = ""
-)
+        var dbName: String = "",
+        var port: Int = 5432
+) {
+}
 
 data class Runtime(
         var inputFileName: String = ""

@@ -1,6 +1,7 @@
 package be.ledfan.geocoder.importer.processors
 
 import be.ledfan.geocoder.db.entity.OsmUpstreamElement
+import be.ledfan.geocoder.db.entity.OsmWay
 import be.ledfan.geocoder.db.mapper.*
 import be.ledfan.geocoder.importer.DetermineLayerNode
 import be.ledfan.geocoder.importer.Layer
@@ -56,7 +57,7 @@ class OsmNodeProcessorUnitTest {
         val mocks = Mocks()
 
         every { mocks.osmUpstreamPointMapper.getByPrimaryIds(listOf(10L)) } returns hashMapOf()
-        every { mocks.wayNodeMapper.getLinkedWaysByNode(listOf(10L)) } returns hashMapOf()
+        every { mocks.wayNodeMapper.getLinkedWaysByNodesIds(listOf(10L)) } returns hashMapOf()
 
 
         val nodes = listOf(create_osm_node(10, 1.0, 2.0))
@@ -79,7 +80,7 @@ class OsmNodeProcessorUnitTest {
         point.zOrder = 42
 
         every { mocks.osmUpstreamPointMapper.getByPrimaryIds(listOf(10L)) } returns hashMapOf(10L to point)
-        every { mocks.wayNodeMapper.getLinkedWaysByNode(listOf(10L)) } returns hashMapOf()
+        every { mocks.wayNodeMapper.getLinkedWaysByNodesIds(listOf(10L)) } returns hashMapOf()
         every { mocks.determineLayerNode.determine(any(), any()) } returns hashSetOf(Layer.Street)
 
         val nodes = listOf(create_osm_node(10, 1.0, 2.0))
@@ -101,7 +102,7 @@ class OsmNodeProcessorUnitTest {
         point.zOrder = 42
 
         every { mocks.osmUpstreamPointMapper.getByPrimaryIds(listOf(10L)) } returns hashMapOf()
-        every { mocks.wayNodeMapper.getLinkedWaysByNode(listOf(10L)) } returns hashMapOf(10L to arrayListOf(Pair(13L, Layer.Street)))
+        every { mocks.wayNodeMapper.getLinkedWaysByNodesIds(listOf(10L)) } returns hashMapOf(10L to arrayListOf(OsmWay.create(13L, Layer.Street)))
         every { mocks.determineLayerNode.determine(any(), any()) } returns hashSetOf(Layer.Junction)
 
         val node = create_osm_node(10, 1.0, 2.0)
@@ -124,9 +125,9 @@ class OsmNodeProcessorUnitTest {
         point.zOrder = 42
 
         every { mocks.osmUpstreamPointMapper.getByPrimaryIds(listOf(10L)) } returns hashMapOf()
-        every { mocks.wayNodeMapper.getLinkedWaysByNode(listOf(10L)) } returns hashMapOf(10L to arrayListOf(
-                Pair(13L, Layer.Street),
-                Pair(15L, Layer.Link)
+        every { mocks.wayNodeMapper.getLinkedWaysByNodesIds(listOf(10L)) } returns hashMapOf(10L to arrayListOf(
+                OsmWay.create(13L, Layer.Street),
+                OsmWay.create(15L, Layer.Link)
         ))
         every { mocks.determineLayerNode.determine(any(), any()) } returns hashSetOf(Layer.Junction)
 
@@ -161,10 +162,10 @@ class OsmNodeProcessorUnitTest {
         point.zOrder = 42
 
         every { mocks.osmUpstreamPointMapper.getByPrimaryIds(listOf(10L)) } returns hashMapOf()
-        every { mocks.wayNodeMapper.getLinkedWaysByNode(listOf(10L)) } returns hashMapOf(10L to arrayListOf(
-                Pair(13L, Layer.Link),
-                Pair(15L, Layer.Junction),
-                Pair(18L, Layer.Venue)
+        every { mocks.wayNodeMapper.getLinkedWaysByNodesIds(listOf(10L)) } returns hashMapOf(10L to arrayListOf(
+                OsmWay.create(13L, Layer.Link),
+                OsmWay.create(15L, Layer.Junction),
+                OsmWay.create(18L, Layer.Venue)
         ))
         every { mocks.determineLayerNode.determine(any(), any()) } returns hashSetOf(Layer.Junction)
 
@@ -200,7 +201,7 @@ class OsmNodeProcessorUnitTest {
         point.zOrder = 42
 
         every { mocks.osmUpstreamPointMapper.getByPrimaryIds(listOf(10L)) } returns hashMapOf(10L to point)
-        every { mocks.wayNodeMapper.getLinkedWaysByNode(listOf(10L)) } returns hashMapOf()
+        every { mocks.wayNodeMapper.getLinkedWaysByNodesIds(listOf(10L)) } returns hashMapOf()
         every { mocks.determineLayerNode.determine(any(), any()) } returns hashSetOf()
 
         val nodes = listOf(create_osm_node(10, 1.0, 2.0))
@@ -221,7 +222,7 @@ class OsmNodeProcessorUnitTest {
         val point = create_upstream_element(10)
 
         every { mocks.osmUpstreamPointMapper.getByPrimaryIds(listOf(10L)) } returns hashMapOf(10L to point)
-        every { mocks.wayNodeMapper.getLinkedWaysByNode(listOf(10L)) } returns hashMapOf()
+        every { mocks.wayNodeMapper.getLinkedWaysByNodesIds(listOf(10L)) } returns hashMapOf()
         every { mocks.determineLayerNode.determine(any(), any()) } returns hashSetOf(Layer.Junction, Layer.Address, Layer.Superfluous)
 
         val nodes = listOf(create_osm_node(10, 1.0, 2.0))

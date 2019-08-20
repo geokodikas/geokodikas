@@ -1,6 +1,7 @@
 package be.ledfan.geocoder.db.entity
 
 import be.ledfan.geocoder.db.getHstore
+import be.ledfan.geocoder.db.getLayer
 import be.ledfan.geocoder.importer.Layer
 import org.postgis.PGgeometry
 import java.sql.ResultSet
@@ -15,9 +16,16 @@ class OsmRelation(id: Long) : OsmEntity(id) {
             r.geometry = row.getObject("geometry") as PGgeometry
             r.tags = row.getHstore("tags")
             r.zOrder = row.getInt("z_order")
-            r.layer = Layer.valueOf(row.getString("layer"))
+            r.layer = row.getLayer()
             r.name = row.getString("name")
 
+            return r
+        }
+
+        fun create(id: Long, name: String, layer: Layer): OsmRelation {
+            val r = OsmRelation(id)
+            r.name = name
+            r.layer = layer
             return r
         }
 

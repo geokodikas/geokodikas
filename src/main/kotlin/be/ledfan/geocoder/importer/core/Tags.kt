@@ -2,7 +2,7 @@ package be.ledfan.geocoder.importer.core
 
 import java.lang.Exception
 
-data class Tags(private var values: List<String>? = null, private val children: HashMap<String, Tags> = HashMap()) {
+data class Tags(var values: List<String>? = null, val children: HashMap<String, Tags> = HashMap()) {
 
     val amountOfChildren: Int
         get() = children.size

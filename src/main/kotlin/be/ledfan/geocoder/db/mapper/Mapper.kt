@@ -39,7 +39,7 @@ abstract class Mapper<T>(private val con: ConnectionWrapper) {
     }
 
     fun deleteByPrimaryId(id: Long) {
-        val sql = "DELETE  FROM $tableName WHERE osm_id = ?"
+        val sql = "DELETE FROM $tableName WHERE osm_id = ?"
         val stmt = con.prepareStatement(sql) // TODO replace osm_id
         stmt.setLong(1, id)
         stmt.executeUpdate()
