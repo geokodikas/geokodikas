@@ -12,7 +12,7 @@ import org.kodein.di.Kodein
 class OverviewController(override val kodein: Kodein) : KodeinController(kodein) {
 
     private suspend fun getRoot(call: ApplicationCall) {
-        val urls = Routes.definedRoutes.map { "http://localhost:8080" + it.href } // TODO
+        val urls = Routes.exampleRoutes.map { "http://localhost:8080" + it.href } // TODO
 
         call.respond(mapOf("urls" to urls))
     }
