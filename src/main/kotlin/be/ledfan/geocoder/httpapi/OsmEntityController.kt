@@ -31,6 +31,14 @@ class OsmEntityController(override val kodein: Kodein) : KodeinController(kodein
         val ids = route.id.split(",").map { it.toLong() }
         val jsonResponseBuilder = JSONResponseBuilder()
         val entities = mapper.getByPrimaryIds(ids)
+
+        if (entities.size == 0) {
+            return call.respondNotFound("""No entities found for ids: '${route.id}'""")
+        }
+        if (entities.size != ids.size) {
+            return call.respondNotFound("""No entities found for ids: '${ids.subtract(entities.keys.toList())}'""")
+        }
+
         entities.forEach { jsonResponseBuilder.addEntity(it.value) }
 
         val parents = osmParentMapper.getParents(entities.values.toList())
