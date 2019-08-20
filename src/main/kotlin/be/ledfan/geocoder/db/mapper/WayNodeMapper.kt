@@ -97,7 +97,7 @@ class WayNodeMapper(private val con: ConnectionWrapper) : Mapper<WayNode>(con) {
         return r
     }
 
-    fun getLinkedNodesByWay(osmWays: MutableCollection<OsmWay>): Map<Long, List<OsmNode>> {
+    fun getLinkedNodesByWay(osmWays: List<OsmWay>): Map<Long, List<OsmNode>> {
         @Language("SQL")
         val sql = """SELECT way_id, node_id, node_layer, "order" from way_node where way_id= ANY(?)"""
         val stmt = con.prepareStatement(sql)

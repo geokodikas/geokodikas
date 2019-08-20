@@ -4,6 +4,7 @@ import ch.qos.logback.classic.util.ContextInitializer
 import freemarker.cache.ClassTemplateLoader
 import io.ktor.application.Application
 import io.ktor.application.install
+import io.ktor.application.log
 import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
 import io.ktor.freemarker.FreeMarker
@@ -64,6 +65,7 @@ fun Application.kodeinApplication() {
                 (res as KodeinController).apply { registerRoutes() }
             }
         }
+        trace { application.log.trace(it.buildText()) }
     }
 }
 

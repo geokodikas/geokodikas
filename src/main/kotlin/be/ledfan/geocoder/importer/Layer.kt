@@ -1,5 +1,7 @@
 package be.ledfan.geocoder.importer
 
+import java.lang.IllegalArgumentException
+
 enum class Layer(val order: Int) {
 
     VirtualTrafficFlow(130),    // node
@@ -15,4 +17,13 @@ enum class Layer(val order: Int) {
     MacroRegion(94),
     Country(93),
     Superfluous(0),             // node, way -> Do Not Import!
+}
+
+fun isValidLayer(layer: String): Boolean {
+    return try {
+        Layer.valueOf(layer)
+        true
+    } catch (e: IllegalArgumentException) {
+        false
+    }
 }

@@ -72,8 +72,15 @@
 
     let mymap = L.map('mapid'); //.setView([51.505, -0.09], 13);
 
-    let group = L.featureGroup([L.geoJSON(geojsonFeature)])
-        .addTo(mymap);
+    let group = L.geoJSON(geojsonFeature, {onEachFeature: onEachFeature}).addTo(mymap);
+
+    function onEachFeature(feature, layer) {
+        layer.on({
+            click: function () {
+                $('#tab-btn-' + layer.feature.properties.osm_id).tab('show');
+            }
+        });
+    }
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
@@ -82,6 +89,24 @@
     }).addTo(mymap);
 
     mymap.fitBounds(group.getBounds());
+
+
+    let firstLayer = group.getLayers()[0];
+    $('#tab-btn-' + firstLayer.feature.properties.osm_id).tab('show');
+
+    function highlightFeature(featureId) {
+        group.eachLayer(function (layer) {
+            if (layer.feature.properties.osm_id === featureId) {
+                layer.setStyle({fillColor: 'red', color: 'red'})
+            } else {
+                layer.setStyle({fillColor: '#3388ff', color: '#3388ff'})
+            }
+        });
+    }
+
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        highlightFeature(parseInt(e.target.id.substr(8)));
+    })
 </script>
 </body>
 </html>
