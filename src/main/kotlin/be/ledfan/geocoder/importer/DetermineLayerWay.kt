@@ -29,10 +29,11 @@ class DetermineLayerWay : DetermineLayer() {
                         || highway.hasValue("pedestrian")
                         || highway.hasValue("tunnel")
                         || highway.hasValue("road") // this should be tmp tags
+                        || highway.hasValue("footway") // some houses are located on a footway
                 ) {
                     assignLayer(layers, Layer.Street)
-                } else if (highway.hasValue("footway")
-                        || highway.hasValue("bridleway")
+                } else if (
+                        highway.hasValue("bridleway")
                         || highway.hasValue("steps")
                         || highway.hasValue("path")
                         || highway.hasValue("service")
