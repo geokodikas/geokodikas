@@ -4,7 +4,7 @@ import be.ledfan.geocoder.forFirstAndRest
 import be.ledfan.geocoder.importer.isValidLayer
 import org.intellij.lang.annotations.Language
 
-class ReverseQueryBuilder {
+class ReverseQueryBuilder(private val debug: Boolean = false) {
 
 //    private var logger = KotlinLogging.logger {}
 
@@ -42,6 +42,13 @@ class ReverseQueryBuilder {
     }
 
     fun build(): Pair<String, List<Any>> {
+        if (debug) {
+            var filledQuery = currentQuery
+            parameters.forEach { parameterValue ->
+                filledQuery = filledQuery.replaceFirst("?", parameterValue.toString())
+            }
+            println("Filledquery: $filledQuery")
+        }
         return Pair(currentQuery, parameters)
     }
 

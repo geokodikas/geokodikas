@@ -2,19 +2,16 @@ package be.ledfan.geocoder.geocoding
 
 import be.ledfan.geocoder.db.ConnectionWrapper
 import be.ledfan.geocoder.db.entity.OsmWay
-import com.vividsolutions.jts.geom.Coordinate
 
 class Reverse(private val con: ConnectionWrapper) {
 
-//    data class Result(val osmWay: OsmWay, val closestPoint: Coordinate, val name: String)
     data class Result(val osmWay: OsmWay, val distance: Double, val name: String)
-//    data class Result(val osmWay: Long, val distance: Double, val name: String)
 
     fun reverseGeocode(lat: Double, lon: Double,
                        limitNumeric: Int?, limitRadius: Int?,
                        desiredLayers: List<String>?): ArrayList<Result> {
 
-        val (sqlQuery, parameters) = ReverseQueryBuilder().run {
+        val (sqlQuery, parameters) = ReverseQueryBuilder(debug=true).run {
             baseQuery(lat, lon)
             if (limitRadius != null && limitRadius > 0) {
                 whereMetricDistance(limitRadius)
@@ -30,13 +27,10 @@ class Reverse(private val con: ConnectionWrapper) {
             }
             build()
         }
-        println("SQL QUERY: $sqlQuery")
-        println("Paramters: $parameters")
 
         val stmt = con.prepareStatement(sqlQuery)
 
         parameters.forEachIndexed { index, param ->
-            println("Set ${index + 1} => $param")
             stmt.setObject(index + 1, param)
         }
 
@@ -54,8 +48,6 @@ class Reverse(private val con: ConnectionWrapper) {
         result.close()
 
         return results
-
-
     }
 
 }
