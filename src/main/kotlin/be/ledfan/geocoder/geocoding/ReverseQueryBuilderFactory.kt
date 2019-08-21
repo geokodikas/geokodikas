@@ -25,9 +25,9 @@ class ReverseQueryBuilderFactory {
     }
 
     fun processResult(table: SearchTable, row: ResultSet,
-                      nodes: ArrayList<Reverse.Result<OsmNode>>,
-                      ways: ArrayList<Reverse.Result<OsmWay>>,
-                      relations: ArrayList<Reverse.Result<OsmRelation>>) {
+                      nodes: MutableList<Reverse.Result<OsmNode>>,
+                      ways: MutableList<Reverse.Result<OsmWay>>,
+                      relations: MutableList<Reverse.Result<OsmRelation>>) {
 
         when (table) {
             SearchTable.Node -> {

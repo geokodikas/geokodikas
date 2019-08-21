@@ -20,7 +20,7 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
 
     val con: ConnectionWrapper by instance()
 
-    private val reverseGeocoder = Reverse(con)
+    private val reverseGeocoder = Reverse()
     private val osmWayMapper: OsmWayMapper by instance()
     private val osmParentMapper: OsmParentMapper by instance()
     private val wayNodeMapper: WayNodeMapper by instance()
@@ -66,7 +66,6 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
 
     override fun Routing.registerRoutes() {
         get<Routes.Reverse> { route -> reverse(route, this.call) }
-        println("heiro")
     }
 
 }
