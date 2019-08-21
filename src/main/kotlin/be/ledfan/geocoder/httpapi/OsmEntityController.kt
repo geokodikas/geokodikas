@@ -1,7 +1,6 @@
 package be.ledfan.geocoder.httpapi
 
 import be.ledfan.geocoder.db.entity.OsmEntity
-import be.ledfan.geocoder.db.entity.OsmRelation
 import be.ledfan.geocoder.db.mapper.*
 import com.beust.klaxon.JsonObject
 import io.ktor.application.ApplicationCall

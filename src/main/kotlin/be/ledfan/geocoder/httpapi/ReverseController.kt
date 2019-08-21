@@ -5,23 +5,20 @@ import be.ledfan.geocoder.db.mapper.OsmParentMapper
 import be.ledfan.geocoder.db.mapper.OsmWayMapper
 import be.ledfan.geocoder.db.mapper.WayNodeMapper
 import be.ledfan.geocoder.geocoding.Reverse
-import de.topobyte.osm4j.core.model.iface.OsmWay
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.locations.KtorExperimentalLocationsAPI
 import io.ktor.locations.get
 import io.ktor.response.respond
-import io.ktor.response.respondText
 import io.ktor.routing.Routing
 import org.kodein.di.Kodein
-import org.kodein.di.direct
 import org.kodein.di.generic.instance
 import java.lang.Exception
 
 @KtorExperimentalLocationsAPI
 class ReverseController(override val kodein: Kodein) : KodeinController(kodein) {
 
-    val con : ConnectionWrapper by instance()
+    val con: ConnectionWrapper by instance()
 
     private val reverseGeocoder = Reverse(con)
     private val osmWayMapper: OsmWayMapper by instance()
@@ -34,7 +31,7 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
         val limitRadius: Int? = call.request.queryParameters["limitRadius"]?.toInt()
         val limitLayers: List<String>? = call.request.queryParameters["limitLayers"]?.split(",")?.filter { it.trim() != "" }
 
-        val results = try {
+        val (nodes, ways, relations) = try {
             reverseGeocoder.reverseGeocode(
                     route.lat,
                     route.lon,
@@ -52,17 +49,16 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
         }
 
         val jsonResponseBuilder = JSONResponseBuilder()
-        results.forEach {
+        (nodes + ways + relations).forEach {
             jsonResponseBuilder.addEntity(it.osmWay) {
                 withProperty("distance", it.distance)
                 withProperty("name", it.name)
             }
         }
 
-
         val geoJson = jsonResponseBuilder.toJson()
         if (route.formatting == "html") {
-            call.respond(htmlViewer.createHtml(geoJson, listOf(), results.map { it.osmWay }, listOf()))
+            call.respond(htmlViewer.createHtml(geoJson, nodes.map { it.osmWay }, ways.map { it.osmWay}, relations.map { it.osmWay }))
         } else {
             call.respond(geoJson)
         }

@@ -1,15 +1,12 @@
 package be.ledfan.geocoder.httpapi
 
-import be.ledfan.geocoder.db.entity.OsmEntity
 import be.ledfan.geocoder.db.entity.OsmNode
 import be.ledfan.geocoder.db.entity.OsmRelation
 import be.ledfan.geocoder.db.entity.OsmWay
 import be.ledfan.geocoder.db.mapper.OsmParentMapper
 import be.ledfan.geocoder.db.mapper.WayNodeMapper
 import com.beust.klaxon.JsonObject
-import freemarker.ext.servlet.FreemarkerServlet
 import io.ktor.freemarker.FreeMarkerContent
-import io.ktor.response.respond
 
 class HTMLViewer(private val wayNodeMapper: WayNodeMapper, private val osmParentMapper: OsmParentMapper) {
 
