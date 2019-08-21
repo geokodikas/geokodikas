@@ -11,6 +11,7 @@ import io.ktor.freemarker.FreeMarkerContent
 class HTMLViewer(private val wayNodeMapper: WayNodeMapper, private val osmParentMapper: OsmParentMapper) {
 
     private val htmlResponseBuilder = HTMLResponseBuilder()
+
     fun createHtml(geoJson: JsonObject, nodes: List<OsmNode>, ways: List<OsmWay>, relations: List<OsmRelation>): FreeMarkerContent {
 
         val allEntities = ways.toList() + nodes.toList() + relations.toList()

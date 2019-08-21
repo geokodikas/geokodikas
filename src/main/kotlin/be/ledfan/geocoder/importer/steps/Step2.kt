@@ -63,7 +63,8 @@ suspend fun step2_create_indexes(): Boolean {
     @Language("SQL")
     val sqlQueries = listOf(
             "CREATE UNIQUE INDEX IF NOT EXISTS osm_node_osm_id_uindex ON osm_node (osm_id)",
-            "CREATE INDEX IF NOT EXISTS osm_node_osm_centroid_uindex ON osm_node USING GIST(centroid)")
+            "CREATE INDEX IF NOT EXISTS osm_node_osm_centroid_uindex ON osm_node USING GIST(centroid)",
+            "CREATE INDEX IF NOT EXISTS osm_node_geometry_layer_index ON osm_node USING GIST(layer, centroid)")
 
     return executeBatchQueries(sqlQueries)
 }

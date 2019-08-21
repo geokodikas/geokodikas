@@ -16,7 +16,9 @@ class NodeReverseQueryBuilder(debug: Boolean = false) : ReverseQueryBuilder(debu
               centroid AS closest_point
             FROM osm_node
             WHERE ST_DWithin(ST_SetSRID(ST_Point(4.409658908843995, 51.22282456687231), 4326), centroid, 0.006)
-            AND layer in ('VirtualTrafficFlow'::Layer, 'Junction'::Layer, 'PhysicalTrafficFlow'::Layer)
+            AND (layer = 'VirtualTrafficFlow'::Layer
+             OR  layer = 'Junction'::Layer
+             OR  layer = 'PhysicalTrafficFlow'::Layer)
         """.trimIndent()
     }
 
