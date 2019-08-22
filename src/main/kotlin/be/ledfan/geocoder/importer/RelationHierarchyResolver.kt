@@ -26,7 +26,7 @@ class RelationHierarchyResolver(private val con: ConnectionWrapper) {
             )"""
 
         // Setup parents for nodes which lie within a Neighbourhood
-        // Nodes only have the first parent in the hierarchy stored
+        // Ways only have the neighbourhood (if any) and LocalAdmin stored
         // This query thus will setup Neighbourhood
         @Language("SQL")
         val sql2 = """
@@ -38,7 +38,7 @@ class RelationHierarchyResolver(private val con: ConnectionWrapper) {
             )"""
 
         // Setup parents for nodes which do not lie within a Neighbourhood
-        // Nodes only have the first parent in the hierarchy stored
+        // Ways only have the neighbourhood (if any) and LocalAdmin stored
         // This query thus will setup LocalAdmin
         @Language("SQL")
         val sql3 = """
@@ -47,7 +47,6 @@ class RelationHierarchyResolver(private val con: ConnectionWrapper) {
               FROM osm_node AS child
                JOIN osm_relation AS parent ON st_contains(parent.geometry, child.centroid)
                WHERE parent.layer = 'LocalAdmin'::Layer
-                AND NOT EXISTS (SELECT * FROM parent WHERE child_id=child.osm_id AND parent_layer='Neighbourhood'::Layer)
              )"""
 
         // Setup LocalAdmin parents for ways
