@@ -87,6 +87,7 @@ abstract class AbstractPipeline(private val ic: IntegrationConfig) {
                 importer.executeStep("step1")
                 importer.executeStep("step2")
                 importer.executeStep("step3")
+                importer.executeStep("step4")
                 importer.finish()
             }
 

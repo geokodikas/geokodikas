@@ -11,11 +11,6 @@ import org.intellij.lang.annotations.Language
 
 class OsmParentMapper(private val con: ConnectionWrapper) {
 
-//    override val entityCompanion = OsmUpstreamElement.Companion
-//
-//    override val tableName = "osm_up_polygon"
-
-
     fun getParents(entities: List<OsmEntity>): HashMap<Long, ArrayList<OsmRelation>> {
         @Language("SQL")
         val stmt = con.prepareCall("""

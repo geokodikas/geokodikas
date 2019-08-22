@@ -65,6 +65,7 @@ class HTMLResponseBuilder {
 
     fun buildParentTable(parentsOfEntity: java.util.ArrayList<OsmRelation>?): String {
         return if (parentsOfEntity != null) {
+            parentsOfEntity.sortByDescending { it.layer.order }
             createHTML().table {
                 classes = setOf("table", "table-striped", "table-sm")
                 parentsOfEntity.forEach { parent ->

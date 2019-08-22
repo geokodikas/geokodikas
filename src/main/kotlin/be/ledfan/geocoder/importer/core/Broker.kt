@@ -17,7 +17,7 @@ import kotlin.concurrent.timer
 /**
  * The Broker class maintains a Queue and a collection of processors.
  */
-class Broker<OsmType : OsmEntity>(
+class Broker<OsmType>(
         private val outputThreshold: Int,
         private val numProcessors: Int,
         maxQueueSize: Int,
@@ -77,6 +77,10 @@ class Broker<OsmType : OsmEntity>(
         numRead++
 
         queue.put(el)
+    }
+
+    fun enqueueAll(elements: List<OsmType>) {
+        queue.addAll(elements)
     }
 
     private fun updateStats() {

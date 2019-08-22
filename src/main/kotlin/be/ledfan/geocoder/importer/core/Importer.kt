@@ -60,6 +60,12 @@ class Importer {
                 Pair("step3_create_indexes", ::step3_create_indexes),
                 Pair("step3_prune_regions", ::step3_prune_regions),
                 Pair("step3_resolve_hierarchies", ::step3_resolve_hierarchies))
+
+        steps["step4"] = listOf(
+                Pair("step4_checks", ::step4_checks),
+                Pair("step4_materialized_view", ::step4_materialized_view),
+                Pair("step4_build_address_index", ::step4_build_address_index))
+
     }
 
 

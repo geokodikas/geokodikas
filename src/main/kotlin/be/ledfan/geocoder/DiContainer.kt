@@ -51,6 +51,8 @@ val kodein = ConfigurableKodein().also {
 
         bind<OsmParentMapper>() with provider { OsmParentMapper(instance()) }
 
+        bind<AddressIndexMapper>() with provider { AddressIndexMapper(instance()) }
+
         /**
          * Importer
          */
@@ -76,6 +78,10 @@ val kodein = ConfigurableKodein().also {
         bind<RegionPruner>() with singleton { RegionPruner(instance(), instance(), instance(), instance(), instance()) }
 
         bind<StatsCollector>() with singleton { StatsCollector() }
+
+        bind<BuildAddressIndex>() with singleton { BuildAddressIndex(instance(), instance()) }
+
+        bind<AddressNodeProcessor>() with singleton { AddressNodeProcessor(instance(), instance(), instance()) }
 
 
         /**

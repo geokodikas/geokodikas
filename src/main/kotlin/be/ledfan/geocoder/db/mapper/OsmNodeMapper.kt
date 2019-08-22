@@ -2,6 +2,8 @@ package be.ledfan.geocoder.db.mapper
 
 import be.ledfan.geocoder.db.ConnectionWrapper
 import be.ledfan.geocoder.db.entity.OsmNode
+import be.ledfan.geocoder.importer.Layer
+import org.intellij.lang.annotations.Language
 import java.util.*
 
 class OsmNodeMapper(private val con: ConnectionWrapper) : Mapper<OsmNode>(con) {
@@ -28,6 +30,17 @@ class OsmNodeMapper(private val con: ConnectionWrapper) : Mapper<OsmNode>(con) {
 
         stmt.executeBatch()
         stmt.close()
+    }
+
+    fun getAddressesAndVenues(): HashMap<Long, OsmNode> {
+        @Language("SQL")
+        val stmt = con.prepareCall("""
+            SELECT *
+            FROM osm_node
+            WHERE layer = 'Address'::Layer OR layer='Venue'::Layer
+        """.trimIndent())
+
+        return executeSelect(stmt)
     }
 
 }
