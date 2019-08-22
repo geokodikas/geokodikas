@@ -25,6 +25,9 @@ object Routes {
         @Location("/api/v1/osm_entity/node/{id}")
         data class Node(override val id: String, override val formatting: String = "json") : OsmEntityRoute(id, formatting)
 
+        @Location("/api/v1/osm_entity/any/{id}")
+        data class Any(override val id: String, override val formatting: String = "json"): OsmEntityRoute(id, formatting)
+
     }
 
     val exampleRoutes = arrayListOf<TypedRoute>().also {

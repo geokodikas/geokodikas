@@ -8,7 +8,7 @@ abstract class ReverseQueryBuilder(private val debug: Boolean = false) {
     private var hasWhere = false
 
     private var currentQuery = ""
-    private val parameters = ArrayList<Any>()
+    protected val parameters = ArrayList<Any>()
 
     abstract fun cteQuery(lon: Double, lat: Double): String
 

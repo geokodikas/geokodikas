@@ -2,6 +2,7 @@ package be.ledfan.geocoder.db.mapper
 
 import be.ledfan.geocoder.db.ConnectionWrapper
 import be.ledfan.geocoder.db.entity.AddressIndex
+import be.ledfan.geocoder.db.entity.OsmWay
 import be.ledfan.geocoder.geocoding.SearchTable
 
 class AddressIndexMapper(private val con: ConnectionWrapper) : Mapper<AddressIndex>(con) {
@@ -50,6 +51,17 @@ class AddressIndexMapper(private val con: ConnectionWrapper) : Mapper<AddressInd
         stmt.executeBatch()
         stmt.close()
     }
+
+    fun getByWays(ways: List<OsmWay>): HashMap<Long, ArrayList<AddressIndex>> {
+        val ids = ways.map { it.id }
+        val sql = "SELECT * FROM address_index WHERE street_id = ANY(?)"
+        val stmt = con.prepareStatement(sql)
+        val array = con.createArrayOf("BIGINT", ids.toTypedArray())
+        stmt.setArray(1, array)
+
+        return executeGroupedSelect(stmt, ids, "street_id")
+    }
+
 
     override val tableName = "address_index"
 

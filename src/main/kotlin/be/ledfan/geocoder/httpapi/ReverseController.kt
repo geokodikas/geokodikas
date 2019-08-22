@@ -1,6 +1,7 @@
 package be.ledfan.geocoder.httpapi
 
 import be.ledfan.geocoder.db.ConnectionWrapper
+import be.ledfan.geocoder.db.mapper.AddressIndexMapper
 import be.ledfan.geocoder.db.mapper.OsmParentMapper
 import be.ledfan.geocoder.db.mapper.OsmWayMapper
 import be.ledfan.geocoder.db.mapper.WayNodeMapper
@@ -24,7 +25,9 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
     private val osmWayMapper: OsmWayMapper by instance()
     private val osmParentMapper: OsmParentMapper by instance()
     private val wayNodeMapper: WayNodeMapper by instance()
-    private val htmlViewer = HTMLViewer(wayNodeMapper, osmParentMapper)
+    private val addressIndexMapper: AddressIndexMapper by instance()
+    private val htmlViewer = HTMLViewer(wayNodeMapper, osmParentMapper, addressIndexMapper)
+
 
     private suspend fun reverse(route: Routes.Reverse, call: ApplicationCall) {
         val limitNumeric: Int? = call.request.queryParameters["limitNumeric"]?.toInt()

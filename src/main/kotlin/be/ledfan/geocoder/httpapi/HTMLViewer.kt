@@ -3,12 +3,13 @@ package be.ledfan.geocoder.httpapi
 import be.ledfan.geocoder.db.entity.OsmNode
 import be.ledfan.geocoder.db.entity.OsmRelation
 import be.ledfan.geocoder.db.entity.OsmWay
+import be.ledfan.geocoder.db.mapper.AddressIndexMapper
 import be.ledfan.geocoder.db.mapper.OsmParentMapper
 import be.ledfan.geocoder.db.mapper.WayNodeMapper
 import com.beust.klaxon.JsonObject
 import io.ktor.freemarker.FreeMarkerContent
 
-class HTMLViewer(private val wayNodeMapper: WayNodeMapper, private val osmParentMapper: OsmParentMapper) {
+class HTMLViewer(private val wayNodeMapper: WayNodeMapper, private val osmParentMapper: OsmParentMapper, private val addressIndexMapper: AddressIndexMapper) {
 
     private val htmlResponseBuilder = HTMLResponseBuilder()
 
@@ -19,7 +20,8 @@ class HTMLViewer(private val wayNodeMapper: WayNodeMapper, private val osmParent
 
         // Ways
         val nodesRelatedToWays = wayNodeMapper.getLinkedNodesByWay(ways)
-        val tabs = htmlResponseBuilder.buildWay(ways, parents, nodesRelatedToWays)
+        val addressesOnWays = addressIndexMapper.getByWays(ways)
+        val tabs = htmlResponseBuilder.buildWay(ways, parents, nodesRelatedToWays, addressesOnWays)
 
         // nodes
         val waysRelatedToNodes = wayNodeMapper.getLinkedWaysByNodes(nodes.toList())

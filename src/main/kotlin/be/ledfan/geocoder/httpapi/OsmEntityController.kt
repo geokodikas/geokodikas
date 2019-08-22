@@ -1,11 +1,11 @@
 package be.ledfan.geocoder.httpapi
 
 import be.ledfan.geocoder.db.entity.OsmEntity
+import be.ledfan.geocoder.db.entity.OsmWay
 import be.ledfan.geocoder.db.mapper.*
 import com.beust.klaxon.JsonObject
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
-import io.ktor.freemarker.FreeMarkerContent
 import io.ktor.locations.KtorExperimentalLocationsAPI
 import io.ktor.locations.get
 import io.ktor.response.respond
@@ -21,54 +21,80 @@ class OsmEntityController(override val kodein: Kodein) : KodeinController(kodein
     private val osmParentMapper: OsmParentMapper by instance()
     private val wayNodeMapper: WayNodeMapper by instance()
     private val osmRelationMapper: OsmRelationMapper by instance()
-    private val htmlViewer = HTMLViewer(wayNodeMapper, osmParentMapper)
+    private val addressIndexMapper: AddressIndexMapper by instance()
+    private val htmlViewer = HTMLViewer(wayNodeMapper, osmParentMapper, addressIndexMapper)
 
-    private suspend fun <T : OsmEntity> get(mapper: Mapper<T>, route: Routes.OsmEntity.OsmEntityRoute, call: ApplicationCall,
-                                            buildHtml: (JsonObject, List<T>) -> FreeMarkerContent) {
+    //    buildHtml: (JsonObject, List<T>) -> FreeMarkerContent
+    private suspend fun <T : OsmEntity> get(mapper: Mapper<T>, route: Routes.OsmEntity.OsmEntityRoute, call: ApplicationCall): List<T>? {
 
         if (!listOf("html", "json").contains(route.formatting)) {
-            return call.respondError("Format must be either html or json")
+            call.respondError("Format must be either html or json")
+            return null
         }
 
         val ids = route.id.split(",").map { it.toLong() }
-
-        val jsonResponseBuilder = JSONResponseBuilder()
         val entities = mapper.getByPrimaryIds(ids)
 
-        if (entities.size == 0) {
-            return call.respondNotFound("""No entities found for ids: '${route.id}'""")
-        }
-        if (entities.size != ids.size) {
-            return call.respondNotFound("""No entities found for ids: '${ids.subtract(entities.keys.toList())}'""")
-        }
+//        if (entities.size == 0) {
+//            call.respondNotFound("""No entities found for ids: '${route.id}'""")
+//            return null
+//        }
+//        if (entities.size != ids.size) {
+//            call.respondNotFound("""No entities found for ids: '${ids.subtract(entities.keys.toList())}'""")
+//            return null
+//        }
 
-        entities.forEach { jsonResponseBuilder.addEntity(it.value) }
+        return entities.values.toList()
+    }
 
-        val geoJson = jsonResponseBuilder.toJson()
+    private fun toGeoJson(entities: List<OsmEntity>): JsonObject {
+        val jsonResponseBuilder = JSONResponseBuilder()
+        entities.forEach { jsonResponseBuilder.addEntity(it) }
+        return jsonResponseBuilder.toJson()
 
-        if (route.formatting == "html") {
-            call.respond(buildHtml(geoJson, entities.values.toList()))
-        } else {
-            call.respond(geoJson)
-        }
     }
 
     override fun Routing.registerRoutes() {
+        println("registering")
         get<Routes.OsmEntity.Way> { route ->
-            get(osmWayMapper, route, this.call) { geoJson, ways ->
-                htmlViewer.createHtml(geoJson = geoJson, ways = ways, nodes = listOf(), relations = listOf())
+            val entities = get(osmWayMapper, route, this.call) ?: return@get
+            val geoJson = toGeoJson(entities)
+            if (route.formatting == "html") {
+                call.respond(htmlViewer.createHtml(geoJson = geoJson, ways = entities, nodes = listOf(), relations = listOf()))
+            } else {
+                call.respond(geoJson)
             }
         }
         get<Routes.OsmEntity.Node> { route ->
-            get(osmNodeMapper, route, this.call) { geoJson, nodes ->
-                htmlViewer.createHtml(geoJson = geoJson, ways = listOf(), nodes = nodes, relations = listOf())
+            val entities = get(osmNodeMapper, route, this.call) ?: return@get
+            val geoJson = toGeoJson(entities)
+            if (route.formatting == "html") {
+                call.respond(htmlViewer.createHtml(geoJson = geoJson, ways = listOf(), nodes = entities, relations = listOf()))
+            } else {
+                call.respond(geoJson)
             }
         }
         get<Routes.OsmEntity.Relation> { route ->
-            get(osmRelationMapper, route, this.call) { geoJson, relations ->
-                htmlViewer.createHtml(geoJson = geoJson, ways = listOf(), nodes = listOf(), relations = relations)
+            val entities = get(osmRelationMapper, route, this.call) ?: return@get
+            val geoJson = toGeoJson(entities)
+            if (route.formatting == "html") {
+                call.respond(htmlViewer.createHtml(geoJson = geoJson, ways = listOf(), nodes = listOf(), relations = entities))
+            } else {
+                call.respond(geoJson)
             }
         }
+        get<Routes.OsmEntity.Any> { route ->
+            val nodes = get(osmNodeMapper, route, this.call) ?: return@get
+            val ways = get(osmWayMapper, route, this.call) ?: return@get
+            val relations = get(osmRelationMapper, route, this.call) ?: return@get
+            val geoJson = toGeoJson(nodes + ways + relations)
+            if (route.formatting == "html") {
+                call.respond(htmlViewer.createHtml(geoJson = geoJson, ways = ways, nodes = nodes, relations = relations))
+            } else {
+                call.respond(geoJson)
+            }
+        }
+        println("done")
     }
 
 }

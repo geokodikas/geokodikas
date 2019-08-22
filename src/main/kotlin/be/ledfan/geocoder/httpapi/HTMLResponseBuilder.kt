@@ -1,5 +1,6 @@
 package be.ledfan.geocoder.httpapi
 
+import be.ledfan.geocoder.db.entity.AddressIndex
 import be.ledfan.geocoder.db.entity.OsmNode
 import be.ledfan.geocoder.db.entity.OsmRelation
 import be.ledfan.geocoder.db.entity.OsmWay
@@ -139,7 +140,7 @@ class HTMLResponseBuilder {
         }
     }
 
-    fun buildWay(entities: List<OsmWay>, parents: HashMap<Long, ArrayList<OsmRelation>>, nodes: Map<Long, List<OsmNode>>): HashMap<Long, String> {
+    fun buildWay(entities: List<OsmWay>, parents: HashMap<Long, ArrayList<OsmRelation>>, nodes: Map<Long, List<OsmNode>>, addressesOnWays: HashMap<Long, ArrayList<AddressIndex>>): HashMap<Long, String> {
         return HashMap(entities.associateBy { it.id }.mapValues { (_, entity) ->
             createHTML().div {
                 ul {
@@ -178,9 +179,35 @@ class HTMLResponseBuilder {
                 unsafe { +buildParentTable(parents[entity.id]) }
 
                 br()
+                unsafe { +buildAddressesOnWaysTable(addressesOnWays[entity.id]) }
+
+                br()
                 unsafe { +buildTagTable(entity.tags) }
             }
         })
+    }
+
+    private fun buildAddressesOnWaysTable(addressIndexes: ArrayList<AddressIndex>?): String {
+        return if (addressIndexes != null && addressIndexes.size > 0) {
+            createHTML().div {
+
+                a(application.locations.href(Routes.OsmEntity.Any("${addressIndexes.first().street_id},${addressIndexes.map { it.id }.joinToString(",")}", "html"))) {
+                    text("Show all on map")
+                }
+
+                ul {
+                    addressIndexes.forEach { address ->
+                        li {
+                            a(application.locations.href(Routes.OsmEntity.Node(address.id.toString(), "html"))) {
+                                text(address.id)
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            ""
+        }
     }
 
     private fun buildNodesTable(relatedNodes: List<OsmNode>?): String {
