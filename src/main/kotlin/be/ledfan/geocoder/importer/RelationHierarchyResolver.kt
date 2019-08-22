@@ -50,29 +50,30 @@ class RelationHierarchyResolver(private val con: ConnectionWrapper) {
                 AND NOT EXISTS (SELECT * FROM parent WHERE child_id=child.osm_id AND parent_layer='Neighbourhood'::Layer)
              )"""
 
-        // Setup parents for ways which lie within a Neighbourhood
-        // Ways only have the first parent in the hierarchy stored
+        // Setup LocalAdmin parents for ways
+        // Ways only have the neighbourhood (if any) and LocalAdmin stored
+        // It is possible for ways to lie in multiple Neighbourhoods or LocalAdmins
         // This query thus will setup Neighbourhood
         @Language("SQL")
         val sql4 = """
             INSERT INTO parent(child_id, child_layer, child_osm_type, parent_id, parent_layer, parent_osm_type)
             ( SELECT child.osm_id, child.layer, 'way', parent.osm_id, parent.layer, 'relation'
               FROM osm_way AS child
-               JOIN osm_relation AS parent ON st_contains(parent.geometry, child.centroid)
+               JOIN osm_relation AS parent ON st_intersects(parent.geometry, child.geometry)
                WHERE parent.layer = 'Neighbourhood'::Layer
             )"""
 
-        // Setup parents for ways which do not lie within a Neighbourhood
-        // Ways only have the first parent in the hierarchy stored
+        // Setup LocalAdmin parents for ways
+        // Ways only have the neighbourhood (if any) and LocalAdmin stored
+        // It is possible for ways to lie in multiple Neighbourhoods or LocalAdmins
         // This query thus will setup LocalAdmin
         @Language("SQL")
         val sql5 = """
             INSERT INTO parent(child_id, child_layer, child_osm_type, parent_id, parent_layer, parent_osm_type)
             ( SELECT child.osm_id, child.layer, 'way', parent.osm_id, parent.layer, 'relation'
               FROM osm_way AS child
-              JOIN osm_relation AS parent ON st_contains(parent.geometry, child.centroid)
-              WHERE parent.layer = 'LocalAdmin'::Layer
-               AND NOT EXISTS(SELECT * FROM parent WHERE child_id = child.osm_id AND parent_layer = 'Neighbourhood'::Layer)
+                JOIN osm_relation AS parent ON st_intersects(parent.geometry, child.geometry)
+                WHERE parent.layer = 'LocalAdmin'::Layer
             )"""
 
         val queries = listOf(sql1, sql2, sql3, sql4, sql5)
