@@ -70,9 +70,23 @@
 <script>
     let geojsonFeature = ${geojson};
 
-    let mymap = L.map('mapid'); //.setView([51.505, -0.09], 13);
+    let mymap = L.map('mapid');
 
-    let group = L.geoJSON(geojsonFeature, {onEachFeature: onEachFeature}).addTo(mymap);
+    let geojsonMarkerOptions = {
+        radius: 8,
+        fillColor: "#3388ff",
+        color: "#3388ff",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+    };
+
+    let group = L.geoJSON(geojsonFeature, {
+        onEachFeature: onEachFeature,
+        pointToLayer: function (feature, latlng) {
+            return L.circleMarker(latlng, geojsonMarkerOptions);
+        }
+    }).addTo(mymap);
 
     function onEachFeature(feature, layer) {
         layer.on({
@@ -90,9 +104,9 @@
 
     mymap.fitBounds(group.getBounds());
 
-
     let firstLayer = group.getLayers()[0];
     $('#tab-btn-' + firstLayer.feature.properties.osm_id).tab('show');
+    highlightFeature(firstLayer.feature.properties.osm_id);
 
     function highlightFeature(featureId) {
         group.eachLayer(function (layer) {
@@ -105,18 +119,19 @@
     }
 
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-        highlightFeature(parseInt(e.target.id.substr(8)));
+        const id = parseInt(e.target.id.substr(8));
+        highlightFeature(id);
     });
 
     mymap.on('contextmenu', function (e) {
-        var coord = e.latlng;
-        var lat = coord.lat;
-        var lon = coord.lng;
+        const coord = e.latlng;
+        const lat = coord.lat;
+        const lon = coord.lng;
 
         const urlParams = new URLSearchParams(window.location.search);
         urlParams.set("lat", lat);
         urlParams.set("lon", lon);
-        console.log(urlParams.toString());
+        urlParams.delete("ids");
 
         window.location = "/api/v1/reverse?" + urlParams.toString();
     });
