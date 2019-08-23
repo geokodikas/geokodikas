@@ -1,6 +1,7 @@
 package be.ledfan.geocoder.importer
 
 import be.ledfan.geocoder.db.ConnectionWrapper
+import be.ledfan.geocoder.importer.steps.executeBatchQueriesParallel
 import mu.KotlinLogging
 import org.intellij.lang.annotations.Language
 import java.sql.Connection
@@ -9,7 +10,7 @@ class RelationHierarchyResolver(private val con: ConnectionWrapper) {
 
     private var logger = KotlinLogging.logger {}
 
-    fun run() {
+    suspend fun run() {
         @Language("SQL")
 
         // Setup parents for relations
@@ -77,15 +78,9 @@ class RelationHierarchyResolver(private val con: ConnectionWrapper) {
 
         val queries = listOf(sql1, sql2, sql3, sql4, sql5)
 
-        for (query in queries) {
-            logger.info("Performing query to calculate parents (PIP) this may take 1-2minutes.")
-            val stmt = con.prepareStatement(query)
-            stmt.executeUpdate()
-            stmt.close()
-            logger.info("Query executed")
-        }
+        logger.info("Going to run PIP queries, this may take some time")
+        executeBatchQueriesParallel(queries)
 
     }
-
 
 }

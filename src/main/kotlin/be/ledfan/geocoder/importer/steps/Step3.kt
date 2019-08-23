@@ -94,7 +94,7 @@ suspend fun step3_create_indexes(): Boolean {
     )
 
 
-    return executeBatchQueries(sqlQuerries)
+    return executeBatchQueriesParallel(sqlQuerries)
 
 }
 

@@ -9,7 +9,8 @@ class AddressIndexMapper(private val con: ConnectionWrapper) : Mapper<AddressInd
 
     fun bulkInsert(addressIndexes: List<AddressIndex>) {
         val stmt = con.prepareStatement(
-                """INSERT INTO address_index (osm_id, osm_type, street_id, neighbourhood_id, localadmin_id, county_id, macroregion_id, country_id, housenumber) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""")
+                """INSERT INTO address_index (osm_id, osm_type, street_id, neighbourhood_id, localadmin_id, county_id, macroregion_id, country_id, housenumber)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""")
 
         for (dbObject in addressIndexes) {
             stmt.run {

@@ -66,7 +66,7 @@ suspend fun step2_create_indexes(): Boolean {
             "CREATE INDEX IF NOT EXISTS osm_node_osm_centroid_uindex ON osm_node USING GIST(centroid)",
             "CREATE INDEX IF NOT EXISTS osm_node_geometry_layer_index ON osm_node USING GIST(layer, centroid)")
 
-    return executeBatchQueries(sqlQueries)
+    return executeBatchQueriesParallel(sqlQueries)
 }
 
 //suspend fun step2_resolve_distances_way_node(): Boolean {

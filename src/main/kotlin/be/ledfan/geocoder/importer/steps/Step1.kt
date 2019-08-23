@@ -91,6 +91,6 @@ suspend fun step1_create_indexes(): Boolean {
             "CREATE INDEX IF NOT EXISTS osm_way_geometry_layer_index ON osm_way USING GIST(layer, geometry)")
 //        "CREATE INDEX IF NOT EXISTS one_way_restrictions_way_id_from_node_id_index ON one_way_restrictions (way_id, from_node_id)")
 
-    return executeBatchQueries(sqlQueries)
+    return executeBatchQueriesParallel(sqlQueries)
 }
 

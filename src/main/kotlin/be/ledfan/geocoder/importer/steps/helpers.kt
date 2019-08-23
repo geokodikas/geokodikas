@@ -1,7 +1,9 @@
 package be.ledfan.geocoder.importer.steps
 
 import be.ledfan.geocoder.db.ConnectionWrapper
+import be.ledfan.geocoder.importer.core.Importer
 import be.ledfan.geocoder.kodein
+import kotlinx.coroutines.*
 import mu.KotlinLogging
 import org.kodein.di.direct
 import org.kodein.di.generic.instance
@@ -18,7 +20,7 @@ fun countTable(tableName: String): Long {
 }
 
 
-fun ensureNotEmpty(tableName: String) : Boolean {
+fun ensureNotEmpty(tableName: String): Boolean {
 
     val count = countTable(tableName)
 
@@ -31,7 +33,7 @@ fun ensureNotEmpty(tableName: String) : Boolean {
     }
 }
 
-fun ensureEmpty(tableName: String) : Boolean {
+fun ensureEmpty(tableName: String): Boolean {
 
     val count = countTable(tableName)
 
@@ -50,7 +52,21 @@ fun executeBatchQueries(sqlQueries: List<String>): Boolean {
         stmt.executeUpdate()
         stmt.close()
     }
-
     return true
 }
 
+suspend fun executeBatchQueriesParallel(sqlQueries: List<String>): Boolean {
+    val jobs = ArrayList<Job>()
+    for (query in sqlQueries) {
+        jobs.add(GlobalScope.launch(Dispatchers.IO) {
+            val logger = KotlinLogging.logger {}
+            logger.info("Scheduling query to run in parallel")
+            val stmt = con.prepareStatement(query)
+            stmt.executeUpdate()
+            stmt.close()
+            logger.info("Query was executed")
+        })
+    }
+    jobs.joinAll()
+    return true
+}
