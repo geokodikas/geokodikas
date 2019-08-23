@@ -122,6 +122,7 @@ suspend fun step0_create_schema(): Boolean {
             (
                 osm_id bigint NOT NULL,
                 osm_type varchar(1) NOT NULL,
+                housenumber varchar(255),
                 street_id bigint,
                 neighbourhood_id bigint,
                 localadmin_id bigint NOT NULL,

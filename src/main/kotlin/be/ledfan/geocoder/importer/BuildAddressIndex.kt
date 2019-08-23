@@ -2,6 +2,7 @@ package be.ledfan.geocoder.importer
 
 import be.ledfan.geocoder.config.Config
 import be.ledfan.geocoder.db.entity.AddressIndex
+import be.ledfan.geocoder.db.entity.OsmEntity
 import be.ledfan.geocoder.db.entity.OsmNode
 import be.ledfan.geocoder.db.mapper.AddressIndexMapper
 import be.ledfan.geocoder.db.mapper.OsmNodeMapper
@@ -12,24 +13,25 @@ import be.ledfan.geocoder.importer.core.BaseProcessor
 import be.ledfan.geocoder.importer.core.Broker
 import be.ledfan.geocoder.importer.core.TagParser
 import be.ledfan.geocoder.kodein
+import kotlinx.coroutines.delay
 import mu.KotlinLogging
 import org.kodein.di.direct
 import org.kodein.di.generic.instance
+import kotlin.math.min
 
 class AddressNodeProcessor(private val addressIndexMapper: AddressIndexMapper,
                            private val osmWayMapper: OsmWayMapper,
-                           private val parentMapper: OsmParentMapper) : BaseProcessor<OsmNode>() {
+                           private val parentMapper: OsmParentMapper) : BaseProcessor<OsmEntity>() {
 
-    override suspend fun processEntities(entities: List<OsmNode>) {
+    override suspend fun processEntities(entities: List<OsmEntity>) {
         val addressIndexes = HashMap<Long, AddressIndex>()
 
+        logger.debug { "Looking up parents and addressindex for ${entities.size} entities, going to find streets" }
         // get parents
         val parents = parentMapper.getParents(entities)
+        logger.debug { "Done" }
 
-        // try to determine street
-
-//            val parsedTags = tagParser.parse(entity.tags)
-
+        // determine basic properties
         for (entity in entities) {
             val addressIndex = AddressIndex.create(entity.id, SearchTable.Node)
             val parentsOfEntity = parents[entity.id] ?: continue
@@ -54,15 +56,19 @@ class AddressNodeProcessor(private val addressIndexMapper: AddressIndexMapper,
                     }
                 }
             }
-//            addressIndex.street_id = streetIds[entity.id]
-
             addressIndexes[entity.id] = addressIndex
         }
 
-        val streetIds = findRelatedStreet(osmWayMapper, entities, addressIndexes)
+        logger.debug { "Found parents and addressindex for ${entities.size} entities, going to find streets" }
+
+        val (streetIds, houseNumbers) = findRelatedStreet(osmWayMapper, entities, addressIndexes)
 
         for ((id, addressIndex) in addressIndexes) {
+//            if (streetIds[id] == 0L) {
+//                throw Exception("Street is is 0 for enttiy $id, addressIndex: $addressIndex")
+//            }
             addressIndex.street_id = streetIds[id]
+            addressIndex.housenumber = houseNumbers[id]
         }
 
         addressIndexMapper.bulkInsert(addressIndexes.values.toList())
@@ -70,7 +76,7 @@ class AddressNodeProcessor(private val addressIndexMapper: AddressIndexMapper,
 
 }
 
-class BuildAddressIndex(private val osmNodeMapper: OsmNodeMapper, private val config: Config) {
+class BuildAddressIndex(private val osmNodeMapper: OsmNodeMapper, private val osmWayMapper: OsmWayMapper, private val config: Config) {
 
     private val logger = KotlinLogging.logger {}
 
@@ -80,18 +86,38 @@ class BuildAddressIndex(private val osmNodeMapper: OsmNodeMapper, private val co
         val nodes = osmNodeMapper.getAddressesAndVenues()
         // note: for larger imports this ^ may not fit into memory
 
-        val broker = Broker<OsmNode>(
+        val broker = Broker<OsmEntity>(
                 config.importer.outputThreshold,
                 config.importer.numProcessors,
                 config.importer.maxQueueSze,
-                config.importer.processorBlockSize,
+                64000,
                 { kodein.direct.instance<AddressNodeProcessor>() },
                 "Node",
                 "Step 5 --> Index Address",
                 kodein.direct.instance())
 
-        broker.enqueueAll(nodes.values.toList())
+//        broker.enqueueAll(nodes.values.toList())
         broker.startProcessors()
+
+        // queue is now filled with nodes, fillt it with ways
+        // step 2 get all nodes with layer Address or Venue
+        delay(3000L)
+        val ways = ArrayList(osmWayMapper.getAddressesAndVenues().values)
+        logger.debug { "Found ${ways.size} addresses in ways table" }
+        var oldIndex = 0
+        while (oldIndex != ways.size) {
+            val end = min(oldIndex + broker.freeSpace(), ways.size)
+            logger.debug { "Ways remaining: ${ways.size - oldIndex}, can queue: $end items" }
+            val waysToQueue = ways.subList(oldIndex, end)
+            oldIndex = end
+            logger.debug { "Got Sublist" }
+            broker.enqueueAll(waysToQueue)
+            logger.debug { "Enqueued" }
+//            ways.removeAll(waysToQueue)
+//            logger.debug { "Removed way" }
+            delay(3000L)
+        }
+
         broker.finishedReading()
         broker.join()
 

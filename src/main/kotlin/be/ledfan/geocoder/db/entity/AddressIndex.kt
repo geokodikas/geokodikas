@@ -23,6 +23,7 @@ class AddressIndex(val id: Long) : Entity {
             r.county_id = row.getLong("county_id")
             r.macroregion_id = row.getLong("macroregion_id")
             r.country_id = row.getLong("country_id")
+            r.housenumber = row.getString("housenumber")
 
             return r
         }
@@ -36,6 +37,7 @@ class AddressIndex(val id: Long) : Entity {
     }
 
     lateinit var osm_type: SearchTable
+    var housenumber: String? = null
     var street_id: Long? = null
     var neighbourhood_id: Long? = null
     var localadmin_id: Long = 0

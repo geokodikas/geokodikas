@@ -30,13 +30,14 @@ class DetermineLayerWay : DetermineLayer() {
                         || highway.hasValue("tunnel")
                         || highway.hasValue("road") // this should be tmp tags
                         || highway.hasValue("footway") // some houses are located on a footway
+                        || highway.hasValue("service") // idem ^
+                        || highway.hasValue("track") // idem ^
                 ) {
                     assignLayer(layers, Layer.Street)
                 } else if (
                         highway.hasValue("bridleway")
                         || highway.hasValue("steps")
                         || highway.hasValue("path")
-                        || highway.hasValue("service")
                         || highway.hasValue("services")
                         || highway.hasValue("rest_area")
                         || highway.hasValue("construction")
@@ -47,7 +48,6 @@ class DetermineLayerWay : DetermineLayer() {
                         || highway.hasValue("platform")
                         || highway.hasValue("ramp")
                         || highway.hasValue("raceway")
-                        || highway.hasValue("track")
                         || highway.hasValue("corridor")
                         || highway.hasValue("proposed")
                         || highway.hasValue("planned")

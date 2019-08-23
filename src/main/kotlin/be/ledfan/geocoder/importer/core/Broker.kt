@@ -20,7 +20,7 @@ import kotlin.concurrent.timer
 class Broker<OsmType>(
         private val outputThreshold: Int,
         private val numProcessors: Int,
-        maxQueueSize: Int,
+        private val maxQueueSize: Int,
         private val processorBlocKSize: Int,
         private val factory: () -> BaseProcessor<OsmType>,
         private val osmTypeName: String,
@@ -81,6 +81,12 @@ class Broker<OsmType>(
 
     fun enqueueAll(elements: List<OsmType>) {
         queue.addAll(elements)
+        numRead += elements.size
+        logger.debug {"queued some items, queue size: ${queue.size}"}
+    }
+
+    fun freeSpace(): Int {
+        return maxQueueSize - queue.size
     }
 
     private fun updateStats() {

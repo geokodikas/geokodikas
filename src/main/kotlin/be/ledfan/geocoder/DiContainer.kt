@@ -65,6 +65,8 @@ val kodein = ConfigurableKodein().also {
 
         bind<OsmWayProcessor>() with provider { OsmWayProcessor(instance(), instance(), instance(), instance(), instance(), instance()) }
 
+        bind<AddressNodeProcessor>() with provider { AddressNodeProcessor(instance(), instance(), instance()) }
+
         bind<DetermineLayerNode>() with singleton { DetermineLayerNode() }
 
         bind<DetermineLayerRelation>() with singleton { DetermineLayerRelation() }
@@ -79,9 +81,8 @@ val kodein = ConfigurableKodein().also {
 
         bind<StatsCollector>() with singleton { StatsCollector() }
 
-        bind<BuildAddressIndex>() with singleton { BuildAddressIndex(instance(), instance()) }
+        bind<BuildAddressIndex>() with singleton { BuildAddressIndex(instance(), instance(), instance()) }
 
-        bind<AddressNodeProcessor>() with singleton { AddressNodeProcessor(instance(), instance(), instance()) }
 
 
         /**

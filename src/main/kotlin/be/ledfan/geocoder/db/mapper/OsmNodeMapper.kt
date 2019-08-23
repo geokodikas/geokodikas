@@ -36,7 +36,7 @@ class OsmNodeMapper(private val con: ConnectionWrapper) : Mapper<OsmNode>(con) {
         @Language("SQL")
         val stmt = con.prepareCall("""
             SELECT *
-            FROM osm_node
+            FROM $tableName
             WHERE layer = 'Address'::Layer OR layer='Venue'::Layer
         """.trimIndent())
 

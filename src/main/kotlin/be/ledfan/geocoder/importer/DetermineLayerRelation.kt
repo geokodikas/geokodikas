@@ -82,7 +82,7 @@ class DetermineLayerRelation : DetermineLayer() {
                 assignLayer(layers, Layer.Superfluous)
             }
 
-            if (layers.size == 0 && parsedTags.hasChild("addr")) {
+            if (layers.none { it != Layer.Superfluous } && parsedTags.hasChild("addr")) {
                 if (parsedTags.hasChild("name")) {
                     assignLayer(layers, Layer.Venue)
                 } else {
