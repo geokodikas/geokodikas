@@ -1,9 +1,6 @@
 package be.ledfan.geocoder.httpapi
 
-import be.ledfan.geocoder.db.entity.AddressIndex
-import be.ledfan.geocoder.db.entity.OsmNode
-import be.ledfan.geocoder.db.entity.OsmRelation
-import be.ledfan.geocoder.db.entity.OsmWay
+import be.ledfan.geocoder.db.entity.*
 import be.ledfan.geocoder.importer.core.TagParser
 import be.ledfan.geocoder.importer.core.Tags
 import io.ktor.application.Application
@@ -18,7 +15,18 @@ class HTMLResponseBuilder {
 
     private val application = kodein.direct.instance<Application>()
 
-    fun buildTagTable(tags: Map<String, String>): String {
+    private fun dynamicProperties(entity: OsmEntity): UL.() -> Unit {
+        return {
+            for (prop in entity.dynamicProperties) {
+                li {
+                    classes = setOf("list-group-item")
+                    text("Dynamic property: ${prop.key} => ${prop.value}")
+                }
+            }
+        }
+    }
+
+    private fun buildTagTable(tags: Map<String, String>): String {
         fun recurse(children: HashMap<String, Tags>): String {
             return createHTML().table {
                 classes = setOf("table", "table-striped", "table-sm")
@@ -64,7 +72,7 @@ class HTMLResponseBuilder {
         return recurse(parsedTags.children)
     }
 
-    fun buildParentTable(parentsOfEntity: java.util.ArrayList<OsmRelation>?): String {
+    private fun buildParentTable(parentsOfEntity: java.util.ArrayList<OsmRelation>?): String {
         return if (parentsOfEntity != null) {
             parentsOfEntity.sortByDescending { it.layer.order }
             createHTML().table {
@@ -170,6 +178,8 @@ class HTMLResponseBuilder {
                             +"No one way restriction"
                         }
                     }
+
+                    apply(dynamicProperties(entity))
                 }
 
                 br()
@@ -274,6 +284,8 @@ class HTMLResponseBuilder {
                         classes = setOf("list-group-item")
                         +"Layer is ${entity.layer}"
                     }
+
+                    apply(dynamicProperties(entity))
                 }
 
                 br()
@@ -312,6 +324,8 @@ class HTMLResponseBuilder {
                         classes = setOf("list-group-item")
                         +"Layer is ${entity.layer}"
                     }
+
+                    apply(dynamicProperties(entity))
                 }
 
                 br()

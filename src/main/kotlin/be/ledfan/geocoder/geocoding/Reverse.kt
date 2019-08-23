@@ -1,7 +1,6 @@
 package be.ledfan.geocoder.geocoding
 
 import be.ledfan.geocoder.db.ConnectionWrapper
-import be.ledfan.geocoder.db.entity.OsmEntity
 import be.ledfan.geocoder.db.entity.OsmNode
 import be.ledfan.geocoder.db.entity.OsmRelation
 import be.ledfan.geocoder.db.entity.OsmWay
@@ -19,14 +18,12 @@ private val reverseGeocoderContext = newFixedThreadPoolContext(16, "reverseGeoco
 
 class Reverse {
 
-    data class Result<T : OsmEntity>(val osmWay: T, val distance: Double, val name: String)
-
     private val reverseQueryBuilderFactory = ReverseQueryBuilderFactory()
 
     suspend fun reverseGeocode(lat: Double, lon: Double,
                                limitNumeric: Int?, limitRadius: Int?,
                                desiredLayers: List<String>?):
-            Triple<List<Result<OsmNode>>, List<Result<OsmWay>>, List<Result<OsmRelation>>> {
+            Triple<List<OsmNode>, List<OsmWay>, List<OsmRelation>> {
 
         val layers = if (desiredLayers == null || desiredLayers.isEmpty()) {
             Layer.values().toList()
@@ -36,9 +33,9 @@ class Reverse {
 
         val requiredTables = getTablesForLayers(layers)
 
-        val nodes = Collections.synchronizedList(ArrayList<Result<OsmNode>>())
-        val ways = Collections.synchronizedList(ArrayList<Result<OsmWay>>())
-        val relations = Collections.synchronizedList(ArrayList<Result<OsmRelation>>())
+        val nodes = Collections.synchronizedList(ArrayList<OsmNode>())
+        val ways = Collections.synchronizedList(ArrayList<OsmWay>())
+        val relations = Collections.synchronizedList(ArrayList<OsmRelation>())
 
         withContext(reverseGeocoderContext) {
             for (table in requiredTables) {

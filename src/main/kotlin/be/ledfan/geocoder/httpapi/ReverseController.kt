@@ -53,15 +53,12 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
 
         val jsonResponseBuilder = JSONResponseBuilder()
         (nodes + ways + relations).forEach {
-            jsonResponseBuilder.addEntity(it.osmWay) {
-                withProperty("distance", it.distance)
-                withProperty("name", it.name)
-            }
+            jsonResponseBuilder.addEntity(it)
         }
 
         val geoJson = jsonResponseBuilder.toJson()
         if (route.formatting == "html") {
-            call.respond(htmlViewer.createHtml(geoJson, nodes.map { it.osmWay }, ways.map { it.osmWay}, relations.map { it.osmWay }))
+            call.respond(htmlViewer.createHtml(geoJson, nodes, ways, relations))
         } else {
             call.respond(geoJson)
         }

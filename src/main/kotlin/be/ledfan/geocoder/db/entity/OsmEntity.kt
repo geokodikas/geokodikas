@@ -20,4 +20,6 @@ open class OsmEntity(val id: Long) : Entity {
         layer = newLayer
     }
 
+    val dynamicProperties = HashMap<String, Any>()
+
 }

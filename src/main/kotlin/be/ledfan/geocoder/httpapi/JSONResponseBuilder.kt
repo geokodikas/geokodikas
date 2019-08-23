@@ -48,6 +48,10 @@ class JSONResponseBuilder {
 
                 withProperty("osm_id", osmEntity.id)
 
+                if (osmEntity.dynamicProperties.size > 0) {
+                    withProperty("dynamic_properties", osmEntity)
+                }
+
                 block()
             }
         }
