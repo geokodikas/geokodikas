@@ -18,32 +18,40 @@ suspend fun step4_materialized_view(): Boolean {
     @Language("SQL")
     val sqlQuerries = listOf(
             """CREATE MATERIALIZED VIEW IF NOT EXISTS streets
-                AS
-                SELECT osm_way.osm_id   AS way_id,
-                       array_remove(ARRAY [
-                                        regexp_replace(unaccent(lower(osm_way.tags -> 'name')), '[\s[:punct:]]', '', 'g'),
-                                        regexp_replace(unaccent(lower(osm_way.tags -> 'alt_name')), '[\s[:punct:]]', '', 'g'),
-                                        regexp_replace(unaccent(lower(osm_way.tags -> 'alt_name:nl')), '[\s[:punct:]]', '', 'g'),
-                                        regexp_replace(unaccent(lower(osm_way.tags -> 'alt_name:fr')), '[\s[:punct:]]', '', 'g'),
-                                        regexp_replace(unaccent(lower(osm_way.tags -> 'name:nl')), '[\s[:punct:]]', '', 'g'),
-                                        regexp_replace(unaccent(lower(osm_way.tags -> 'name:fr')), '[\s[:punct:]]', '', 'g'),
-                                        regexp_replace(unaccent(lower(osm_way.tags -> 'name:left')), '[\s[:punct:]]', '', 'g'),
-                                        regexp_replace(unaccent(lower(osm_way.tags -> 'name:right')), '[\s[:punct:]]', '', 'g')
-                                        ], NULL)
-                                        AS street_name,
-                       parent.parent_id AS localadmin_id,
-                       osm_way.geometry AS geometry
-                FROM osm_way
-                         JOIN parent ON parent.child_id = osm_way.osm_id AND parent.parent_layer = 'LocalAdmin'::Layer
-                    WHERE osm_way.layer = 'Street'::Layer
-                         AND (osm_way.tags -> 'name' IS NOT NULL
-                        OR osm_way.tags -> 'alt_name' IS NOT NULL
-                        OR osm_way.tags -> 'alt_name:nl' IS NOT NULL
-                        OR osm_way.tags -> 'alt_name:fr' IS NOT NULL
-                        OR osm_way.tags -> 'name:nl' IS NOT NULL
-                        OR osm_way.tags -> 'name:fr' IS NOT NULL
-                        OR osm_way.tags -> 'name:left' IS NOT NULL
-                        OR osm_way.tags -> 'name:right' IS NOT NULL)""",
+AS
+SELECT DISTINCT relation_type,
+                osm_id,
+                ARRAY((SELECT DISTINCT unnest(array_agg(DISTINCT street_names.a) ||
+                                              array_agg(DISTINCT street_names.b))
+                       FROM (SELECT regexp_replace(
+                                            unaccent(lower(
+                                                    unnest(regexp_split_to_array(tags -> tag_name, E'[\,/-]')))),
+                                            '[\s[:punct:]]', '', 'g') AS a,
+                                    regexp_replace(unaccent(lower(tags -> tag_name)), '[\s[:punct:]]', '',
+                                                   'g')               AS b
+                             FROM (SELECT unnest(
+                                                  ARRAY ['name', 'name:nl', 'name:fr', 'alt_name','alt_name:nl', 'alt_name:fr', 'name:left', 'name:right']) AS tag_name) AS tn)
+                                AS street_names)) AS street_name,
+                localadmin_id,
+                geometry                          AS geometry
+FROM ((SELECT 'w'       AS relation_type,osm_way.osm_id as osm_id,
+             osm_way.tags as tags,
+             osm_way.geometry as geometry,
+             parent_id AS localadmin_id
+      FROM osm_way
+               JOIN parent ON parent.child_id = osm_way.osm_id AND parent.parent_layer = 'LocalAdmin'::Layer
+      WHERE osm_way.layer = 'Street'::Layer
+        AND osm_way.tags -> 'name' IS NOT NULL)
+UNION
+(SELECT 'r'       AS relation_type,
+        osm_relation.osm_id as osm_id,
+        osm_relation.tags as tags,
+        osm_relation.geometry as geometry,
+        parent_id AS localadmin_id
+ FROM osm_relation
+          JOIN parent ON parent.child_id = osm_relation.osm_id AND parent.parent_layer = 'LocalAdmin'::Layer
+ WHERE osm_relation.layer = 'Venue'::Layer
+   AND osm_relation.tags -> 'name' IS NOT NULL)) as owporp""",
             """CREATE INDEX IF NOT EXISTS streets_idx ON streets (localadmin_id, street_name) """,
             """CREATE INDEX IF NOT EXISTS streets_idx ON streets (localadmin_id)"""
     )

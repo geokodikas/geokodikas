@@ -16,6 +16,7 @@ class WayReverseQueryBuilder(debug: Boolean = false) : ReverseQueryBuilder(debug
                has_reversed_oneway,
                layer,
                geometry                                                                                       AS geometry,
+               centroid,
                ST_distance(ST_SetSRID(ST_Point(?, ?), 4326), geometry)        AS distance,
                st_distance_sphere(ST_SetSRID(ST_Point(?, ?), 4326),
                                   geometry)                                                                   AS metric_distance,

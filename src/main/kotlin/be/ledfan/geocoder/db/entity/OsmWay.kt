@@ -16,6 +16,7 @@ class OsmWay(id: Long) : OsmEntity(id) {
 
             r.version = row.getInt("version")
             r.geometry = row.getObject("geometry") as PGgeometry
+            r.centroid = row.getObject("centroid") as PGgeometry
             r.tags = row.getHstore("tags")
             r.zOrder = row.getInt("z_order")
             r.layer = row.getLayer()
@@ -35,6 +36,7 @@ class OsmWay(id: Long) : OsmEntity(id) {
     }
 
     lateinit var geometry: PGgeometry
+    lateinit var centroid: PGgeometry
     var hasOneWayRestriction: Boolean = false
     var hasReversedOneWay: Boolean = false
 

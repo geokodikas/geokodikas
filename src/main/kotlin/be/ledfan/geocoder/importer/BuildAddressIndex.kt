@@ -1,6 +1,7 @@
 package be.ledfan.geocoder.importer
 
 import be.ledfan.geocoder.config.Config
+import be.ledfan.geocoder.db.ConnectionWrapper
 import be.ledfan.geocoder.db.entity.AddressIndex
 import be.ledfan.geocoder.db.entity.OsmEntity
 import be.ledfan.geocoder.db.entity.OsmNode
@@ -21,10 +22,12 @@ import kotlin.math.min
 
 class AddressNodeProcessor(private val addressIndexMapper: AddressIndexMapper,
                            private val osmWayMapper: OsmWayMapper,
-                           private val parentMapper: OsmParentMapper) : BaseProcessor<OsmEntity>() {
+                           private val parentMapper: OsmParentMapper,
+                           private val con: ConnectionWrapper) : BaseProcessor<OsmEntity>() {
 
     override suspend fun processEntities(entities: List<OsmEntity>) {
         val addressIndexes = HashMap<Long, AddressIndex>()
+        val entitiesMap = HashMap(entities.associateBy { it.id })
 
         logger.debug { "Looking up parents and addressindex for ${entities.size} entities, going to find streets" }
         // get parents
@@ -61,7 +64,7 @@ class AddressNodeProcessor(private val addressIndexMapper: AddressIndexMapper,
 
         logger.debug { "Found parents and addressindex for ${entities.size} entities, going to find streets" }
 
-        val (streetIds, houseNumbers) = findRelatedStreet(osmWayMapper, entities, addressIndexes)
+        val (streetIds, houseNumbers) = findRelatedStreet(con, osmWayMapper, entitiesMap, addressIndexes)
 
         for ((id, addressIndex) in addressIndexes) {
 //            if (streetIds[id] == 0L) {
@@ -90,7 +93,7 @@ class BuildAddressIndex(private val osmNodeMapper: OsmNodeMapper, private val os
                 config.importer.outputThreshold,
                 config.importer.numProcessors,
                 config.importer.maxQueueSze,
-                64000,
+                32000,
                 { kodein.direct.instance<AddressNodeProcessor>() },
                 "Node",
                 "Step 5 --> Index Address",
