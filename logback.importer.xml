@@ -9,7 +9,7 @@
         <immediateFlush>true</immediateFlush>
     </appender>
 
-    <root level="TRACE">
+    <root level="DEBUG">
         <appender-ref ref="FILE-IMPORTER" />
     </root>
 

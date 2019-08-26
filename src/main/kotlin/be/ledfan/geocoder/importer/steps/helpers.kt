@@ -57,14 +57,14 @@ fun executeBatchQueries(sqlQueries: List<String>): Boolean {
 
 suspend fun executeBatchQueriesParallel(sqlQueries: List<String>): Boolean {
     val jobs = ArrayList<Job>()
-    for (query in sqlQueries) {
+    for ((idx, query) in sqlQueries.withIndex()) {
         jobs.add(GlobalScope.launch(Dispatchers.IO) {
             val logger = KotlinLogging.logger {}
-            logger.info("Scheduling query to run in parallel")
+            logger.info("[${idx+1}/${sqlQueries.size}] Scheduling query to run in parallel")
             val stmt = con.prepareStatement(query)
             stmt.executeUpdate()
             stmt.close()
-            logger.info("Query was executed")
+            logger.info("[${idx+1}/${sqlQueries.size}] Query was executed")
         })
     }
     jobs.joinAll()
