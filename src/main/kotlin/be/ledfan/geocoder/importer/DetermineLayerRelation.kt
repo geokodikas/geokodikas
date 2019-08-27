@@ -82,14 +82,6 @@ class DetermineLayerRelation : DetermineLayer() {
                 assignLayer(layers, Layer.Superfluous)
             }
 
-            if (layers.none { it != Layer.Superfluous } && parsedTags.hasChild("addr")) {
-                if (parsedTags.hasChild("name")) {
-                    assignLayer(layers, Layer.Venue)
-                } else {
-                    assignLayer(layers, Layer.Address)
-                }
-            }
-
             if (parsedTags.hasChild("name") && parsedTags.hasChild("leisure")) {
                 if (parsedTags.child("leisure").singleValueOrNull() == "park") {
                     assignLayer(layers, Layer.Venue)
@@ -100,7 +92,7 @@ class DetermineLayerRelation : DetermineLayer() {
 
             if (parsedTags.hasChild("name") && parsedTags.hasChild("landuse")) {
                 if (parsedTags.child("landuse").singleValueOrNull() == "industrial") {
-                    assignLayer(layers, Layer.Street)
+                    assignLayer(layers, Layer.Venue)
                 } else {
                     assignLayer(layers, Layer.Superfluous)
                 }
@@ -111,6 +103,15 @@ class DetermineLayerRelation : DetermineLayer() {
                     assignLayer(layers, Layer.Venue)
                 } else {
                     assignLayer(layers, Layer.Superfluous)
+                }
+            }
+
+            // Warning: check names above this part
+            if (layers.none { it != Layer.Superfluous } && parsedTags.hasChild("addr")) {
+                if (parsedTags.hasChild("name")) {
+                    assignLayer(layers, Layer.Venue)
+                } else {
+                    assignLayer(layers, Layer.Address)
                 }
             }
 
