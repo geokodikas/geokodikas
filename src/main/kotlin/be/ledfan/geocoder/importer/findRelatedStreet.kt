@@ -1,31 +1,15 @@
 package be.ledfan.geocoder.importer
 
-import be.ledfan.geocoder.db.ConnectionWrapper
-import be.ledfan.geocoder.db.entity.AddressIndex
-import be.ledfan.geocoder.db.entity.OsmEntity
-import be.ledfan.geocoder.db.entity.OsmNode
-import be.ledfan.geocoder.db.entity.OsmWay
+import be.ledfan.geocoder.db.entity.*
 import be.ledfan.geocoder.db.mapper.OsmWayMapper
-import be.ledfan.geocoder.geo.toGeoJson
 import be.ledfan.geocoder.importer.core.TagParser
-import org.locationtech.jts.io.WKBReader
+import be.ledfan.geocoder.measureTimeMillisAndReturn
 import mu.KotlinLogging
-import org.locationtech.jts.geom.Coordinate
-import org.locationtech.jts.geom.GeometryFactory
+import kotlin.system.measureTimeMillis
 
 val logger = KotlinLogging.logger {}
 
-fun findRelatedStreet(con: ConnectionWrapper, osmWayMapper: OsmWayMapper, entities: HashMap<Long, OsmEntity>, addressIndexes: HashMap<Long, AddressIndex>): Pair<java.util.HashMap<Long, Long?>, HashMap<Long, String?>> {
-
-    val sql = "SELECT st_asbinary(geometry) as geometry from osm_relation where layer='Country'::Layer LIMIT 1"
-    val stmt = con.prepareStatement(sql)
-    val result = stmt.executeQuery()
-    result.next()
-    val belgium = WKBReader().read(result.getBinaryStream("geometry").readBytes())
-    if (belgium == null || belgium.geometryType != "MultiPolygon") {
-        throw Exception("Belgium is not a MultiPolygon")
-    }
-    val factory = GeometryFactory()
+fun findRelatedStreet(belgium: Country, osmWayMapper: OsmWayMapper, entities: HashMap<Long, OsmEntity>, addressIndexes: HashMap<Long, AddressIndex>): Pair<java.util.HashMap<Long, Long?>, HashMap<Long, String?>> {
 
     // this function will first try to determine the method required to determine the street
     val nodesWithStreetNameAndLocalAdmin = ArrayList<Long>()
@@ -44,7 +28,6 @@ fun findRelatedStreet(con: ConnectionWrapper, osmWayMapper: OsmWayMapper, entiti
             }
 
             if (!addrTag.hasChild("street")) {
-//                logger.warn("Entity with addr tag but not a street, id: ${entity.id}, tags: ${addrTag.toString(0)} ")
                 nodesWithoutStreetName.add(entity.id)
                 continue
             }
@@ -53,7 +36,6 @@ fun findRelatedStreet(con: ConnectionWrapper, osmWayMapper: OsmWayMapper, entiti
             if (streetName == null) {
                 nodesWithoutStreetName.add(entity.id)
                 continue
-//                logger.warn("Entity with addr tag street is null, id: ${entity.id}, tags: ${addrTag.toString(0)} ")
             }
 
             nodesWithStreetNameAndLocalAdmin.add(entity.id)
@@ -62,42 +44,50 @@ fun findRelatedStreet(con: ConnectionWrapper, osmWayMapper: OsmWayMapper, entiti
 
     when (entities.values.first()) {
         is OsmNode -> {
-            val result1 = osmWayMapper.getStreetsForNodes_FilterByWayNameAndLocalAdmin(nodesWithStreetNameAndLocalAdmin)
-
+            val result1 = measureTimeMillisAndReturn {
+                osmWayMapper.getStreetsForNodes_FilterByWayNameAndLocalAdmin(nodesWithStreetNameAndLocalAdmin)
+            }.let { (time, r) ->
+                logger.debug{"Found streets for nodes in ${time}ms"}
+                r
+            }
             var closestStreetFallback = result1.filterValues { it == null || it == 0L }.keys
-            logger.warn { "Found nodes with a street name without corresponding street way: $closestStreetFallback" }
 
             // filter nodes not in belgium
-
-            closestStreetFallback = closestStreetFallback.filter {
-                val centroid = (entities[it] as OsmNode).centroid.geometry as org.postgis.Point
-                val point = factory.createPoint(Coordinate(centroid.x, centroid.y))
-                point.within(belgium)
-            }.toSet()
+            measureTimeMillis {
+                closestStreetFallback = closestStreetFallback.filter { belgium.containsNode(entities[it] as OsmNode) }.toSet()
+            }.let { time ->
+                logger.debug{"Filtered nodes not in Belgium in ${time}ms"}
+            }
             nodesWithoutStreetName.addAll(closestStreetFallback)
 
+            logger.warn { "Found nodes with a street name without corresponding street way: $closestStreetFallback" }
 
-//            val result2 = osmWayMapper.getStreetsForNodes_FilterByClosestAndLocalAdmin(nodesWithoutStreetName)
-
-//            result1.putAll(result2)
+            val result2 = osmWayMapper.getStreetsForNodes_FilterByClosestAndLocalAdmin(nodesWithoutStreetName)
+            result1.putAll(result2)
 
             return Pair(result1, houseNumbers)
         }
         is OsmWay -> {
-            val result1 = osmWayMapper.getStreetsForWays_FilterByWayNameAndLocalAdmin(nodesWithStreetNameAndLocalAdmin)
+            val result1 = measureTimeMillisAndReturn {
+                osmWayMapper.getStreetsForWays_FilterByWayNameAndLocalAdmin(nodesWithStreetNameAndLocalAdmin)
+            }.let { (time, r) ->
+                logger.debug{"Found streets for ways in ${time}ms"}
+                r
+            }
 
             var closestStreetFallback = result1.filterValues { it == null || it == 0L }.keys
-            closestStreetFallback = closestStreetFallback.filter {
-                val centroid = (entities[it] as OsmWay).centroid.geometry  as org.postgis.Point
-                val point = factory.createPoint(Coordinate(centroid.x, centroid.y))
-                point.within(belgium)
-            }.toSet()
+
+            measureTimeMillis {
+                closestStreetFallback = closestStreetFallback.filter { belgium.containsWay(entities[it] as OsmWay) }.toSet()
+            }.let { time ->
+                logger.debug{"Filtered ways not in Belgium in ${time}ms"}
+            }
             nodesWithoutStreetName.addAll(closestStreetFallback)
+
             logger.warn { "Found way with a street name without corresponding street way: $closestStreetFallback" }
 
-//            val result2 = osmWayMapper.getStreetsForWays_FilterByClosestAndLocalAdmin(nodesWithoutStreetName)
-
-//            result1.putAll(result2)
+            val result2 = osmWayMapper.getStreetsForWays_FilterByClosestAndLocalAdmin(nodesWithoutStreetName)
+            result1.putAll(result2)
 
             return Pair(result1, houseNumbers)
         }

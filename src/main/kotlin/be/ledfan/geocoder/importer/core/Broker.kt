@@ -2,10 +2,7 @@ package be.ledfan.geocoder.importer.core
 
 import be.ledfan.geocoder.kodein
 import de.topobyte.osm4j.core.model.iface.OsmEntity
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import mu.KotlinLogging
 import org.kodein.di.direct
 import org.kodein.di.generic.instance
@@ -44,7 +41,7 @@ class Broker<OsmType>(
     /**
      * Starts $processorCount processors which the elements for this broker are send to.
      */
-    fun startProcessors() {
+    suspend fun startProcessors() {
         logger.debug { "Starting $numProcessors processors for type: $osmTypeName ..." }
         for (i in 0 until numProcessors) {
             val job = GlobalScope.launch(Dispatchers.IO) {
@@ -68,6 +65,10 @@ class Broker<OsmType>(
         statsTimer = timer("print_stats_timer", period = 250) {
             updateStats()
         }
+        while (processors.size != numProcessors) {
+            delay(1000)
+        }
+        logger.debug { "All processors eventually registered"}
     }
 
     /**

@@ -64,22 +64,25 @@ class OsmWayMapper(private val con: ConnectionWrapper) : Mapper<OsmWay>(con) {
         // TODO null check
         @Language("SQL")
         val sql = """WITH resolved_data AS (
-    SELECT osm_node.osm_id              AS node_osm_id
-         , centroid
-         , regexp_replace(unaccent(lower(osm_node.tags -> 'addr:street')), '[\s[:punct:]]', '', 'g') AS street_name
-         , parent.parent_id             AS localadmin_id
-         , parent_layer
-    FROM osm_node
-             JOIN parent ON parent.child_id = osm_node.osm_id AND parent.parent_layer = 'LocalAdmin'::Layer
-        WHERE osm_node.osm_id = ANY(?))
-        SELECT node_osm_id AS address_osm_id,
-               (SELECT osm_id
-                FROM streets
-                    WHERE resolved_data.localadmin_id = streets.localadmin_id
-                         AND resolved_data.street_name = ANY(streets.street_name
-                   ORDER BY st_distance(resolved_data.centroid, streets.geometry)
-                   LIMIT 1) AS street_osm_id
-        FROM resolved_data"""
+                    SELECT osm_node.osm_id                                                                           AS node_osm_id
+                         , centroid
+                         , regexp_replace(unaccent(lower(osm_node.tags -> 'addr:street')), '[\s[:punct:]]', '', 'g') AS street_name
+                         , parent.parent_id                                                                          AS localadmin_id
+                         , parent_layer
+                    FROM osm_node
+                             JOIN parent ON parent.child_id = osm_node.osm_id AND parent.parent_layer = 'LocalAdmin'::Layer
+                    WHERE osm_node.osm_id = ANY (?))
+                SELECT *
+                FROM (
+                         SELECT node_osm_id                                                                             AS address_osm_id,
+                                (SELECT osm_id
+                                 FROM streets
+                                 WHERE resolved_data.localadmin_id = streets.localadmin_id
+                                   AND resolved_data.street_name = streets.street_name
+                                 ORDER BY st_distance(resolved_data.centroid, streets.geometry)
+                                   LIMIT 1) AS street_osm_id
+                         FROM resolved_data) AS aoisoi
+                WHERE street_osm_id IS NOT NULL """
 
         val r = processStreetsForNodes(nodeIds, sql)
 
@@ -115,21 +118,23 @@ class OsmWayMapper(private val con: ConnectionWrapper) : Mapper<OsmWay>(con) {
         // TODO null check
         @Language("SQL")
         val sql = """WITH resolved_data AS (
-                SELECT osm_node.osm_id  AS node_osm_id
-                     , centroid
-                     , parent.parent_id AS localadmin_id
-                     , parent_layer
-                FROM osm_node
-                         JOIN parent ON parent.child_id = osm_node.osm_id AND parent.parent_layer = 'LocalAdmin'::Layer
-                    WHERE osm_node.osm_id = ANY (?))
-            SELECT node_osm_id as address_osm_id,
-                   (SELECT osm_id
-                    FROM streets
-                        WHERE resolved_data.localadmin_id = streets.localadmin_id
-                        ORDER BY st_distance (resolved_data.centroid, streets.geometry)
-                        LIMIT 1) AS street_osm_id
-            FROM resolved_data
-            """
+                    SELECT osm_node.osm_id  AS node_osm_id
+                         , centroid
+                         , parent.parent_id AS localadmin_id
+                         , parent_layer
+                    FROM osm_node
+                             JOIN parent ON parent.child_id = osm_node.osm_id AND parent.parent_layer = 'LocalAdmin'::Layer
+                    WHERE osm_node.osm_id = ANY(?))
+                SELECT *
+                FROM (SELECT node_osm_id AS address_osm_id,
+                             (SELECT osm_id
+                              FROM streets
+                              WHERE resolved_data.localadmin_id = streets.localadmin_id
+                              ORDER BY st_distance(resolved_data.centroid, streets.geometry)
+                              LIMIT 1)   AS street_osm_id
+                      FROM resolved_data) as aoisoi
+                WHERE street_osm_id IS NOT NULL
+                """
 
         val r = processStreetsForNodes(nodeIds, sql)
 
@@ -155,25 +160,25 @@ class OsmWayMapper(private val con: ConnectionWrapper) : Mapper<OsmWay>(con) {
 
         @Language("SQL")
         val sql = """WITH resolved_data AS (
-                SELECT osm_way.osm_id                                                                           AS address_osm_id
-                     , geometry
-                     , regexp_replace(unaccent(lower(osm_way.tags -> 'addr:street')), '[\s[:punct:]]', '', 'g') AS street_name
-                     , parent.parent_id                                                                         AS localadmin_id
-                     , parent_layer
-                FROM osm_way
-                         JOIN parent ON parent.child_id = osm_way.osm_id AND parent.parent_layer = 'LocalAdmin'::Layer
-                WHERE osm_way.osm_id = ANY(?))
-                    SELECT *
-                    FROM (
-                             SELECT address_osm_id,
-                                    (SELECT osm_id
-                                     FROM streets
-                                     WHERE resolved_data.localadmin_id = streets.localadmin_id
-                                       AND resolved_data.street_name = ANY (streets.street_name)
-                                     ORDER BY st_distance(resolved_data.geometry, streets.geometry)
-                                     LIMIT 1) AS street_osm_id
-                             FROM resolved_data) as aoisoi
-                    WHERE street_osm_id IS NOT NULL"""
+                    SELECT osm_way.osm_id                                                                           AS address_osm_id
+                         , geometry
+                         , regexp_replace(unaccent(lower(osm_way.tags -> 'addr:street')), '[\s[:punct:]]', '', 'g') AS street_name
+                         , parent.parent_id                                                                         AS localadmin_id
+                         , parent_layer
+                    FROM osm_way
+                             JOIN parent ON parent.child_id = osm_way.osm_id AND parent.parent_layer = 'LocalAdmin'::Layer
+                    WHERE osm_way.osm_id = ANY(?))
+                        SELECT *
+                        FROM (
+                                 SELECT address_osm_id,
+                                        (SELECT osm_id
+                                         FROM streets
+                                         WHERE resolved_data.localadmin_id = streets.localadmin_id
+                                           AND resolved_data.street_name = streets.street_name
+                                         ORDER BY st_distance(resolved_data.geometry, streets.geometry)
+                                         LIMIT 1) AS street_osm_id
+                                 FROM resolved_data) AS aoisoi
+                        WHERE street_osm_id IS NOT NULL"""
 
         val r = processStreetsForNodes(waysIds, sql)
 

@@ -124,10 +124,20 @@ class DetermineLayerWay : DetermineLayer() {
                 }
             }
 
-//            if (parsedTags.childOrNull("addr")?.childOrNull("street")?.singleValueOrNull() == "residential") {
-//                assignLayer(layers, Layer.Street)
-//            }
-
+            if (parsedTags.hasChild("name") && parsedTags.hasChild("landuse")) {
+                if (parsedTags.hasChild("addr") && parsedTags.child("addr").hasChild("housenumber")) {
+                    assignLayer(layers, Layer.Venue)
+                } else if (parsedTags.child("landuse").singleValueOrNull() == "industrial"
+                        && !parsedTags.hasChild("power")
+                        && !parsedTags.hasChild("amenity")
+                        && !parsedTags.hasChild("emergency")) {
+                    assignLayer(layers, Layer.Street)
+                } else {
+                    assignLayer(layers, Layer.Superfluous)
+                }
+            } else {
+                assignLayer(layers, Layer.Superfluous)
+            }
             if (!layers.contains(Layer.Street) && parsedTags.hasChild("addr")) {
                 if (parsedTags.hasChild("name")) {
                     assignLayer(layers, Layer.Venue)
@@ -187,7 +197,7 @@ class DetermineLayerWay : DetermineLayer() {
         return true
     }
 
-    override val ignore = listOf("gate", "FIXME", "fixme", "Picture", "TMC", "abandoned", "access", "aerialway", "aeroway", "billboard", "boundary", "boundary_stone", "brewery", "chapel", "check", "cuisine", "culvert", "cycleway", "demolished", "description", "design", "destination", "disued", "disused", "door", "ele", "emergency", "entrance", "entry", "fenced", "foot", "ford", "gauge", "healthcare", "height", "historic", "history", "image", "landmark", "landuse", "layer", "leisure", "loc_name", "location", "man_made", "mapillary", "military", "motorcar", "natural", "network", "office", "official_vicinal_ref", "opening_hours", "operator", "parking", "pipeline", "playground", "power", "priority", "public_transport", "rcn", "rcn_ref", "recycling", "ref", "relation", "rhn_ref", "river", "rwn", "rwn_ref", "seamark", "shelter", "shop", "source_rcn", "sport", "starting", "surface", "surveillance", "toll", "tourism", "tower", "tram", "waterway", "waypoint", "website", "amenity", "bicycle", "bollard", "lit", "mooring", "bench", "emergency_service", "placement", "right", "drive_through", "internet_access", "brand", "school", "guidepost", "note", "whitewater", "proposed", "lock", "denomination", "information", "contact", "animal", "maxheight", "author", "airpane", "craft", "carpenter", "cafe", "ladder", "endpoint", "razed", "continue", "stairs", "construction", "bicycle_parking", "todo", "water", "golf", "display", "ex_addr", "covered", "theme", "communication", "agricultural", "place_of_worship", "shootting", "tactile_paving", "container12", "car", "van", "backrest", "passenger_lines", "fuel", "barrier", "3dshapes", "designation", "material", "fireplace", "piste", "leaf_type", "leaf_cycle", "indoor", "landcover", "water_supply", "multipolygon", "wheelchair", "wikidata", "wikipedia", "embankment", "hti", "wetland", "bridge", "mtb", "street_cabinet", "kerb", "traffic_calming", "generator", "advertising", "crossing", "attraction", "water_slide", "tunnel", "allotments", "roof", "noname", "footway", "admin_level", "removed", "Meuleveldoop", "meadow", "was", "tracktype", "width", "ote", "destroyed", "crop", "verticalpassage", "capacity", "FID", "render", "agriculture", "old_name", "shed", "CABUTY", "garden", "wall", "fence_type", "grassland", "station", "cutting", "levels", "level", "camp_site", "tomb", "ramp", "length", "industrial", "conveying", "ruins", "bunker_type", "gun_turret", "smoothness", "tree_lined", "garden", "destroyed", "cemetery", "model_aerodrome", "nature", "lanes", "bar", "room", "building", "buildingpart", "house", "heritage")
+    override val ignore = listOf("gate", "FIXME", "fixme", "Picture", "TMC", "abandoned", "access", "aerialway", "aeroway", "billboard", "boundary", "boundary_stone", "brewery", "chapel", "check", "cuisine", "culvert", "cycleway", "demolished", "description", "design", "destination", "disued", "disused", "door", "ele", "emergency", "entrance", "entry", "fenced", "foot", "ford", "gauge", "healthcare", "height", "historic", "history", "image", "landmark", "layer", "leisure", "loc_name", "location", "man_made", "mapillary", "military", "motorcar", "natural", "network", "office", "official_vicinal_ref", "opening_hours", "operator", "parking", "pipeline", "playground", "power", "priority", "public_transport", "rcn", "rcn_ref", "recycling", "ref", "relation", "rhn_ref", "river", "rwn", "rwn_ref", "seamark", "shelter", "shop", "source_rcn", "sport", "starting", "surface", "surveillance", "toll", "tourism", "tower", "tram", "waterway", "waypoint", "website", "amenity", "bicycle", "bollard", "lit", "mooring", "bench", "emergency_service", "placement", "right", "drive_through", "internet_access", "brand", "school", "guidepost", "note", "whitewater", "proposed", "lock", "denomination", "information", "contact", "animal", "maxheight", "author", "airpane", "craft", "carpenter", "cafe", "ladder", "endpoint", "razed", "continue", "stairs", "construction", "bicycle_parking", "todo", "water", "golf", "display", "ex_addr", "covered", "theme", "communication", "agricultural", "place_of_worship", "shootting", "tactile_paving", "container12", "car", "van", "backrest", "passenger_lines", "fuel", "barrier", "3dshapes", "designation", "material", "fireplace", "piste", "leaf_type", "leaf_cycle", "indoor", "landcover", "water_supply", "multipolygon", "wheelchair", "wikidata", "wikipedia", "embankment", "hti", "wetland", "bridge", "mtb", "street_cabinet", "kerb", "traffic_calming", "generator", "advertising", "crossing", "attraction", "water_slide", "tunnel", "allotments", "roof", "noname", "footway", "admin_level", "removed", "Meuleveldoop", "meadow", "was", "tracktype", "width", "ote", "destroyed", "crop", "verticalpassage", "capacity", "FID", "render", "agriculture", "old_name", "shed", "CABUTY", "garden", "wall", "fence_type", "grassland", "station", "cutting", "levels", "level", "camp_site", "tomb", "ramp", "length", "industrial", "conveying", "ruins", "bunker_type", "gun_turret", "smoothness", "tree_lined", "garden", "destroyed", "cemetery", "model_aerodrome", "nature", "lanes", "bar", "room", "building", "buildingpart", "house", "heritage")
 
     override val prune = listOf("railway")
 

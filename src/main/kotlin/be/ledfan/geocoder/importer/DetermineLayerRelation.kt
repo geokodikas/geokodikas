@@ -100,7 +100,7 @@ class DetermineLayerRelation : DetermineLayer() {
 
             if (parsedTags.hasChild("name") && parsedTags.hasChild("landuse")) {
                 if (parsedTags.child("landuse").singleValueOrNull() == "industrial") {
-                    assignLayer(layers, Layer.Venue)
+                    assignLayer(layers, Layer.Street)
                 } else {
                     assignLayer(layers, Layer.Superfluous)
                 }

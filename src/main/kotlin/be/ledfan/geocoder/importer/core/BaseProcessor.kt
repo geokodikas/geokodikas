@@ -27,7 +27,7 @@ abstract class BaseProcessor<OsmType> {
      * Starts reading the queue and processing each item in it.
      */
     suspend fun run() {
-        logger.debug { "Processor $threadId started"}
+        logger.debug { "Processor $threadId started, queue size: ${queue.size}, running?: $running"}
 
         while (running || !queue.isEmpty()) {
             // while running (i.e. the main process is still reading items)

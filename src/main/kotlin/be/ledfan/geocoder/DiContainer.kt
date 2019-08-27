@@ -4,6 +4,7 @@ import be.ledfan.geocoder.config.Config
 import be.ledfan.geocoder.config.ConfigReader
 import be.ledfan.geocoder.db.ConnectionFactory
 import be.ledfan.geocoder.db.ConnectionWrapper
+import be.ledfan.geocoder.db.entity.Country
 import be.ledfan.geocoder.db.mapper.*
 import be.ledfan.geocoder.httpapi.OsmEntityController
 import be.ledfan.geocoder.importer.*
@@ -65,7 +66,7 @@ val kodein = ConfigurableKodein().also {
 
         bind<OsmWayProcessor>() with provider { OsmWayProcessor(instance(), instance(), instance(), instance(), instance(), instance()) }
 
-        bind<AddressNodeProcessor>() with provider { AddressNodeProcessor(instance(), instance(), instance(), instance()) }
+        bind<AddressNodeProcessor>() with provider { AddressNodeProcessor(instance(), instance(), instance(), instance(), instance()) }
 
         bind<DetermineLayerNode>() with singleton { DetermineLayerNode() }
 
@@ -90,6 +91,7 @@ val kodein = ConfigurableKodein().also {
          */
 
         bind<TagParser>() with singleton { TagParser() }
+        bind<Country>() with singleton { Country.getFromDb(instance(), 52411L) } // TODO magic number
 
         /**
          * Controllers
