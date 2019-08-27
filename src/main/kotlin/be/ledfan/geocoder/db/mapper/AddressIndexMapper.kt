@@ -16,9 +16,9 @@ class AddressIndexMapper(private val con: ConnectionWrapper) : Mapper<AddressInd
             stmt.run {
                 setLong(1, dbObject.id)
                 when (dbObject.osm_type) {
-                    SearchTable.Node -> setString(2, "n")
-                    SearchTable.Way -> setString(2, "w")
-                    SearchTable.Relation -> setString(2, "r")
+                    SearchTable.Node -> setString(2, "node")
+                    SearchTable.Way -> setString(2, "way")
+                    SearchTable.Relation -> setString(2, "relation")
                     else -> {
                     }
                 }

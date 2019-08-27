@@ -12,9 +12,9 @@ class AddressIndex(val id: Long) : Entity {
             val r = AddressIndex(row.getLong("osm_id"))
 
             when (row.getString("osm_type")) {
-                "n" -> r.osm_type = SearchTable.Node
-                "w" -> r.osm_type = SearchTable.Way
-                "r" -> r.osm_type = SearchTable.Relation
+                "node" -> r.osm_type = SearchTable.Node
+                "way" -> r.osm_type = SearchTable.Way
+                "relation" -> r.osm_type = SearchTable.Relation
             }
 
             r.street_id = row.getLong("street_id")

@@ -40,7 +40,7 @@ class AddressNodeProcessor(private val country: Country,
 
         // determine basic properties
         for (entity in entities) {
-            val addressIndex = AddressIndex.create(entity.id, SearchTable.Node)
+            val addressIndex = AddressIndex.create(entity.id, entity.Type)
             val parentsOfEntity = parents[entity.id] ?: continue
             for (parent in parentsOfEntity) {
                 when (parent.layer) {
@@ -69,7 +69,7 @@ class AddressNodeProcessor(private val country: Country,
         val (streetIds, houseNumbers) = measureTimeMillisAndReturn {
             findRelatedStreet(country, osmWayMapper, entitiesMap, addressIndexes)
         }.let { (time, r) ->
-            logger.debug { "Found parents for ${entities.size} entities in ${time}ms" }
+            logger.debug { "Found related streets for ${entities.size} entities in ${time}ms" }
             r
         }
 
