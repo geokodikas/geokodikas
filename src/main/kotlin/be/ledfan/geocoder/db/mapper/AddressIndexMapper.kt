@@ -5,7 +5,13 @@ import be.ledfan.geocoder.db.entity.AddressIndex
 import be.ledfan.geocoder.db.entity.OsmWay
 import be.ledfan.geocoder.geocoding.SearchTable
 
-class AddressIndexMapper(private val con: ConnectionWrapper) : Mapper<AddressIndex>(con) {
+class AddressIndexMapper(private val con: ConnectionWrapper,
+                         private val osmWayMapper: OsmWayMapper,
+                         private val osmRelationMapper: OsmRelationMapper) : Mapper<AddressIndex>(con) {
+
+    override val tableName = "address_index"
+
+    override val entityCompanion = AddressIndex.Companion
 
     fun bulkInsert(addressIndexes: List<AddressIndex>) {
         val stmt = con.prepareStatement(
@@ -15,34 +21,34 @@ class AddressIndexMapper(private val con: ConnectionWrapper) : Mapper<AddressInd
         for (dbObject in addressIndexes) {
             stmt.run {
                 setLong(1, dbObject.id)
-                when (dbObject.osm_type) {
+                when (dbObject.osmType) {
                     SearchTable.Node -> setString(2, "node")
                     SearchTable.Way -> setString(2, "way")
                     SearchTable.Relation -> setString(2, "relation")
                     else -> {
                     }
                 }
-                val sid = dbObject.street_id
+                val sid = dbObject.streetId
                 if (sid != null) {
                     setLong(3, sid)
                 } else {
                     setNull(3, java.sql.Types.INTEGER)
                 }
-                val nbid = dbObject.neighbourhood_id
+                val nbid = dbObject.neighbourhoodId
                 if (nbid != null) {
                     setLong(4, nbid)
                 } else {
                     setNull(4, java.sql.Types.INTEGER)
                 }
-                setLong(5, dbObject.localadmin_id)
-                val cid = dbObject.county_id
+                setLong(5, dbObject.localadminId)
+                val cid = dbObject.countyId
                 if (cid != null) {
                     setLong(6, cid)
                 } else {
                     setNull(6, java.sql.Types.INTEGER)
                 }
-                setLong(7, dbObject.macroregion_id)
-                setLong(8, dbObject.country_id)
+                setLong(7, dbObject.macroregionId)
+                setLong(8, dbObject.countryId)
                 setString(9, dbObject.housenumber)
 
                 addBatch()
@@ -64,8 +70,27 @@ class AddressIndexMapper(private val con: ConnectionWrapper) : Mapper<AddressInd
     }
 
 
-    override val tableName = "address_index"
+    fun fetchRelations(addressIndex: AddressIndex) {
+        val relationIds = arrayListOf<Long>(
+                addressIndex.countryId,
+                addressIndex.localadminId,
+                addressIndex.macroregionId)
 
-    override val entityCompanion = AddressIndex.Companion
+        addressIndex.countyId?.let { relationIds.add(it) }
+        addressIndex.neighbourhoodId?.let { relationIds.add(it) }
+
+        val relations = osmRelationMapper.getByPrimaryIds(relationIds)
+
+        addressIndex.country = relations[addressIndex.countryId]
+        addressIndex.localAdmin = relations[addressIndex.localadminId]
+        addressIndex.macroregion = relations[addressIndex.macroregionId]
+        addressIndex.countyId?.let { addressIndex.county = relations[it] }
+        addressIndex.neighbourhoodId?.let { addressIndex.neighbourhood = relations[it] }
+        addressIndex.streetId?.let { addressIndex.street = osmWayMapper.getByPrimaryId(it) }
+        addressIndex.entity = osmWayMapper.getByPrimaryId(addressIndex.id)  // TODO combine with query above ^
+
+        addressIndex.relationsFetched = true
+    }
+
 
 }

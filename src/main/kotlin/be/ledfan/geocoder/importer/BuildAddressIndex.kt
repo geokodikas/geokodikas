@@ -7,10 +7,8 @@ import be.ledfan.geocoder.db.mapper.AddressIndexMapper
 import be.ledfan.geocoder.db.mapper.OsmNodeMapper
 import be.ledfan.geocoder.db.mapper.OsmParentMapper
 import be.ledfan.geocoder.db.mapper.OsmWayMapper
-import be.ledfan.geocoder.geocoding.SearchTable
 import be.ledfan.geocoder.importer.core.BaseProcessor
 import be.ledfan.geocoder.importer.core.Broker
-import be.ledfan.geocoder.importer.core.TagParser
 import be.ledfan.geocoder.kodein
 import be.ledfan.geocoder.measureTimeMillisAndReturn
 import kotlinx.coroutines.delay
@@ -44,19 +42,19 @@ class AddressNodeProcessor(private val country: Country,
             for (parent in parentsOfEntity) {
                 when (parent.layer) {
                     Layer.Neighbourhood -> {
-                        addressIndex.neighbourhood_id = parent.id
+                        addressIndex.neighbourhoodId = parent.id
                     }
                     Layer.LocalAdmin -> {
-                        addressIndex.localadmin_id = parent.id
+                        addressIndex.localadminId = parent.id
                     }
                     Layer.County -> {
-                        addressIndex.county_id = parent.id
+                        addressIndex.countyId = parent.id
                     }
                     Layer.MacroRegion -> {
-                        addressIndex.macroregion_id = parent.id
+                        addressIndex.macroregionId = parent.id
                     }
                     Layer.Country -> {
-                        addressIndex.country_id = parent.id
+                        addressIndex.countryId = parent.id
                     }
                     else -> {
                     }

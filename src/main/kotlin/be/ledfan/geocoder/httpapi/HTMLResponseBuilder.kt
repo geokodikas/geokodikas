@@ -201,7 +201,7 @@ class HTMLResponseBuilder {
         return if (addressIndexes != null && addressIndexes.size > 0) {
             createHTML().div {
 
-                a(application.locations.href(Routes.OsmEntity.Any("${addressIndexes.first().street_id},${addressIndexes.map { it.id }.joinToString(",")}", "html"))) {
+                a(application.locations.href(Routes.OsmEntity.Any("${addressIndexes.first().streetId},${addressIndexes.map { it.id }.joinToString(",")}", "html"))) {
                     text("Show all on map")
                 }
 

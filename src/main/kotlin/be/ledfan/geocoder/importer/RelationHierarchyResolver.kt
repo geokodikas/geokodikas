@@ -95,7 +95,7 @@ class RelationHierarchyResolver(private val con: ConnectionWrapper) {
         executeBatchQueriesParallel(queries)
         logger.info("Going to run final PIP query this may take some time")
         executeBatchQueries(listOf(sql6))
-        
+
 
     }
 

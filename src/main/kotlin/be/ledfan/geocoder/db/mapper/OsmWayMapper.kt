@@ -114,8 +114,6 @@ class OsmWayMapper(private val con: ConnectionWrapper) : Mapper<OsmWay>(con) {
 
         logger.debug { "Finding related streets for ${nodeIds.size} nodes (by closest street)" }
 
-
-        // TODO null check
         @Language("SQL")
         val sql = """WITH resolved_data AS (
                     SELECT osm_node.osm_id  AS node_osm_id
