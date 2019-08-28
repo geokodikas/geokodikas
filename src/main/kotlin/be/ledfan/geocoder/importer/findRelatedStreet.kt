@@ -14,8 +14,6 @@ fun findRelatedStreet(belgium: Country, osmWayMapper: OsmWayMapper, entities: Ha
     // this function will first try to determine the method required to determine the street
     val nodesWithStreetNameAndLocalAdmin = ArrayList<Long>()
     val nodesWithoutStreetName = ArrayList<Long>()
-    val houseNumbers = HashMap<Long, String?>()
-    entities.values.forEach { houseNumbers[it.id] = null }
 
     for (entity in entities.values) {
         val parsedTags = TagParser().parse(entity.tags)
@@ -24,7 +22,7 @@ fun findRelatedStreet(belgium: Country, osmWayMapper: OsmWayMapper, entities: Ha
             val addrTag = parsedTags.child("addr")
 
             if (addrTag.hasChild("housenumber")) {
-                houseNumbers[entity.id] = addrTag.child("housenumber").singleValueOrNull()
+                addressIndexes[entity.id]?.housenumber = addrTag.child("housenumber").singleValueOrNull()
             }
 
             if (!addrTag.hasChild("street")) {
@@ -98,11 +96,11 @@ fun findRelatedStreet(belgium: Country, osmWayMapper: OsmWayMapper, entities: Ha
     addressIndexes.forEach { (id, address_idx) ->
         val res1 = result1[id]
         if (res1 != null) {
-            address_idx.street_id = res1
+            address_idx.streetId = res1
         } else {
             val res2 = result2[id]
             if (res2 != null) {
-                address_idx.street_id = res2
+                address_idx.streetId = res2
             } else {
                 toRemove.add(id)
             }
