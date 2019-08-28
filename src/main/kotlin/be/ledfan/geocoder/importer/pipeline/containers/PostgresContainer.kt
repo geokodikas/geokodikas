@@ -16,6 +16,7 @@ class KPostgreSQLContainer(dockerImageName: String) : PostgreSQLContainer<KPostg
                 .withTimes(1) // Very important that this is 1 instead of 2 for containers which already
                 // contain a postgresql data directory, either as volume or with a committed container
                 .withStartupTimeout(Duration.of(180, SECONDS))
+        withSharedMemorySize(512 * 1024 * 1024)
         withDatabaseName("geokodikas")
         withUsername("geokodikas")
         withPassword("geokodikas")
