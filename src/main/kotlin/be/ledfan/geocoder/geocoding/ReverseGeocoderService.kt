@@ -1,6 +1,7 @@
 package be.ledfan.geocoder.geocoding
 
 import be.ledfan.geocoder.db.ConnectionWrapper
+import be.ledfan.geocoder.db.entity.AddressIndex
 import be.ledfan.geocoder.db.entity.OsmNode
 import be.ledfan.geocoder.db.entity.OsmRelation
 import be.ledfan.geocoder.db.entity.OsmWay
@@ -16,7 +17,7 @@ import kotlin.collections.ArrayList
 
 private val reverseGeocoderContext = newFixedThreadPoolContext(16, "reverseGeocoderContext") // TODO make parameter configurable
 
-class Reverse {
+class ReverseGeocoderService {
 
     private val reverseQueryBuilderFactory = ReverseQueryBuilderFactory()
 
@@ -36,12 +37,13 @@ class Reverse {
         val nodes = Collections.synchronizedList(ArrayList<OsmNode>())
         val ways = Collections.synchronizedList(ArrayList<OsmWay>())
         val relations = Collections.synchronizedList(ArrayList<OsmRelation>())
+        val addresses = Collections.synchronizedList(ArrayList<AddressIndex>())
 
         withContext(reverseGeocoderContext) {
             for (table in requiredTables) {
                 this@withContext.launch {
                     // query and process each table in parallel
-                val privateCon = kodein.direct.instance<ConnectionWrapper>()
+                    val privateCon = kodein.direct.instance<ConnectionWrapper>()
                     val (sqlQuery, parameters) = reverseQueryBuilderFactory.createBuilder(table, debug = true).run {
                         baseQuery(lat, lon, requiredTables)
                         if (limitRadius != null && limitRadius > 0) {
@@ -67,7 +69,7 @@ class Reverse {
 
                     val result = stmt.executeQuery()
                     while (result.next()) {
-                        reverseQueryBuilderFactory.processResult(table, result, nodes, ways, relations)
+                        reverseQueryBuilderFactory.processResult(table, result, nodes, ways, relations, addresses)
                     }
 
                     stmt.close()

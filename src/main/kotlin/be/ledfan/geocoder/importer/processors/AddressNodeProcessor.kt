@@ -34,6 +34,8 @@ class AddressNodeProcessor(private val country: Country,
         // determine basic properties
         for (entity in entities) {
             val addressIndex = AddressIndex.create(entity.id, entity.Type)
+            addressIndex.tags = entity.tags
+            addressIndex.geometry = entity.mainGeometry()
             val parentsOfEntity = parents[entity.id] ?: continue
             for (parent in parentsOfEntity) {
                 when (parent.layer) {

@@ -55,7 +55,6 @@ class OsmEntityController(override val kodein: Kodein) : KodeinController(kodein
     }
 
     override fun Routing.registerRoutes() {
-        println("registering")
         get<Routes.OsmEntity.Way> { route ->
             val entities = get(osmWayMapper, route, this.call) ?: return@get
             val geoJson = toGeoJson(entities)
@@ -94,7 +93,6 @@ class OsmEntityController(override val kodein: Kodein) : KodeinController(kodein
                 call.respond(geoJson)
             }
         }
-        println("done")
     }
 
 }

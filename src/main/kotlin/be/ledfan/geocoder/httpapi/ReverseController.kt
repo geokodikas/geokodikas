@@ -5,7 +5,7 @@ import be.ledfan.geocoder.db.mapper.AddressIndexMapper
 import be.ledfan.geocoder.db.mapper.OsmParentMapper
 import be.ledfan.geocoder.db.mapper.OsmWayMapper
 import be.ledfan.geocoder.db.mapper.WayNodeMapper
-import be.ledfan.geocoder.geocoding.Reverse
+import be.ledfan.geocoder.geocoding.ReverseGeocoderService
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.locations.KtorExperimentalLocationsAPI
@@ -21,7 +21,7 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
 
     val con: ConnectionWrapper by instance()
 
-    private val reverseGeocoder = Reverse()
+    private val reverseGeocoder = ReverseGeocoderService()
     private val osmWayMapper: OsmWayMapper by instance()
     private val osmParentMapper: OsmParentMapper by instance()
     private val wayNodeMapper: WayNodeMapper by instance()

@@ -4,6 +4,7 @@ package be.ledfan.geocoder.db.entity
 //import be.ledfan.geocoder.geocoder.IRetrievable
 //import be.ledfan.geocoder.geocoder.ITagParsable
 import be.ledfan.geocoder.importer.Layer
+import org.postgis.PGgeometry
 
 abstract class OsmEntity(val id: Long) : Entity {
 
@@ -21,6 +22,8 @@ abstract class OsmEntity(val id: Long) : Entity {
         }
         layer = newLayer
     }
+
+    abstract fun mainGeometry(): PGgeometry
 
     val dynamicProperties = HashMap<String, Any>()
 

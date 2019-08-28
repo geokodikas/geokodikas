@@ -1,9 +1,6 @@
 package be.ledfan.geocoder.geocoding
 
-import be.ledfan.geocoder.db.entity.OsmNode
-import be.ledfan.geocoder.db.entity.OsmRelation
-import be.ledfan.geocoder.db.entity.OsmType
-import be.ledfan.geocoder.db.entity.OsmWay
+import be.ledfan.geocoder.db.entity.*
 import java.sql.ResultSet
 import kotlin.math.roundToInt
 
@@ -21,7 +18,7 @@ class ReverseQueryBuilderFactory {
                 TODO()
             }
             OsmType.AddressIndex -> {
-                TODO()
+                AddressIndexReverseQueryBuilder(debug)
             }
         }
     }
@@ -29,7 +26,8 @@ class ReverseQueryBuilderFactory {
     fun processResult(table: OsmType, row: ResultSet,
                       nodes: MutableList<OsmNode>,
                       ways: MutableList<OsmWay>,
-                      relations: MutableList<OsmRelation>) {
+                      relations: MutableList<OsmRelation>,
+                      addresses: MutableList<AddressIndex>) {
 
         when (table) {
             OsmType.Node -> {
@@ -51,7 +49,9 @@ class ReverseQueryBuilderFactory {
                 relations.add(relation)
             }
             OsmType.AddressIndex -> {
-
+                val addressIndex = AddressIndex.fillFromRow(row)
+                // TODO
+                addresses.add(addressIndex)
             }
         }
 

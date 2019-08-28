@@ -34,6 +34,9 @@ class OsmRelation(id: Long) : OsmEntity(id) {
     }
 
     lateinit var geometry: PGgeometry
+
     var name: String? = null // nullable
+
+    override fun mainGeometry(): PGgeometry = geometry
 
 }

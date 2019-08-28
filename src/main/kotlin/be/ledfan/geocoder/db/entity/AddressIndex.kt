@@ -1,10 +1,11 @@
 package be.ledfan.geocoder.db.entity
 
+import org.postgis.PGgeometry
 import java.sql.ResultSet
 
-class AddressIndex(val id: Long) : Entity {
+class AddressIndex(id: Long) : OsmEntity(id) {
 
-    val Type = OsmType.AddressIndex
+    override val Type = OsmType.AddressIndex
 
     companion object : EntityCompanion<AddressIndex> {
 
@@ -35,6 +36,10 @@ class AddressIndex(val id: Long) : Entity {
         }
 
     }
+
+    override fun mainGeometry(): PGgeometry = geometry
+
+    lateinit var geometry: PGgeometry
 
     var entity: OsmWay? = null
 

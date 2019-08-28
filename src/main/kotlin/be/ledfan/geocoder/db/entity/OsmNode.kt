@@ -32,6 +32,8 @@ class OsmNode(id: Long) : OsmEntity(id) {
         }
     }
 
+    override fun mainGeometry(): PGgeometry = centroid
+
     lateinit var centroid: PGgeometry
 
 
