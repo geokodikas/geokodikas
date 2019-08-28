@@ -1,18 +1,28 @@
 package be.ledfan.geocoder.importer
 
-enum class Layer(val order: Int) {
+import java.lang.IllegalArgumentException
 
-    VirtualTrafficFlow(130),    // node
-    PhysicalTrafficFlow(130),   // node
-    Junction(120),              // node
-    Link(110),                  // way
-    Venue(100),                 // node
-    Address(99),                // node
-    Street(98),                 // way
+enum class Layer(val order: Int) {
+    VirtualTrafficFlow(130),
+    PhysicalTrafficFlow(130),
+    Junction(120),
+    Link(110),
+    Venue(100),
+    Address(99),
+    Street(98),
     Neighbourhood(97),
     LocalAdmin(96),
     County(95),
     MacroRegion(94),
     Country(93),
-    Superfluous(0),             // node, way -> Do Not Import!
+    Superfluous(0),             // Do Not Import!
+}
+
+fun isValidLayer(layer: String): Boolean {
+    return try {
+        Layer.valueOf(layer)
+        true
+    } catch (e: IllegalArgumentException) {
+        false
+    }
 }

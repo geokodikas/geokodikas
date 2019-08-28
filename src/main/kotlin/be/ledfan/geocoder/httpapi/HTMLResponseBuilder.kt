@@ -1,8 +1,6 @@
 package be.ledfan.geocoder.httpapi
 
-import be.ledfan.geocoder.db.entity.OsmNode
-import be.ledfan.geocoder.db.entity.OsmRelation
-import be.ledfan.geocoder.db.entity.OsmWay
+import be.ledfan.geocoder.db.entity.*
 import be.ledfan.geocoder.importer.core.TagParser
 import be.ledfan.geocoder.importer.core.Tags
 import io.ktor.application.Application
@@ -17,7 +15,18 @@ class HTMLResponseBuilder {
 
     private val application = kodein.direct.instance<Application>()
 
-    fun buildTagTable(tags: Map<String, String>): String {
+    private fun dynamicProperties(entity: OsmEntity): UL.() -> Unit {
+        return {
+            for (prop in entity.dynamicProperties) {
+                li {
+                    classes = setOf("list-group-item")
+                    text("Dynamic property: ${prop.key} => ${prop.value}")
+                }
+            }
+        }
+    }
+
+    private fun buildTagTable(tags: Map<String, String>): String {
         fun recurse(children: HashMap<String, Tags>): String {
             return createHTML().table {
                 classes = setOf("table", "table-striped", "table-sm")
@@ -63,8 +72,9 @@ class HTMLResponseBuilder {
         return recurse(parsedTags.children)
     }
 
-    fun buildParentTable(parentsOfEntity: java.util.ArrayList<OsmRelation>?): String {
+    private fun buildParentTable(parentsOfEntity: java.util.ArrayList<OsmRelation>?): String {
         return if (parentsOfEntity != null) {
+            parentsOfEntity.sortByDescending { it.layer.order }
             createHTML().table {
                 classes = setOf("table", "table-striped", "table-sm")
                 parentsOfEntity.forEach { parent ->
@@ -138,49 +148,76 @@ class HTMLResponseBuilder {
         }
     }
 
-    fun buildWay(entities: HashMap<Long, OsmWay>, parents: HashMap<Long, ArrayList<OsmRelation>>, nodes: Map<Long, List<OsmNode>>): String {
-        return buildTabs(
-                entities.mapValues { (_, entity) ->
-                    createHTML().div {
-                        ul {
-                            classes = setOf("list-group")
+    fun buildWay(entities: List<OsmWay>, parents: HashMap<Long, ArrayList<OsmRelation>>, nodes: Map<Long, List<OsmNode>>, addressesOnWays: HashMap<Long, ArrayList<AddressIndex>>): HashMap<Long, String> {
+        return HashMap(entities.associateBy { it.id }.mapValues { (_, entity) ->
+            createHTML().div {
+                ul {
+                    classes = setOf("list-group")
 
-                            li {
-                                classes = setOf("list-group-item", "list-group-item-primary")
-                                +"${entity.id}"
-                            }
+                    li {
+                        classes = setOf("list-group-item", "list-group-item-primary")
+                        +"${entity.id}"
+                    }
 
-                            li {
-                                classes = setOf("list-group-item")
-                                +"Way"
-                            }
+                    li {
+                        classes = setOf("list-group-item")
+                        +"Way"
+                    }
 
-                            li {
-                                classes = setOf("list-group-item")
-                                +"Layer is ${entity.layer}"
-                            }
+                    li {
+                        classes = setOf("list-group-item")
+                        +"Layer is ${entity.layer}"
+                    }
 
-                            li {
-                                if (entity.hasOneWayRestriction) {
-                                    classes = setOf("list-group-item", "list-group-item-success")
-                                    +"Has one way restriction"
-                                } else {
-                                    classes = setOf("list-group-item", "list-group-item-danger")
-                                    +"No one way restriction"
-                                }
+                    li {
+                        if (entity.hasOneWayRestriction) {
+                            classes = setOf("list-group-item", "list-group-item-success")
+                            +"Has one way restriction"
+                        } else {
+                            classes = setOf("list-group-item", "list-group-item-danger")
+                            +"No one way restriction"
+                        }
+                    }
+
+                    apply(dynamicProperties(entity))
+                }
+
+                br()
+                unsafe { +buildNodesTable(nodes[entity.id]) }
+
+                br()
+                unsafe { +buildParentTable(parents[entity.id]) }
+
+                br()
+                unsafe { +buildAddressesOnWaysTable(addressesOnWays[entity.id]) }
+
+                br()
+                unsafe { +buildTagTable(entity.tags) }
+            }
+        })
+    }
+
+    private fun buildAddressesOnWaysTable(addressIndexes: ArrayList<AddressIndex>?): String {
+        return if (addressIndexes != null && addressIndexes.size > 0) {
+            createHTML().div {
+
+                a(application.locations.href(Routes.OsmEntity.Any("${addressIndexes.first().streetId},${addressIndexes.map { it.id }.joinToString(",")}", "html"))) {
+                    text("Show all on map")
+                }
+
+                ul {
+                    addressIndexes.forEach { address ->
+                        li {
+                            a(application.locations.href(Routes.OsmEntity.Node(address.id.toString(), "html"))) {
+                                text(address.id)
                             }
                         }
-
-                        br()
-                        unsafe { +buildNodesTable(nodes[entity.id]) }
-
-                        br()
-                        unsafe { +buildParentTable(parents[entity.id]) }
-
-                        br()
-                        unsafe { +buildTagTable(entity.tags) }
                     }
-                })
+                }
+            }
+        } else {
+            ""
+        }
     }
 
     private fun buildNodesTable(relatedNodes: List<OsmNode>?): String {
@@ -227,74 +264,77 @@ class HTMLResponseBuilder {
         }
     }
 
-    fun buildNode(entities: java.util.HashMap<Long, OsmNode>, parents: HashMap<Long, ArrayList<OsmRelation>>, ways: HashMap<Long, ArrayList<OsmWay>>): String {
-        return buildTabs(
-                entities.mapValues { (_, entity) ->
-                    createHTML().div {
-                        ul {
-                            classes = setOf("list-group")
+    fun buildNode(entities: List<OsmNode>, parents: HashMap<Long, ArrayList<OsmRelation>>, ways: HashMap<Long, ArrayList<OsmWay>>): HashMap<Long, String> {
+        return HashMap(entities.associateBy { it.id }.mapValues { (_, entity) ->
+            createHTML().div {
+                ul {
+                    classes = setOf("list-group")
 
-                            li {
-                                classes = setOf("list-group-item", "list-group-item-primary")
-                                +"${entity.id}"
-                            }
-
-                            li {
-                                classes = setOf("list-group-item")
-                                +"Node"
-                            }
-
-                            li {
-                                classes = setOf("list-group-item")
-                                +"Layer is ${entity.layer}"
-                            }
-                        }
-
-                        br()
-                        unsafe { +buildWaysTable(ways[entity.id]) }
-
-                        br()
-                        unsafe { +buildParentTable(parents[entity.id]) }
-                        br()
-                        unsafe { +buildTagTable(entity.tags) }
+                    li {
+                        classes = setOf("list-group-item", "list-group-item-primary")
+                        +"${entity.id}"
                     }
-                })
+
+                    li {
+                        classes = setOf("list-group-item")
+                        +"Node"
+                    }
+
+                    li {
+                        classes = setOf("list-group-item")
+                        +"Layer is ${entity.layer}"
+                    }
+
+                    apply(dynamicProperties(entity))
+                }
+
+                br()
+                unsafe { +buildWaysTable(ways[entity.id]) }
+
+                br()
+                unsafe { +buildParentTable(parents[entity.id]) }
+                br()
+                unsafe { +buildTagTable(entity.tags) }
+            }
+        })
     }
 
-    fun buildRelation(entities: java.util.HashMap<Long, OsmRelation>, parents: HashMap<Long, ArrayList<OsmRelation>>): String {
-        return buildTabs(
-                entities.mapValues { (_, entity) ->
-                    createHTML().div {
-                        ul {
-                            classes = setOf("list-group")
+    fun buildRelation(entities: List<OsmRelation>, parents: HashMap<Long, ArrayList<OsmRelation>>): HashMap<Long, String> {
+        return HashMap(entities.associateBy { it.id }.mapValues { (_, entity) ->
+            createHTML().div {
+                ul {
+                    classes = setOf("list-group")
 
-                            li {
-                                classes = setOf("list-group-item", "list-group-item-primary")
-                                +"${entity.id}"
-                            }
-
-                            li {
-                                classes = setOf("list-group-item", "list-group-item-primary")
-                                +"${entity.name}"
-                            }
-
-                            li {
-                                classes = setOf("list-group-item")
-                                +"Relation"
-                            }
-
-                            li {
-                                classes = setOf("list-group-item")
-                                +"Layer is ${entity.layer}"
-                            }
-                        }
-
-                        br()
-                        unsafe { +buildParentTable(parents[entity.id]) }
-                        br()
-                        unsafe { +buildTagTable(entity.tags) }
+                    li {
+                        classes = setOf("list-group-item", "list-group-item-primary")
+                        +"${entity.id}"
                     }
-                })
+
+                    li {
+                        classes = setOf("list-group-item", "list-group-item-primary")
+                        +"${entity.name}"
+                    }
+
+                    li {
+                        classes = setOf("list-group-item")
+                        +"Relation"
+                    }
+
+                    li {
+                        classes = setOf("list-group-item")
+                        +"Layer is ${entity.layer}"
+                    }
+
+                    apply(dynamicProperties(entity))
+                }
+
+                br()
+                unsafe { +buildParentTable(parents[entity.id]) }
+                br()
+                unsafe { +buildTagTable(entity.tags) }
+            }
+        })
+
     }
 
 }

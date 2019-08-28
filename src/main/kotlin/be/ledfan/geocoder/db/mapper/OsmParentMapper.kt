@@ -11,23 +11,12 @@ import org.intellij.lang.annotations.Language
 
 class OsmParentMapper(private val con: ConnectionWrapper) {
 
-//    override val entityCompanion = OsmUpstreamElement.Companion
-//
-//    override val tableName = "osm_up_polygon"
-
-
     fun getParents(entities: List<OsmEntity>): HashMap<Long, ArrayList<OsmRelation>> {
         @Language("SQL")
-        val stmt = con.prepareCall("""
-            SELECT child, osm_relation.osm_id, osm_relation.name, osm_relation.layer
+        val stmt = con.prepareCall("""SELECT child_id, osm_relation.osm_id, osm_relation.name, osm_relation.layer
             FROM osm_relation
-               JOIN (SELECT DISTINCT p1.child_id                                                                  AS child,
-                      unnest(array_cat(array_agg(DISTINCT p1.parent_id), array_agg(p2.parent_id))) AS parent_id
-               FROM parent AS p1
-                        LEFT OUTER JOIN parent AS p2 ON p1.parent_id = p2.child_id
-               WHERE p1.child_id = ANY(?)
-               GROUP BY (p1.child_id)) AS cpi ON osm_relation.osm_id = parent_id
-        """.trimIndent())
+                 JOIN parent ON parent.parent_id = osm_relation.osm_id
+            WHERE parent.child_id = ANY(?)""")
 
         val array = con.createArrayOf("BIGINT", entities.map { it.id }.toTypedArray())
         stmt.setArray(1, array)
@@ -40,8 +29,7 @@ class OsmParentMapper(private val con: ConnectionWrapper) {
 
         while (result.next()) {
             val rel = OsmRelation.create(result.getLong("osm_id"), result.getString("name"), result.getLayer())
-
-            val childId = result.getLong("child")
+            val childId = result.getLong("child_id")
             r[childId]?.add(rel)
         }
 

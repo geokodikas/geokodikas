@@ -7,7 +7,7 @@ import kotlin.contracts.ExperimentalContracts
 class BelgiumPipeline : AbstractPipeline(
         IntegrationConfig("http://download.openstreetmap.fr/extracts/europe/belgium.osm.pbf",
                 "belgium.osm.pbf",
-                "a02f17ea9a4bd5d60d0a86bfe304faf1")
+                "0c1d93be05ce2ce87a59b65bda77767d")
 ) {
 
     @ExperimentalContracts

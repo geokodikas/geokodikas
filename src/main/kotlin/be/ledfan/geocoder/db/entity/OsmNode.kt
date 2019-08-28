@@ -8,6 +8,8 @@ import java.sql.ResultSet
 
 class OsmNode(id: Long) : OsmEntity(id) {
 
+    override val Type = OsmType.Node
+
     companion object : EntityCompanion<OsmNode> {
         override fun fillFromRow(row: ResultSet): OsmNode {
             val r = OsmNode(row.getLong("osm_id"))

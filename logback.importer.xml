@@ -9,8 +9,13 @@
         <immediateFlush>true</immediateFlush>
     </appender>
 
-    <root level="TRACE">
+    <root level="DEBUG">
         <appender-ref ref="FILE-IMPORTER" />
     </root>
+
+    <logger name="be.ledfan.geocoder.importer.DetermineLayer" level="ERROR"/>
+    <logger name="be.ledfan.geocoder.importer.DetermineLayerNode" level="ERROR"/>
+    <logger name="be.ledfan.geocoder.importer.DetermineLayerRelation" level="ERROR"/>
+    <logger name="be.ledfan.geocoder.importer.DetermineLayerWay" level="ERROR"/>
 
 </configuration>

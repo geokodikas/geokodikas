@@ -2,10 +2,7 @@ package be.ledfan.geocoder.importer.core
 
 import be.ledfan.geocoder.kodein
 import de.topobyte.osm4j.core.model.iface.OsmEntity
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import mu.KotlinLogging
 import org.kodein.di.direct
 import org.kodein.di.generic.instance
@@ -17,10 +14,10 @@ import kotlin.concurrent.timer
 /**
  * The Broker class maintains a Queue and a collection of processors.
  */
-class Broker<OsmType : OsmEntity>(
+class Broker<OsmType>(
         private val outputThreshold: Int,
         private val numProcessors: Int,
-        maxQueueSize: Int,
+        private val maxQueueSize: Int,
         private val processorBlocKSize: Int,
         private val factory: () -> BaseProcessor<OsmType>,
         private val osmTypeName: String,
@@ -44,7 +41,7 @@ class Broker<OsmType : OsmEntity>(
     /**
      * Starts $processorCount processors which the elements for this broker are send to.
      */
-    fun startProcessors() {
+    suspend fun startProcessors() {
         logger.debug { "Starting $numProcessors processors for type: $osmTypeName ..." }
         for (i in 0 until numProcessors) {
             val job = GlobalScope.launch(Dispatchers.IO) {
@@ -68,6 +65,10 @@ class Broker<OsmType : OsmEntity>(
         statsTimer = timer("print_stats_timer", period = 250) {
             updateStats()
         }
+        while (processors.size != numProcessors) {
+            delay(1000)
+        }
+        logger.debug { "All processors eventually registered"}
     }
 
     /**
@@ -77,6 +78,16 @@ class Broker<OsmType : OsmEntity>(
         numRead++
 
         queue.put(el)
+    }
+
+    fun enqueueAll(elements: List<OsmType>) {
+        queue.addAll(elements)
+        numRead += elements.size
+        logger.debug {"queued some items, queue size: ${queue.size}"}
+    }
+
+    fun freeSpace(): Int {
+        return maxQueueSize - queue.size
     }
 
     private fun updateStats() {

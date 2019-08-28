@@ -21,7 +21,7 @@ suspend fun step0_create_indexes(): Boolean {
             "CREATE INDEX IF NOT EXISTS osm_up_point_osm_id_index ON  osm_up_point (osm_id)",
             "CREATE INDEX IF NOT EXISTS osm_up_polygon_osm_id_index ON osm_up_polygon (osm_id)")
 
-    return executeBatchQueries(sqlQueries)
+    return executeBatchQueriesParallel(sqlQueries)
 }
 
 
@@ -115,8 +115,22 @@ suspend fun step0_create_schema(): Boolean {
                 parent_id bigint NOT NULL,
                 parent_layer layer NOT NULL,
                 parent_osm_type varchar(255) NOT NULL
-            );""")
+            );""",
 
+            """
+            CREATE TABLE IF NOT EXISTS address_index
+            (
+                osm_id bigint NOT NULL,
+                osm_type varchar(255) NOT NULL,
+                housenumber varchar(255),
+                street_id bigint,
+                neighbourhood_id bigint,
+                localadmin_id bigint NOT NULL,
+                county_id bigint,
+                macroregion_id bigint NOT NULL,
+                country_id bigint NOT NULL
+            );
+            """)
 //            """
 //            CREATE TABLE IF NOT EXISTS one_way_restrictions
 //            (

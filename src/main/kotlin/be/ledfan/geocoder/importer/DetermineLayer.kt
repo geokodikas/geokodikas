@@ -82,7 +82,7 @@ open class DetermineLayer {
         specificDeterminer(layers)
 
         if (layers.size == 0) {
-            logger.warn { "LAYER ${entity.id} is unknown: ${parsedTags.toString(0).trim()}" }
+            logger.debug { "LAYER ${entity.id} is unknown: ${parsedTags.toString(0).trim()}" }
             assignLayer(layers, Layer.Superfluous)
         }
 

@@ -70,10 +70,31 @@
 <script>
     let geojsonFeature = ${geojson};
 
-    let mymap = L.map('mapid'); //.setView([51.505, -0.09], 13);
+    let mymap = L.map('mapid');
 
-    let group = L.featureGroup([L.geoJSON(geojsonFeature)])
-        .addTo(mymap);
+    let geojsonMarkerOptions = {
+        radius: 8,
+        fillColor: "#3388ff",
+        color: "#3388ff",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+    };
+
+    let group = L.geoJSON(geojsonFeature, {
+        onEachFeature: onEachFeature,
+        pointToLayer: function (feature, latlng) {
+            return L.circleMarker(latlng, geojsonMarkerOptions);
+        }
+    }).addTo(mymap);
+
+    function onEachFeature(feature, layer) {
+        layer.on({
+            click: function () {
+                $('#tab-btn-' + layer.feature.properties.osm_id).tab('show');
+            }
+        });
+    }
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
@@ -82,6 +103,38 @@
     }).addTo(mymap);
 
     mymap.fitBounds(group.getBounds());
+
+    let firstLayer = group.getLayers()[0];
+    $('#tab-btn-' + firstLayer.feature.properties.osm_id).tab('show');
+    highlightFeature(firstLayer.feature.properties.osm_id);
+
+    function highlightFeature(featureId) {
+        group.eachLayer(function (layer) {
+            if (layer.feature.properties.osm_id === featureId) {
+                layer.setStyle({fillColor: 'red', color: 'red'})
+            } else {
+                layer.setStyle({fillColor: '#3388ff', color: '#3388ff'})
+            }
+        });
+    }
+
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        const id = parseInt(e.target.id.substr(8));
+        highlightFeature(id);
+    });
+
+    mymap.on('contextmenu', function (e) {
+        const coord = e.latlng;
+        const lat = coord.lat;
+        const lon = coord.lng;
+
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set("lat", lat);
+        urlParams.set("lon", lon);
+        urlParams.delete("ids");
+
+        window.location = "/api/v1/reverse?" + urlParams.toString();
+    });
 </script>
 </body>
 </html>

@@ -5,7 +5,9 @@ package be.ledfan.geocoder.db.entity
 //import be.ledfan.geocoder.geocoder.ITagParsable
 import be.ledfan.geocoder.importer.Layer
 
-open class OsmEntity(val id: Long) : Entity {
+abstract class OsmEntity(val id: Long) : Entity {
+
+    abstract val Type: OsmType
 
     var tags: HashMap<String, String> = HashMap()
     var zOrder: Int = 0
@@ -19,5 +21,7 @@ open class OsmEntity(val id: Long) : Entity {
         }
         layer = newLayer
     }
+
+    val dynamicProperties = HashMap<String, Any>()
 
 }

@@ -82,7 +82,32 @@ class DetermineLayerRelation : DetermineLayer() {
                 assignLayer(layers, Layer.Superfluous)
             }
 
-            if (layers.size == 0 && parsedTags.hasChild("addr")) {
+            if (parsedTags.hasChild("name") && parsedTags.hasChild("leisure")) {
+                if (parsedTags.child("leisure").singleValueOrNull() == "park") {
+                    assignLayer(layers, Layer.Venue)
+                } else {
+                    assignLayer(layers, Layer.Superfluous)
+                }
+            }
+
+            if (parsedTags.hasChild("name") && parsedTags.hasChild("landuse")) {
+                if (parsedTags.child("landuse").singleValueOrNull() == "industrial") {
+                    assignLayer(layers, Layer.Venue)
+                } else {
+                    assignLayer(layers, Layer.Superfluous)
+                }
+            }
+
+            if (parsedTags.hasChild("name") && parsedTags.hasChild("amenity")) {
+                if (parsedTags.child("amenity").singleValueOrNull() == "parking") {
+                    assignLayer(layers, Layer.Venue)
+                } else {
+                    assignLayer(layers, Layer.Superfluous)
+                }
+            }
+
+            // Warning: check names above this part
+            if (layers.none { it != Layer.Superfluous } && parsedTags.hasChild("addr")) {
                 if (parsedTags.hasChild("name")) {
                     assignLayer(layers, Layer.Venue)
                 } else {
@@ -102,5 +127,5 @@ class DetermineLayerRelation : DetermineLayer() {
     }
 
 
-    override val ignore = listOf("fixme", "FIXME", "building", "natural", "landuse", "site", "parking", "waterway", "leisure", "barrier", "man_made", "heritage", "sport", "power", "route", "TMC", "buildingpart", "tourism", "amenity", "landcover", "leaf_type", "surface", "indoor", "service", "historic", "designation", "place", "aeroway", "military")
+    override val ignore = listOf("fixme", "FIXME", "building", "natural",  "site", "parking", "waterway", "barrier", "man_made", "heritage", "sport", "power", "route", "TMC", "buildingpart", "tourism", "landcover", "leaf_type", "surface", "indoor", "service", "historic", "designation", "place", "aeroway", "military")
 }

@@ -8,6 +8,8 @@ import java.sql.ResultSet
 
 class OsmRelation(id: Long) : OsmEntity(id) {
 
+    override val Type = OsmType.Relation
+
     companion object : EntityCompanion<OsmRelation> {
         override fun fillFromRow(row: ResultSet): OsmRelation {
             val r = OsmRelation(row.getLong("osm_id"))

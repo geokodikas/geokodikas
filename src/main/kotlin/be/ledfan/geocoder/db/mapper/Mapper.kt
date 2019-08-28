@@ -2,6 +2,8 @@ package be.ledfan.geocoder.db.mapper
 
 import be.ledfan.geocoder.db.ConnectionWrapper
 import be.ledfan.geocoder.db.entity.EntityCompanion
+import be.ledfan.geocoder.db.entity.OsmRelation
+import be.ledfan.geocoder.db.getLayer
 import java.sql.PreparedStatement
 
 abstract class Mapper<T>(private val con: ConnectionWrapper) {
@@ -71,6 +73,26 @@ abstract class Mapper<T>(private val con: ConnectionWrapper) {
 
         stmt.close()
         result.close()
+        return r
+    }
+
+    protected fun executeGroupedSelect(stmt: PreparedStatement, ids: List<Long>, groupByColumn: String): HashMap<Long, ArrayList<T>> {
+        val result = stmt.executeQuery()
+
+        val r = HashMap<Long, ArrayList<T>>()
+
+        ids.forEach { r[it] = ArrayList() }
+
+        while (result.next()) {
+            val rel = entityCompanion.fillFromRow(result)
+
+            val childId = result.getLong(groupByColumn)
+            r[childId]?.add(rel)
+        }
+
+        stmt.close()
+        result.close()
+
         return r
     }
 
