@@ -110,7 +110,7 @@ class OsmWayMapper(private val con: ConnectionWrapper) : Mapper<OsmWay>(con) {
         return r
     }
 
-    fun getStreetsForNodes_FilterByClosestAndLocalAdmin(nodeIds: ArrayList<Long>): Map<out Long, Long?> {
+    fun getStreetsForNodes_FilterByClosestAndLocalAdmin(nodeIds: ArrayList<Long>): Map<Long, Long?> {
 
         logger.debug { "Finding related streets for ${nodeIds.size} nodes (by closest street)" }
 

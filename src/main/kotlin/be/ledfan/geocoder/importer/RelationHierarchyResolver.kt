@@ -1,6 +1,7 @@
 package be.ledfan.geocoder.importer
 
 import be.ledfan.geocoder.db.ConnectionWrapper
+import be.ledfan.geocoder.importer.steps.executeBatchQueries
 import be.ledfan.geocoder.importer.steps.executeBatchQueriesParallel
 import mu.KotlinLogging
 import org.intellij.lang.annotations.Language
@@ -88,10 +89,13 @@ class RelationHierarchyResolver(private val con: ConnectionWrapper) {
         )"""
 
 
-        val queries = listOf(sql1, sql2, sql3, sql4, sql5, sql6)
+        val queries = listOf(sql1, sql2, sql3, sql4, sql5)
 
         logger.info("Going to run PIP queries, this may take some time")
         executeBatchQueriesParallel(queries)
+        logger.info("Going to run final PIP query this may take some time")
+        executeBatchQueries(listOf(sql6))
+        
 
     }
 

@@ -9,7 +9,7 @@ import kotlin.system.measureTimeMillis
 
 val logger = KotlinLogging.logger {}
 
-fun findRelatedStreet(belgium: Country, osmWayMapper: OsmWayMapper, entities: HashMap<Long, OsmEntity>, addressIndexes: HashMap<Long, AddressIndex>): Pair<java.util.HashMap<Long, Long?>, HashMap<Long, String?>> {
+fun findRelatedStreet(belgium: Country, osmWayMapper: OsmWayMapper, entities: HashMap<Long, OsmEntity>, addressIndexes: HashMap<Long, AddressIndex>) {
 
     // this function will first try to determine the method required to determine the street
     val nodesWithStreetNameAndLocalAdmin = ArrayList<Long>()
@@ -42,12 +42,15 @@ fun findRelatedStreet(belgium: Country, osmWayMapper: OsmWayMapper, entities: Ha
         }
     }
 
+    lateinit var result1: Map<Long, Long?>
+    lateinit var result2: Map<Long, Long?>
+
     when (entities.values.first()) {
         is OsmNode -> {
-            val result1 = measureTimeMillisAndReturn {
+            result1 = measureTimeMillisAndReturn {
                 osmWayMapper.getStreetsForNodes_FilterByWayNameAndLocalAdmin(nodesWithStreetNameAndLocalAdmin)
             }.let { (time, r) ->
-                logger.debug{"Found streets for nodes in ${time}ms"}
+                logger.debug { "Found streets for nodes in ${time}ms" }
                 r
             }
             var closestStreetFallback = result1.filterValues { it == null || it == 0L }.keys
@@ -56,22 +59,19 @@ fun findRelatedStreet(belgium: Country, osmWayMapper: OsmWayMapper, entities: Ha
             measureTimeMillis {
                 closestStreetFallback = closestStreetFallback.filter { belgium.containsNode(entities[it] as OsmNode) }.toSet()
             }.let { time ->
-                logger.debug{"Filtered nodes not in Belgium in ${time}ms"}
+                logger.debug { "Filtered nodes not in Belgium in ${time}ms" }
             }
             nodesWithoutStreetName.addAll(closestStreetFallback)
 
             logger.warn { "Found nodes with a street name without corresponding street way: $closestStreetFallback" }
 
-            val result2 = osmWayMapper.getStreetsForNodes_FilterByClosestAndLocalAdmin(nodesWithoutStreetName)
-            result1.putAll(result2)
-
-            return Pair(result1, houseNumbers)
+            result2 = osmWayMapper.getStreetsForNodes_FilterByClosestAndLocalAdmin(nodesWithoutStreetName)
         }
         is OsmWay -> {
-            val result1 = measureTimeMillisAndReturn {
+            result1 = measureTimeMillisAndReturn {
                 osmWayMapper.getStreetsForWays_FilterByWayNameAndLocalAdmin(nodesWithStreetNameAndLocalAdmin)
             }.let { (time, r) ->
-                logger.debug{"Found streets for ways in ${time}ms"}
+                logger.debug { "Found streets for ways in ${time}ms" }
                 r
             }
 
@@ -80,19 +80,33 @@ fun findRelatedStreet(belgium: Country, osmWayMapper: OsmWayMapper, entities: Ha
             measureTimeMillis {
                 closestStreetFallback = closestStreetFallback.filter { belgium.containsWay(entities[it] as OsmWay) }.toSet()
             }.let { time ->
-                logger.debug{"Filtered ways not in Belgium in ${time}ms"}
+                logger.debug { "Filtered ways not in Belgium in ${time}ms" }
             }
             nodesWithoutStreetName.addAll(closestStreetFallback)
 
             logger.warn { "Found way with a street name without corresponding street way: $closestStreetFallback" }
 
-            val result2 = osmWayMapper.getStreetsForWays_FilterByClosestAndLocalAdmin(nodesWithoutStreetName)
-            result1.putAll(result2)
-
-            return Pair(result1, houseNumbers)
+            result2 = osmWayMapper.getStreetsForWays_FilterByClosestAndLocalAdmin(nodesWithoutStreetName)
         }
         else -> {
             TODO()
         }
     }
+
+    val toRemove = HashSet<Long>()
+
+    addressIndexes.forEach { (id, address_idx) ->
+        val res1 = result1[id]
+        if (res1 != null) {
+            address_idx.street_id = res1
+        } else {
+            val res2 = result2[id]
+            if (res2 != null) {
+                address_idx.street_id = res2
+            } else {
+                toRemove.add(id)
+            }
+        }
+    }
+    addressIndexes.keys.removeAll(toRemove)
 }

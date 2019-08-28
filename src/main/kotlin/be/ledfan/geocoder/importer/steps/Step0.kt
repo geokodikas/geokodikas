@@ -121,7 +121,7 @@ suspend fun step0_create_schema(): Boolean {
             CREATE TABLE IF NOT EXISTS address_index
             (
                 osm_id bigint NOT NULL,
-                osm_type varchar(1) NOT NULL,
+                osm_type varchar(255) NOT NULL,
                 housenumber varchar(255),
                 street_id bigint,
                 neighbourhood_id bigint,

@@ -27,7 +27,6 @@ class AddressNodeProcessor(private val country: Country,
                            private val con: ConnectionWrapper) : BaseProcessor<OsmEntity>() {
 
     override suspend fun processEntities(entities: List<OsmEntity>) {
-        logger.debug { "Processing ${entities.size} entities" }
         val addressIndexes = HashMap<Long, AddressIndex>()
         val entitiesMap = HashMap(entities.associateBy { it.id })
 
@@ -66,16 +65,10 @@ class AddressNodeProcessor(private val country: Country,
             addressIndexes[entity.id] = addressIndex
         }
 
-        val (streetIds, houseNumbers) = measureTimeMillisAndReturn {
+        measureTimeMillis {
             findRelatedStreet(country, osmWayMapper, entitiesMap, addressIndexes)
-        }.let { (time, r) ->
+        }.let { time ->
             logger.debug { "Found related streets for ${entities.size} entities in ${time}ms" }
-            r
-        }
-
-        for ((id, addressIndex) in addressIndexes) {
-            addressIndex.street_id = streetIds[id]
-            addressIndex.housenumber = houseNumbers[id]
         }
 
         addressIndexMapper.bulkInsert(addressIndexes.values.toList())
@@ -126,17 +119,12 @@ class BuildAddressIndex(private val osmNodeMapper: OsmNodeMapper, private val os
             logger.debug { "Ways remaining: ${ways.size - oldIndex}, can queue: ${wayBroker.freeSpace()} items" }
             val waysToQueue = ways.subList(oldIndex, end)
             oldIndex = end
-            logger.debug { "Got Sublist" }
             wayBroker.enqueueAll(waysToQueue)
-            logger.debug { "Enqueued" }
-//            ways.removeAll(waysToQueue)
-//            logger.debug { "Removed way" }
             delay(3000L)
         }
 
         wayBroker.finishedReading()
         wayBroker.join()
-
     }
 
 }
