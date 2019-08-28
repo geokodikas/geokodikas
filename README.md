@@ -25,6 +25,13 @@ This project is still very much Work in Progress, don't expect it to outperform 
 For example, currently we only test in Belgium, some things must be changed before other or multi region will work.
 We will elaborate more about other geocoders in the future.
 
+
+## Feedback
+
+If you have an idea or see something which can be improved don't hesitate to open an issue in order to discuss it.
+This also holds for questions.
+
+
 ## In cooperation with
 
 Inuits
