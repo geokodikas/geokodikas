@@ -1,4 +1,4 @@
-Geokodikas
+Geokodikas [![CircleCI](https://circleci.com/gh/geokodikas/geokodikas/tree/master.svg?style=svg)](https://circleci.com/gh/geokodikas/geokodikas/tree/master)
 ==========
 
 ## What is this?
@@ -19,8 +19,8 @@ However, it also has some shortcomings (which we later will document in more det
    For example searching for `Inuits` gives `Inuits, 31, Essensteenweg, KMO-zone Bosduin, Kapellen, Brasschaat, Antwerp, Flanders, 2930, Belgium`.
    The response both contains `Kapellen` and `Brasschaat`, where we would expect it to return only `Brasschaat`.
    Furthermore, the address it is not located in the `KMO-ZOne Bosduin`, but this is returned in the address.
-   
-We know the value of Nominatim and certainly don't want to criticise it. 
+
+We know the value of Nominatim and certainly don't want to criticise it.
 This project is still very much Work in Progress, don't expect it to outperform Nominatim right now.
 For example, currently we only test in Belgium, some things must be changed before other or multi region will work.
 We will elaborate more about other geocoders in the future.
