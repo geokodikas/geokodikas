@@ -1,9 +1,10 @@
 package be.ledfan.geocoder.db.entity
 
-import be.ledfan.geocoder.geocoding.SearchTable
 import java.sql.ResultSet
 
 class AddressIndex(val id: Long) : Entity {
+
+    val Type = OsmType.AddressIndex
 
     companion object : EntityCompanion<AddressIndex> {
 
@@ -11,9 +12,9 @@ class AddressIndex(val id: Long) : Entity {
             val r = AddressIndex(row.getLong("osm_id"))
 
             when (row.getString("osm_type")) {
-                "node" -> r.osmType = SearchTable.Node
-                "way" -> r.osmType = SearchTable.Way
-                "relation" -> r.osmType = SearchTable.Relation
+                "node" -> r.osmType = OsmType.Node
+                "way" -> r.osmType = OsmType.Way
+                "relation" -> r.osmType = OsmType.Relation
             }
 
             r.streetId = row.getLong("street_id")
@@ -27,7 +28,7 @@ class AddressIndex(val id: Long) : Entity {
             return r
         }
 
-        fun create(osmId: Long, osmType: SearchTable): AddressIndex {
+        fun create(osmId: Long, osmType: OsmType): AddressIndex {
             val r = AddressIndex(osmId)
             r.osmType = osmType
             return r
@@ -37,7 +38,7 @@ class AddressIndex(val id: Long) : Entity {
 
     var entity: OsmWay? = null
 
-    lateinit var osmType: SearchTable
+    lateinit var osmType: OsmType
     var housenumber: String? = null
 
     var streetId: Long? = null

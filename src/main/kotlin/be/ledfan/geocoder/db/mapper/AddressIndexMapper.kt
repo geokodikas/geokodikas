@@ -3,7 +3,7 @@ package be.ledfan.geocoder.db.mapper
 import be.ledfan.geocoder.db.ConnectionWrapper
 import be.ledfan.geocoder.db.entity.AddressIndex
 import be.ledfan.geocoder.db.entity.OsmWay
-import be.ledfan.geocoder.geocoding.SearchTable
+import be.ledfan.geocoder.db.entity.OsmType
 
 class AddressIndexMapper(private val con: ConnectionWrapper,
                          private val osmWayMapper: OsmWayMapper,
@@ -22,9 +22,9 @@ class AddressIndexMapper(private val con: ConnectionWrapper,
             stmt.run {
                 setLong(1, dbObject.id)
                 when (dbObject.osmType) {
-                    SearchTable.Node -> setString(2, "node")
-                    SearchTable.Way -> setString(2, "way")
-                    SearchTable.Relation -> setString(2, "relation")
+                    OsmType.Node -> setString(2, "node")
+                    OsmType.Way -> setString(2, "way")
+                    OsmType.Relation -> setString(2, "relation")
                     else -> {
                     }
                 }

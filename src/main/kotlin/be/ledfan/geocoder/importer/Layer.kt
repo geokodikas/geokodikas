@@ -3,7 +3,6 @@ package be.ledfan.geocoder.importer
 import java.lang.IllegalArgumentException
 
 enum class Layer(val order: Int) {
-
     VirtualTrafficFlow(130),
     PhysicalTrafficFlow(130),
     Junction(120),

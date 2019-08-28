@@ -18,6 +18,7 @@ import be.ledfan.geocoder.importer.processors.OsmRelationProcessor
 import be.ledfan.geocoder.importer.processors.OsmWayProcessor
 import be.ledfan.geocoder.httpapi.OverviewController
 import be.ledfan.geocoder.httpapi.ReverseController
+import be.ledfan.geocoder.importer.processors.AddressNodeProcessor
 import io.ktor.locations.KtorExperimentalLocationsAPI
 import org.kodein.di.conf.ConfigurableKodein
 import org.kodein.di.generic.bind
@@ -70,7 +71,7 @@ val kodein = ConfigurableKodein().also {
 
         bind<OsmWayProcessor>() with provider { OsmWayProcessor(instance(), instance(), instance(), instance(), instance(), instance()) }
 
-        bind<AddressNodeProcessor>() with provider { AddressNodeProcessor(instance(), instance(), instance(), instance(), instance()) }
+        bind<AddressNodeProcessor>() with provider { AddressNodeProcessor(instance(), instance(), instance(), instance()) }
 
         bind<DetermineLayerNode>() with singleton { DetermineLayerNode() }
 

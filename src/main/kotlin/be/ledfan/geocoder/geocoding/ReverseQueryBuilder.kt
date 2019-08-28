@@ -1,5 +1,6 @@
 package be.ledfan.geocoder.geocoding
 
+import be.ledfan.geocoder.db.entity.OsmType
 import be.ledfan.geocoder.forFirstAndRest
 import be.ledfan.geocoder.importer.Layer
 
@@ -12,7 +13,7 @@ abstract class ReverseQueryBuilder(private val debug: Boolean = false) {
 
     abstract fun cteQuery(lon: Double, lat: Double): String
 
-    fun baseQuery(lat: Double, lon: Double, searchTables: HashSet<SearchTable>): ReverseQueryBuilder {
+    fun baseQuery(lat: Double, lon: Double, searchTables: HashSet<OsmType>): ReverseQueryBuilder {
         if (searchTables.isEmpty()) throw Exception("Need to search in at least one table")
         currentQuery = "WITH cte_query AS ("
         currentQuery += cteQuery(lon, lat)

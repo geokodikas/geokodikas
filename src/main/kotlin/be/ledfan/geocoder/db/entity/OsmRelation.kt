@@ -2,14 +2,13 @@ package be.ledfan.geocoder.db.entity
 
 import be.ledfan.geocoder.db.getHstore
 import be.ledfan.geocoder.db.getLayer
-import be.ledfan.geocoder.geocoding.SearchTable
 import be.ledfan.geocoder.importer.Layer
 import org.postgis.PGgeometry
 import java.sql.ResultSet
 
 class OsmRelation(id: Long) : OsmEntity(id) {
 
-    override val Type = SearchTable.Relation
+    override val Type = OsmType.Relation
 
     companion object : EntityCompanion<OsmRelation> {
         override fun fillFromRow(row: ResultSet): OsmRelation {
