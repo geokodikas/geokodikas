@@ -97,25 +97,21 @@ class HTMLResponseBuilder {
         }
     }
 
-    fun buildTabs(tabs: Map<Long, String>): String {
+    fun buildTabs(tabs: Map<Long, String>, order: List<Long>? = null): String {
+        val actualOrder = order ?: tabs.keys.toList()
         return createHTML().div {
             ul {
                 classes = setOf("nav", "nav-tabs")
                 id = "myTab"
                 attributes["role"] = "tablist"
 
-                var first = true
-                tabs.forEach { (tabId, tabHtml) ->
+                for (tabId in actualOrder) {
                     li {
                         classes = setOf("nav-item")
                         a {
-                            if (first) {
-                                classes = setOf("nav-link", "active")
-                                first = false
-                            } else {
-                                classes = setOf("nav-link")
-                            }
+                            classes = setOf("nav-link")
                             id = "tab-btn-$tabId"
+
                             attributes["data-toggle"] = "tab"
                             attributes["href"] = "#tab-$tabId"
                             attributes["role"] = "tab"
@@ -129,15 +125,10 @@ class HTMLResponseBuilder {
             div {
                 classes = setOf("tab-content")
                 id = "myTabContent"
-                var first = true
-                tabs.forEach { (tabId, tabHtml) ->
+                for (tabId in actualOrder) {
+                    val tabHtml = tabs[tabId] ?: continue
                     div {
-                        if (first) {
-                            classes = setOf("tab-pane", "fade", "show", "active")
-                            first = false
-                        } else {
-                            classes = setOf("tab-pane", "fade")
-                        }
+                        classes = setOf("tab-pane", "fade")
                         id = "tab-$tabId"
                         attributes["role"] = "tabpanel"
                         unsafe { +tabHtml }

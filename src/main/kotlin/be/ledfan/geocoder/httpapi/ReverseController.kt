@@ -33,7 +33,7 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
         val limitRadius: Int? = call.request.queryParameters["limitRadius"]?.toInt()
         val limitLayers: List<String>? = call.request.queryParameters["limitLayers"]?.split(",")?.filter { it.trim() != "" }
 
-        val (closestPoint, nodes, ways, relations, addresses) = try {
+        val (closestPoint, order, nodes, ways, relations, addresses) = try {
             reverseGeocoder.reverseGeocode(
                     route.lat,
                     route.lon,
@@ -69,7 +69,7 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
 
         val geoJson = jsonResponseBuilder.toJson()
         if (route.formatting == "html") {
-            call.respond(htmlViewer.createHtml(geoJson, nodes, ways, relations, addresses))
+            call.respond(htmlViewer.createHtml(geoJson, nodes, ways, relations, addresses, order))
         } else {
             call.respond(geoJson)
         }

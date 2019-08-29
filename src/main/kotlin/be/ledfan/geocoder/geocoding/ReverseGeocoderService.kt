@@ -18,8 +18,6 @@ import kotlin.collections.ArrayList
 
 private val reverseGeocoderContext = newFixedThreadPoolContext(16, "reverseGeocoderContext") // TODO make parameter configurable
 
-data class ClosestResult(val entity: OsmEntity, val distance: Double, val coordinate: Coordinate)
-
 class ReverseGeocoderService(private val reverseQueryBuilderFactory: ReverseQueryBuilderFactory) {
 
 
@@ -81,25 +79,24 @@ class ReverseGeocoderService(private val reverseQueryBuilderFactory: ReverseQuer
         entities.sortBy { it.dynamicProperties["distance"] as Int }
         entities = ArrayList(entities.subList(0, actualLimitNumeric))
 
-        val nodesL = entities.filter { it.Type == OsmType.Node } as List<OsmNode>
-        val waysL = entities.filter { it.Type == OsmType.Way } as List<OsmWay>
-        val relationsL = entities.filter { it.Type == OsmType.Relation } as List<OsmRelation>
-        val addressL = entities.filter { it.Type == OsmType.AddressIndex } as List<AddressIndex>
-
+        val nodes = entities.filter { it.Type == OsmType.Node } as List<OsmNode>
+        val ways = entities.filter { it.Type == OsmType.Way } as List<OsmWay>
+        val relations = entities.filter { it.Type == OsmType.Relation } as List<OsmRelation>
+        val address = entities.filter { it.Type == OsmType.AddressIndex } as List<AddressIndex>
         val closestEntity = entities.first()
-
         val inputGeometry = GeometryFactory().createPoint(JtsCoordinate(lon, lat))
-
         closestEntity.mainGeometry().value
 
         val distanceOp = DistanceOp(closestEntity.geometryAsJts(), inputGeometry)
         val closestPoint = distanceOp.nearestPoints().first()
+        val order = entities.map { it.id }
 
-        return Result(closestPoint, nodesL, waysL, relationsL, addressL)
+        return Result(closestPoint, order, nodes, ways, relations, address)
     }
 
     data class Result(
             val closestPoint: JtsCoordinate,
+            val order: List<Long>,
             val nodes: List<OsmNode>,
             val ways: List<OsmWay>,
             val relations: List<OsmRelation>,
