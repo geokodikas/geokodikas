@@ -1,5 +1,6 @@
 package be.ledfan.geocoder.httpapi
 
+import be.ledfan.geocoder.db.entity.AddressIndex
 import be.ledfan.geocoder.db.entity.OsmNode
 import be.ledfan.geocoder.db.entity.OsmRelation
 import be.ledfan.geocoder.db.entity.OsmWay
@@ -13,7 +14,8 @@ class HTMLViewer(private val wayNodeMapper: WayNodeMapper, private val osmParent
 
     private val htmlResponseBuilder = HTMLResponseBuilder()
 
-    fun createHtml(geoJson: JsonObject, nodes: List<OsmNode>, ways: List<OsmWay>, relations: List<OsmRelation>): FreeMarkerContent {
+    fun createHtml(geoJson: JsonObject, nodes: List<OsmNode>, ways: List<OsmWay>,
+                   relations: List<OsmRelation>, addresses: List<AddressIndex>): FreeMarkerContent {
 
         val allEntities = ways.toList() + nodes.toList() + relations.toList()
         val parents = osmParentMapper.getParents(allEntities)
@@ -29,6 +31,9 @@ class HTMLViewer(private val wayNodeMapper: WayNodeMapper, private val osmParent
 
         // relations
         tabs.putAll(htmlResponseBuilder.buildRelation(relations, parents))
+
+        // addresses
+        tabs.putAll(htmlResponseBuilder.buildAddress(addresses))
 
         return FreeMarkerContent("map_html.ftl",
                 mapOf("geojson" to geoJson.toJsonString(true),

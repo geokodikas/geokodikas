@@ -40,7 +40,6 @@ class AddressController(override val kodein: Kodein) : KodeinController(kodein) 
         val geoJson = jsonResponseBuilder.toJson()
 
         val address = humanAddressBuilderService.build(LangCode.NL, addressIndex)
-
         entity.dynamicProperties["Address"] = address
 
         call.respond(htmlViewer.createHtmlForAddress(geoJson = geoJson, ways = listOf(entity)))

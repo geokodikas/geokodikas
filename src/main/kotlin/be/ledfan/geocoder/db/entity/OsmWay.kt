@@ -42,4 +42,6 @@ class OsmWay(id: Long) : OsmEntity(id) {
     var hasOneWayRestriction: Boolean = false
     var hasReversedOneWay: Boolean = false
 
+    override fun mainGeometry(): PGgeometry = geometry
+
 }

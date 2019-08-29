@@ -7,6 +7,8 @@ import be.ledfan.geocoder.db.ConnectionFactory
 import be.ledfan.geocoder.db.ConnectionWrapper
 import be.ledfan.geocoder.db.entity.Country
 import be.ledfan.geocoder.db.mapper.*
+import be.ledfan.geocoder.geocoding.ReverseGeocoderService
+import be.ledfan.geocoder.geocoding.ReverseQueryBuilderFactory
 import be.ledfan.geocoder.httpapi.AddressController
 import be.ledfan.geocoder.httpapi.OsmEntityController
 import be.ledfan.geocoder.importer.*
@@ -105,6 +107,13 @@ val kodein = ConfigurableKodein().also {
         bind<ReverseController>() with singleton { ReverseController(this@singleton.kodein) }
         bind<OsmEntityController>() with singleton { OsmEntityController(this@singleton.kodein) }
         bind<AddressController>() with singleton { AddressController(this@singleton.kodein) }
+
+        /**
+         * ReverseGeocoding
+         * TODO do we really want these to be singletons?
+         */
+        bind<ReverseGeocoderService>() with singleton { ReverseGeocoderService(instance()) }
+        bind<ReverseQueryBuilderFactory>() with singleton { ReverseQueryBuilderFactory(instance()) }
 
 
     }

@@ -5,7 +5,8 @@ import be.ledfan.geocoder.db.mapper.AddressIndexMapper
 import be.ledfan.geocoder.db.mapper.OsmParentMapper
 import be.ledfan.geocoder.db.mapper.OsmWayMapper
 import be.ledfan.geocoder.db.mapper.WayNodeMapper
-import be.ledfan.geocoder.geocoding.Reverse
+import be.ledfan.geocoder.geocoding.ReverseGeocoderService
+import be.ledfan.geocoder.geocoding.ReverseQueryBuilderFactory
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.locations.KtorExperimentalLocationsAPI
@@ -21,8 +22,7 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
 
     val con: ConnectionWrapper by instance()
 
-    private val reverseGeocoder = Reverse()
-    private val osmWayMapper: OsmWayMapper by instance()
+    private val reverseGeocoder: ReverseGeocoderService by instance()
     private val osmParentMapper: OsmParentMapper by instance()
     private val wayNodeMapper: WayNodeMapper by instance()
     private val addressIndexMapper: AddressIndexMapper by instance()
@@ -34,7 +34,7 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
         val limitRadius: Int? = call.request.queryParameters["limitRadius"]?.toInt()
         val limitLayers: List<String>? = call.request.queryParameters["limitLayers"]?.split(",")?.filter { it.trim() != "" }
 
-        val (nodes, ways, relations) = try {
+        val (nodes, ways, relations, addresses) = try {
             reverseGeocoder.reverseGeocode(
                     route.lat,
                     route.lon,
@@ -52,13 +52,13 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
         }
 
         val jsonResponseBuilder = JSONResponseBuilder()
-        (nodes + ways + relations).forEach {
+        (nodes + ways + relations + addresses).forEach {
             jsonResponseBuilder.addEntity(it)
         }
 
         val geoJson = jsonResponseBuilder.toJson()
         if (route.formatting == "html") {
-            call.respond(htmlViewer.createHtml(geoJson, nodes, ways, relations))
+            call.respond(htmlViewer.createHtml(geoJson, nodes, ways, relations, addresses))
         } else {
             call.respond(geoJson)
         }

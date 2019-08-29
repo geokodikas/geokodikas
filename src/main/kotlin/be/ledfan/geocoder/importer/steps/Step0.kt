@@ -128,7 +128,10 @@ suspend fun step0_create_schema(): Boolean {
                 localadmin_id bigint NOT NULL,
                 county_id bigint,
                 macroregion_id bigint NOT NULL,
-                country_id bigint NOT NULL
+                country_id bigint NOT NULL,
+                geometry geometry,
+                tags hstore,
+                layer Layer NOT NULL    
             );
             """)
 //            """

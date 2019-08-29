@@ -337,4 +337,36 @@ class HTMLResponseBuilder {
 
     }
 
+    fun buildAddress(entities: List<AddressIndex>): Map<Long, String> {
+        return HashMap(entities.associateBy { it.id }.mapValues { (_, entity) ->
+            createHTML().div {
+                ul {
+                    classes = setOf("list-group")
+
+                    li {
+                        classes = setOf("list-group-item", "list-group-item-primary")
+                        +"${entity.id}"
+                    }
+
+                    li {
+                        classes = setOf("list-group-item")
+                        +"AddressIndex"
+                    }
+
+                    li {
+                        classes = setOf("list-group-item")
+                        +"Layer is ${entity.layer}"
+                    }
+
+                    apply(dynamicProperties(entity))
+                }
+
+                br()
+                unsafe { +buildTagTable(entity.tags) }
+            }
+        })
+
+
+    }
+
 }

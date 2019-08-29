@@ -1,10 +1,13 @@
 package be.ledfan.geocoder.db.entity
 
+import be.ledfan.geocoder.db.getHstore
+import be.ledfan.geocoder.db.getLayer
+import org.postgis.PGgeometry
 import java.sql.ResultSet
 
-class AddressIndex(val id: Long) : Entity {
+class AddressIndex(id: Long) : OsmEntity(id) {
 
-    val Type = OsmType.AddressIndex
+    override val Type = OsmType.AddressIndex
 
     companion object : EntityCompanion<AddressIndex> {
 
@@ -24,6 +27,9 @@ class AddressIndex(val id: Long) : Entity {
             r.macroregionId = row.getLong("macroregion_id")
             r.countryId = row.getLong("country_id")
             r.housenumber = row.getString("housenumber")
+            r.geometry = row.getObject("geometry") as PGgeometry
+            r.tags = row.getHstore("tags")
+            r.layer = row.getLayer()
 
             return r
         }
@@ -35,6 +41,10 @@ class AddressIndex(val id: Long) : Entity {
         }
 
     }
+
+    override fun mainGeometry(): PGgeometry = geometry
+
+    lateinit var geometry: PGgeometry
 
     var entity: OsmWay? = null
 

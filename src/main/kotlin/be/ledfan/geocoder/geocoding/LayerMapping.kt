@@ -13,12 +13,12 @@ val layerMapping = mapOf(
         Layer.Link to listOf(OsmType.Way),
         Layer.Venue to listOf(OsmType.AddressIndex),
         Layer.Address to listOf(OsmType.AddressIndex),
-        Layer.Street to listOf(OsmType.Way),
-        Layer.Neighbourhood to listOf(OsmType.Relation),
-        Layer.LocalAdmin to listOf(OsmType.Relation),
-        Layer.County to listOf(OsmType.Relation),
-        Layer.MacroRegion to listOf(OsmType.Relation),
-        Layer.Country to listOf(OsmType.Relation)
+        Layer.Street to listOf(OsmType.Way)
+//        Layer.Neighbourhood to listOf(OsmType.Relation),
+//        Layer.LocalAdmin to listOf(OsmType.Relation),
+//        Layer.County to listOf(OsmType.Relation),
+//        Layer.MacroRegion to listOf(OsmType.Relation),
+//        Layer.Country to listOf(OsmType.Relation)
 )
 
 fun getTablesForLayers(layers: List<Layer>): HashSet<OsmType> {
