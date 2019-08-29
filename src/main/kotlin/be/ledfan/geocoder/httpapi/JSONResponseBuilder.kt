@@ -1,9 +1,6 @@
 package be.ledfan.geocoder.httpapi
 
-import be.ledfan.geocoder.db.entity.OsmEntity
-import be.ledfan.geocoder.db.entity.OsmNode
-import be.ledfan.geocoder.db.entity.OsmRelation
-import be.ledfan.geocoder.db.entity.OsmWay
+import be.ledfan.geocoder.db.entity.*
 import be.ledfan.geocoder.geo.toGeoJson
 import be.ledfan.geojsondsl.Feature
 import be.ledfan.geojsondsl.feature
@@ -41,6 +38,12 @@ class JSONResponseBuilder {
                             osmEntity.geometry.toGeoJson(this)
                         }
                     }
+                    is AddressIndex -> {
+                        withProperty("osm_type", "address")
+                        withGeometry {
+                            osmEntity.geometry.toGeoJson(this)
+                        }
+                    }
                     else -> {
                         withProperty("osm_type", "unknown")
                     }
@@ -49,7 +52,7 @@ class JSONResponseBuilder {
                 withProperty("osm_id", osmEntity.id)
 
                 if (osmEntity.dynamicProperties.size > 0) {
-                    withProperty("dynamic_properties", osmEntity)
+                    withProperty("dynamic_properties", osmEntity.dynamicProperties)
                 }
 
                 block()

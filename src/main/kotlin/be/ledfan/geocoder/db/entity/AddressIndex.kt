@@ -1,5 +1,6 @@
 package be.ledfan.geocoder.db.entity
 
+import be.ledfan.geocoder.db.getHstore
 import org.postgis.PGgeometry
 import java.sql.ResultSet
 
@@ -25,6 +26,8 @@ class AddressIndex(id: Long) : OsmEntity(id) {
             r.macroregionId = row.getLong("macroregion_id")
             r.countryId = row.getLong("country_id")
             r.housenumber = row.getString("housenumber")
+            r.geometry = row.getObject("geometry") as PGgeometry
+            r.tags = row.getHstore("tags")
 
             return r
         }

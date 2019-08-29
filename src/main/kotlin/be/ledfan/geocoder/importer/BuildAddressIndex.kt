@@ -26,7 +26,7 @@ class BuildAddressIndex(private val osmNodeMapper: OsmNodeMapper, private val os
         fun createBroker(): Broker<OsmEntity> {
             return Broker<OsmEntity>(
                     config.importer.outputThreshold,
-                    config.importer.numProcessors,
+                    min(24, config.importer.numProcessors),
                     config.importer.maxQueueSze,
                     32000,
                     { kodein.direct.instance<AddressNodeProcessor>() },

@@ -24,7 +24,7 @@ class ReverseGeocoderService {
     suspend fun reverseGeocode(lat: Double, lon: Double,
                                limitNumeric: Int?, limitRadius: Int?,
                                desiredLayers: List<String>?):
-            Triple<List<OsmNode>, List<OsmWay>, List<OsmRelation>> {
+            Result {
 
         val layers = if (desiredLayers == null || desiredLayers.isEmpty()) {
             Layer.values().toList()
@@ -78,7 +78,15 @@ class ReverseGeocoderService {
             }
         }
 
-        return Triple(nodes.toList(), ways.toList(), relations.toList())
+
+        return Result(nodes.toList(), ways.toList(), relations.toList(), addresses.toList())
     }
+
+    data class Result(
+            val nodes: List<OsmNode>,
+            val ways: List<OsmWay>,
+            val relations: List<OsmRelation>,
+            val addresses: List<AddressIndex>
+    )
 
 }

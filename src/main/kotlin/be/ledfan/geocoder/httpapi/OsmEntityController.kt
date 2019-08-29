@@ -59,7 +59,7 @@ class OsmEntityController(override val kodein: Kodein) : KodeinController(kodein
             val entities = get(osmWayMapper, route, this.call) ?: return@get
             val geoJson = toGeoJson(entities)
             if (route.formatting == "html") {
-                call.respond(htmlViewer.createHtml(geoJson = geoJson, ways = entities, nodes = listOf(), relations = listOf()))
+                call.respond(htmlViewer.createHtml(geoJson = geoJson, ways = entities, nodes = listOf(), relations = listOf(), addresses = listOf()))
             } else {
                 call.respond(geoJson)
             }
@@ -68,7 +68,7 @@ class OsmEntityController(override val kodein: Kodein) : KodeinController(kodein
             val entities = get(osmNodeMapper, route, this.call) ?: return@get
             val geoJson = toGeoJson(entities)
             if (route.formatting == "html") {
-                call.respond(htmlViewer.createHtml(geoJson = geoJson, ways = listOf(), nodes = entities, relations = listOf()))
+                call.respond(htmlViewer.createHtml(geoJson = geoJson, ways = listOf(), nodes = entities, relations = listOf(), addresses = listOf()))
             } else {
                 call.respond(geoJson)
             }
@@ -77,7 +77,7 @@ class OsmEntityController(override val kodein: Kodein) : KodeinController(kodein
             val entities = get(osmRelationMapper, route, this.call) ?: return@get
             val geoJson = toGeoJson(entities)
             if (route.formatting == "html") {
-                call.respond(htmlViewer.createHtml(geoJson = geoJson, ways = listOf(), nodes = listOf(), relations = entities))
+                call.respond(htmlViewer.createHtml(geoJson = geoJson, ways = listOf(), nodes = listOf(), relations = entities, addresses = listOf()))
             } else {
                 call.respond(geoJson)
             }
@@ -88,7 +88,7 @@ class OsmEntityController(override val kodein: Kodein) : KodeinController(kodein
             val relations = get(osmRelationMapper, route, this.call) ?: return@get
             val geoJson = toGeoJson(nodes + ways + relations)
             if (route.formatting == "html") {
-                call.respond(htmlViewer.createHtml(geoJson = geoJson, ways = ways, nodes = nodes, relations = relations))
+                call.respond(htmlViewer.createHtml(geoJson = geoJson, ways = ways, nodes = nodes, relations = relations, addresses = listOf()))
             } else {
                 call.respond(geoJson)
             }
