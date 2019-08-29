@@ -5,9 +5,6 @@ import be.ledfan.geojsondsl.MultiPolygon as GeoMultiPolygon
 import org.postgis.*
 
 
-fun Point.toGeoJsonCoordinate(): CoordinateBridge {
-    return CoordinateBridge(this)
-}
 
 fun PGgeometry.toGeoJson(geometryFactory: GeometryFactory) {
     val self = this
