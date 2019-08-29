@@ -4,6 +4,8 @@ package be.ledfan.geocoder.db.entity
 //import be.ledfan.geocoder.geocoder.IRetrievable
 //import be.ledfan.geocoder.geocoder.ITagParsable
 import be.ledfan.geocoder.importer.Layer
+import be.ledfan.geocoder.importer.core.TagParser
+import be.ledfan.geocoder.importer.core.Tags
 import org.postgis.PGgeometry
 
 abstract class OsmEntity(val id: Long) : Entity {
@@ -26,5 +28,10 @@ abstract class OsmEntity(val id: Long) : Entity {
     abstract fun mainGeometry(): PGgeometry
 
     val dynamicProperties = HashMap<String, Any>()
+
+    val parsedTags: Tags by lazy {
+        println("Parsing tags for $id")
+        TagParser().parse(tags)
+    }
 
 }

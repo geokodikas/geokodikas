@@ -61,13 +61,12 @@ class HumanAddressBuilderService(
         return address
     }
 
-    fun nameOfEntity(langCode: LangCode, relation: OsmEntity): String? {
-        val tags = tagParser.parse(relation.tags)
-        if (!tags.hasChild("name")) {
+    fun nameOfEntity(langCode: LangCode, entity: OsmEntity): String? {
+        if (!entity.parsedTags.hasChild("name")) {
             return null
         }
         var name: String? = null
-        val nameTag = tags.child("name")
+        val nameTag = entity.parsedTags.child("name")
 
         if (nameTag.amountOfChildren > 0 && nameTag.hasChild(langCode.identifier)) {
             name = nameTag.child(langCode.identifier).singleValueOrNull()

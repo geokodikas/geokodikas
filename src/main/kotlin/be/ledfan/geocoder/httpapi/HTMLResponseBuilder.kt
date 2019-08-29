@@ -348,26 +348,19 @@ class HTMLResponseBuilder {
                         +"${entity.id}"
                     }
 
-//                    li {
-//                        classes = setOf("list-group-item", "list-group-item-primary")
-//                        +"${entity.name}"
-//                    }
-
-//                    li {
-//                        classes = setOf("list-group-item")
-//                        +"Relation"
-//                    }
+                    li {
+                        classes = setOf("list-group-item")
+                        +"AddressIndex"
+                    }
 
                     li {
                         classes = setOf("list-group-item")
                         +"Layer is ${entity.layer}"
                     }
 
-//                    apply(dynamicProperties(entity))
+                    apply(dynamicProperties(entity))
                 }
 
-//                br()
-//                unsafe { +buildParentTable(parents[entity.id]) }
                 br()
                 unsafe { +buildTagTable(entity.tags) }
             }

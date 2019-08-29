@@ -17,9 +17,7 @@ import kotlin.collections.ArrayList
 
 private val reverseGeocoderContext = newFixedThreadPoolContext(16, "reverseGeocoderContext") // TODO make parameter configurable
 
-class ReverseGeocoderService {
-
-    private val reverseQueryBuilderFactory = ReverseQueryBuilderFactory()
+class ReverseGeocoderService(private val reverseQueryBuilderFactory: ReverseQueryBuilderFactory) {
 
     suspend fun reverseGeocode(lat: Double, lon: Double,
                                limitNumeric: Int?, limitRadius: Int?,
