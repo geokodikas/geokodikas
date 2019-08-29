@@ -7,7 +7,6 @@ class AddressIndexReverseQueryBuilder(debug: Boolean = false) : ReverseQueryBuil
             parameters.add(lon)
             parameters.add(lat)
         }
-        // TODO tags?
         return """
                 SELECT osm_id,
                        tags,
@@ -19,6 +18,7 @@ class AddressIndexReverseQueryBuilder(debug: Boolean = false) : ReverseQueryBuil
                        macroregion_id,
                        country_id,
                        housenumber,
+                       layer,
                        geometry                                                                                       AS geometry,
                        ST_distance(ST_SetSRID(ST_Point(?, ?), 4326),
                                    geometry)                                                                          AS distance,

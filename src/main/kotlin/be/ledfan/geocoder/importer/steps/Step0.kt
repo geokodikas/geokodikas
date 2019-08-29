@@ -130,7 +130,8 @@ suspend fun step0_create_schema(): Boolean {
                 macroregion_id bigint NOT NULL,
                 country_id bigint NOT NULL,
                 geometry geometry,
-                tags hstore
+                tags hstore,
+                layer Layer NOT NULL    
             );
             """)
 //            """

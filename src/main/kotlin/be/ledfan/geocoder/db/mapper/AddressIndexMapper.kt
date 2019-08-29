@@ -15,8 +15,8 @@ class AddressIndexMapper(private val con: ConnectionWrapper,
 
     fun bulkInsert(addressIndexes: List<AddressIndex>) {
         val stmt = con.prepareStatement(
-                """INSERT INTO address_index (osm_id, osm_type, street_id, neighbourhood_id, localadmin_id, county_id, macroregion_id, country_id, housenumber, geometry, tags)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""")
+                """INSERT INTO address_index (osm_id, osm_type, street_id, neighbourhood_id, localadmin_id, county_id, macroregion_id, country_id, housenumber, geometry, tags, layer)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::Layer)""")
 
         for (dbObject in addressIndexes) {
             stmt.run {
@@ -52,6 +52,7 @@ class AddressIndexMapper(private val con: ConnectionWrapper,
                 setString(9, dbObject.housenumber)
                 setObject(10, dbObject.geometry)
                 setObject(11, dbObject.tags)
+                setString(12, dbObject.layer.name)
 
                 addBatch()
             }

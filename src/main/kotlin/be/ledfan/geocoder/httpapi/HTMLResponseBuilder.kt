@@ -357,11 +357,11 @@ class HTMLResponseBuilder {
 //                        classes = setOf("list-group-item")
 //                        +"Relation"
 //                    }
-//
-//                    li {
-//                        classes = setOf("list-group-item")
-//                        +"Layer is ${entity.layer}"
-//                    }
+
+                    li {
+                        classes = setOf("list-group-item")
+                        +"Layer is ${entity.layer}"
+                    }
 
 //                    apply(dynamicProperties(entity))
                 }
