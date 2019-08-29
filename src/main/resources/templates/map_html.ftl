@@ -89,11 +89,15 @@
     }).addTo(mymap);
 
     function onEachFeature(feature, layer) {
-        layer.on({
-            click: function () {
-                $('#tab-btn-' + layer.feature.properties.osm_id).tab('show');
-            }
-        });
+        if (layer.feature.id === "input-point") {
+            layer.setStyle({fillColor: 'green', color: 'green'})
+        } else {
+            layer.on({
+                click: function () {
+                    $('#tab-btn-' + layer.feature.properties.osm_id).tab('show');
+                }
+            });
+        }
     }
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -104,16 +108,28 @@
 
     mymap.fitBounds(group.getBounds());
 
-    let firstLayer = group.getLayers()[0];
+    let firstLayer = group.getLayers().filter(el => (el.feature.id !== "input-point") && el.feature.id !== "closest-point" )[0];
     $('#tab-btn-' + firstLayer.feature.properties.osm_id).tab('show');
+    resetHighlighting();
     highlightFeature(firstLayer.feature.properties.osm_id);
 
+    function resetHighlighting() {
+        group.eachLayer(function (layer) {
+            if (layer.feature.id === "input-point") {
+                layer.setStyle({fillColor: 'green', color: 'green'})
+            } else if (layer.feature.id === "closest-point") {
+                layer.setStyle({fillColor: 'orange', color: 'orange'})
+            } else {
+                layer.setStyle({fillColor: '#3388ff', color: '#3388ff'})
+            }
+        });
+    }
+
     function highlightFeature(featureId) {
+        resetHighlighting();
         group.eachLayer(function (layer) {
             if (layer.feature.properties.osm_id === featureId) {
                 layer.setStyle({fillColor: 'red', color: 'red'})
-            } else {
-                layer.setStyle({fillColor: '#3388ff', color: '#3388ff'})
             }
         });
     }

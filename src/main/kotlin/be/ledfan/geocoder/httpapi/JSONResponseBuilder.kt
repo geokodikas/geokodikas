@@ -62,5 +62,12 @@ class JSONResponseBuilder {
 
     fun toJson() = featureCollection.toJson()
 
+    fun addFeature(block: Feature.() -> Unit = {}) {
+        featureCollection.apply {
+            withFeature {
+                block()
+            }
+        }
+    }
 
 }

@@ -3,10 +3,10 @@ package be.ledfan.geocoder.httpapi
 import be.ledfan.geocoder.db.ConnectionWrapper
 import be.ledfan.geocoder.db.mapper.AddressIndexMapper
 import be.ledfan.geocoder.db.mapper.OsmParentMapper
-import be.ledfan.geocoder.db.mapper.OsmWayMapper
 import be.ledfan.geocoder.db.mapper.WayNodeMapper
+import be.ledfan.geocoder.geo.Coordinate
+import be.ledfan.geocoder.geo.toGeoJsonCoordinate
 import be.ledfan.geocoder.geocoding.ReverseGeocoderService
-import be.ledfan.geocoder.geocoding.ReverseQueryBuilderFactory
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.locations.KtorExperimentalLocationsAPI
@@ -15,7 +15,6 @@ import io.ktor.response.respond
 import io.ktor.routing.Routing
 import org.kodein.di.Kodein
 import org.kodein.di.generic.instance
-import java.lang.Exception
 
 @KtorExperimentalLocationsAPI
 class ReverseController(override val kodein: Kodein) : KodeinController(kodein) {
@@ -34,7 +33,7 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
         val limitRadius: Int? = call.request.queryParameters["limitRadius"]?.toInt()
         val limitLayers: List<String>? = call.request.queryParameters["limitLayers"]?.split(",")?.filter { it.trim() != "" }
 
-        val (nodes, ways, relations, addresses) = try {
+        val (closestPoint, nodes, ways, relations, addresses) = try {
             reverseGeocoder.reverseGeocode(
                     route.lat,
                     route.lon,
@@ -52,6 +51,18 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
         }
 
         val jsonResponseBuilder = JSONResponseBuilder()
+        jsonResponseBuilder.addFeature {
+            withId("input-point")
+            withGeometry {
+                point(Coordinate(route.lon, route.lat))
+            }
+        }
+        jsonResponseBuilder.addFeature {
+            withId("closest-point")
+            withGeometry {
+                point(closestPoint.toGeoJsonCoordinate())
+            }
+        }
         (nodes + ways + relations + addresses).forEach {
             jsonResponseBuilder.addEntity(it)
         }
