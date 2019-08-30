@@ -140,13 +140,10 @@
     });
 
     const urlParams = new URLSearchParams(window.location.search);
-    console.log(urlParams.has("limitRadius"));
-    console.log(urlParams.get("limitRadius"));
     if (urlParams.has("limitRadius")) {
         let lat = urlParams.get("lat");
         let lon = urlParams.get("lon");
         let radius = parseInt(urlParams.get("limitRadius"));
-        console.log("radius... ", radius);
 
         L.circle([lat, lon], radius).addTo(mymap);
     }

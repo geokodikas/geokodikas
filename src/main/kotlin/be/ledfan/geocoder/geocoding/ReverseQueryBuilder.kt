@@ -11,11 +11,11 @@ abstract class ReverseQueryBuilder(private val debug: Boolean = false) {
     protected var currentQuery = ""
     protected val parameters = ArrayList<Any>()
 
-    abstract fun specificBaseQuery(lon: Double, lat: Double, metricDistance: Int)
+    abstract fun specificBaseQuery(lon: Double, lat: Double, metricDistance: Int, hasLayerLimits: Boolean)
 
-    fun baseQuery(lat: Double, lon: Double, metricDistance: Int, searchTables: HashSet<OsmType>): ReverseQueryBuilder {
+    fun baseQuery(lat: Double, lon: Double, metricDistance: Int, searchTables: HashSet<OsmType>, hasLayerLimits: Boolean): ReverseQueryBuilder {
         if (searchTables.isEmpty()) throw Exception("Need to search in at least one table")
-        specificBaseQuery(lon, lat, metricDistance)
+        specificBaseQuery(lon, lat, metricDistance, hasLayerLimits)
         return this
     }
 

@@ -2,7 +2,7 @@ package be.ledfan.geocoder.geocoding
 
 class WayReverseQueryBuilder(debug: Boolean = false) : ReverseQueryBuilder(debug) {
 
-    override fun specificBaseQuery(lon: Double, lat: Double, metricDistance: Int) {
+    override fun specificBaseQuery(lon: Double, lat: Double, metricDistance: Int, hasLayerLimits: Boolean) {
         repeat(2) {
             parameters.add(lon)
             parameters.add(lat)
@@ -22,7 +22,10 @@ class WayReverseQueryBuilder(debug: Boolean = false) : ReverseQueryBuilder(debug
             FROM osm_way
         """
         withWhere("ST_DWithin(ST_SetSRID(ST_Point(?, ?), 4326)::geography, geometry::geography, ?)")
-//        AND layer in ('VirtualTrafficFlow'::Layer, 'Junction'::Layer, 'Link'::Layer, 'Street'::Layer)
+
+        if (!hasLayerLimits) {
+            withWhere("layer IN ('VirtualTrafficFlow'::Layer, 'PhysicalTrafficFlow'::Layer, 'Link'::Layer, 'Street'::Layer, 'Junction'::Layer)")
+        }
     }
 
 }

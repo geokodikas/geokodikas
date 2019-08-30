@@ -90,6 +90,7 @@ suspend fun step1_create_indexes(): Boolean {
             "CREATE INDEX IF NOT EXISTS osm_way_geometry_index ON osm_way USING GIST(geometry)",
             "CREATE INDEX IF NOT EXISTS osm_way_geography_index ON osm_way USING gist (geography(geometry))",
             "CREATE INDEX IF NOT EXISTS osm_way_geography_layer_idx ON osm_way USING gist (geography(geometry), layer)",
+            "CREATE INDEX IF NOT EXISTS osm_way_geography_layer_idx_common_layers ON osm_way USING gist (geography(geometry), layer) WHERE layer IN ('VirtualTrafficFlow'::Layer, 'PhysicalTrafficFlow'::Layer, 'Link'::Layer, 'Street'::Layer, 'Junction'::Layer)",
             "CREATE INDEX IF NOT EXISTS osm_way_geometry_layer_index ON osm_way USING GIST(layer, geometry)")
 //        "CREATE INDEX IF NOT EXISTS one_way_restrictions_way_id_from_node_id_index ON one_way_restrictions (way_id, from_node_id)")
 

@@ -54,7 +54,7 @@ class ReverseGeocoderService(private val reverseQueryBuilderFactory: ReverseQuer
                     // query and process each table in parallel
                     val privateCon = kodein.direct.instance<ConnectionWrapper>()
                     val (sqlQuery, parameters) = reverseQueryBuilderFactory.createBuilder(table, debug = true).run {
-                        baseQuery(lat, lon, actualLimitRadius, requiredTables)
+                        baseQuery(lat, lon, actualLimitRadius, requiredTables, desiredLayers != null)
                         if (desiredLayers != null) {
                             whereLayer(layers)
                         }

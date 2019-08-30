@@ -2,7 +2,7 @@ package be.ledfan.geocoder.geocoding
 
 class AddressIndexReverseQueryBuilder(debug: Boolean = false) : ReverseQueryBuilder(debug) {
 
-    override fun specificBaseQuery(lon: Double, lat: Double, metricDistance: Int) {
+    override fun specificBaseQuery(lon: Double, lat: Double, metricDistance: Int, hasLayerLimits: Boolean) {
         repeat(2) {
             parameters.add(lon)
             parameters.add(lat)
