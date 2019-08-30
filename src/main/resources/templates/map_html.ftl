@@ -139,12 +139,21 @@
         highlightFeature(id);
     });
 
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has("limitRadius")) {
+        let lat = urlParams.get("lat");
+        let lon = urlParams.get("lon");
+        let radius = parseInt(urlParams.get("limitRadius"));
+
+        L.circle([lat, lon], radius).addTo(mymap);
+    }
+
+
     mymap.on('contextmenu', function (e) {
         const coord = e.latlng;
         const lat = coord.lat;
         const lon = coord.lng;
 
-        const urlParams = new URLSearchParams(window.location.search);
         urlParams.set("lat", lat);
         urlParams.set("lon", lon);
         urlParams.delete("ids");

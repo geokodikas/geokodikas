@@ -4,6 +4,7 @@ import be.ledfan.geocoder.db.ConnectionWrapper
 import be.ledfan.geocoder.db.entity.AddressIndex
 import be.ledfan.geocoder.db.entity.OsmWay
 import be.ledfan.geocoder.db.entity.OsmType
+import java.sql.Types
 
 class AddressIndexMapper(private val con: ConnectionWrapper,
                          private val osmWayMapper: OsmWayMapper,
@@ -28,24 +29,27 @@ class AddressIndexMapper(private val con: ConnectionWrapper,
                     else -> {
                     }
                 }
-                val sid = dbObject.streetId
-                if (sid != null) {
-                    setLong(3, sid)
-                } else {
-                    setNull(3, java.sql.Types.INTEGER)
+                with(dbObject.streetId) {
+                    if (this != null) {
+                        setLong(3, this)
+                    } else {
+                        setNull(3, Types.INTEGER)
+                    }
                 }
-                val nbid = dbObject.neighbourhoodId
-                if (nbid != null) {
-                    setLong(4, nbid)
-                } else {
-                    setNull(4, java.sql.Types.INTEGER)
+                with(dbObject.neighbourhoodId) {
+                    if (this != null) {
+                        setLong(4, this)
+                    } else {
+                        setNull(4, Types.INTEGER)
+                    }
                 }
                 setLong(5, dbObject.localadminId)
-                val cid = dbObject.countyId
-                if (cid != null) {
-                    setLong(6, cid)
-                } else {
-                    setNull(6, java.sql.Types.INTEGER)
+                with(dbObject.countyId) {
+                    if (this != null) {
+                        setLong(6, this)
+                    } else {
+                        setNull(6, Types.INTEGER)
+                    }
                 }
                 setLong(7, dbObject.macroregionId)
                 setLong(8, dbObject.countryId)

@@ -64,6 +64,9 @@ suspend fun step2_create_indexes(): Boolean {
     val sqlQueries = listOf(
             "CREATE UNIQUE INDEX IF NOT EXISTS osm_node_osm_id_uindex ON osm_node (osm_id)",
             "CREATE INDEX IF NOT EXISTS osm_node_osm_centroid_uindex ON osm_node USING GIST(centroid)",
+            "CREATE INDEX IF NOT EXISTS osm_node_geography_index ON osm_node USING gist (geography(centroid))",
+            "CREATE INDEX IF NOT EXISTS osm_node_geography_layer_idx ON osm_node USING gist (geography(centroid), layer)",
+            "CREATE INDEX IF NOT EXISTS osm_node_geography_layer_idx_common_layers ON osm_node USING gist (geography(centroid), layer) WHERE layer IN ('VirtualTrafficFlow'::Layer, 'PhysicalTrafficFlow'::Layer, 'Junction'::Layer)",
             "CREATE INDEX IF NOT EXISTS osm_node_geometry_layer_index ON osm_node USING GIST(layer, centroid)")
 
     return executeBatchQueriesParallel(sqlQueries)

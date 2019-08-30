@@ -2,12 +2,13 @@ package be.ledfan.geocoder.geocoding
 
 class AddressIndexReverseQueryBuilder(debug: Boolean = false) : ReverseQueryBuilder(debug) {
 
-    override fun cteQuery(lon: Double, lat: Double): String {
-        repeat(3) {
+    override fun specificBaseQuery(lon: Double, lat: Double, metricDistance: Int, hasLayerLimits: Boolean) {
+        repeat(2) {
             parameters.add(lon)
             parameters.add(lat)
         }
-        return """
+        parameters.add(metricDistance)
+        currentQuery =  """
                 SELECT osm_id,
                        tags,
                        osm_type,
@@ -19,14 +20,12 @@ class AddressIndexReverseQueryBuilder(debug: Boolean = false) : ReverseQueryBuil
                        country_id,
                        housenumber,
                        layer,
-                       geometry                                                                                       AS geometry,
-                       ST_distance(ST_SetSRID(ST_Point(?, ?), 4326),
-                                   geometry)                                                                          AS distance,
-                       st_distance_sphere(ST_SetSRID(ST_Point(?, ?), 4326),
-                                          geometry)                                                                   AS metric_distance
+                       geometry                                                       AS geometry,
+                       st_distance_sphere(ST_SetSRID(ST_Point(?, ?), 4326), geometry) AS metric_distance
                 FROM address_index
-                WHERE ST_DWithin(ST_SetSRID(ST_Point(?, ?), 4326), geometry, 0.006)
                 """
+
+        withWhere("ST_DWithin(ST_SetSRID(ST_Point(?, ?), 4326)::geography, geometry::geography, ?)")
     }
 
 }
