@@ -77,3 +77,13 @@ suspend fun step4_build_address_index(): Boolean {
 
     return true
 }
+
+
+suspend fun step4_create_indexes(): Boolean {
+    @Language("SQL")
+    val sqlQuerries = listOf(
+        """CREATE INDEX address_index_geom_idx ON address_index USING gist (geometry)""",
+        """CREATE INDEX address_index_geom_geography_idx ON address_index USING gist (geography(geometry))""")
+
+    return executeBatchQueriesParallel(sqlQuerries)
+}

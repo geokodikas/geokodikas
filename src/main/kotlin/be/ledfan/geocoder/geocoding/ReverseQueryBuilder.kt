@@ -8,16 +8,14 @@ abstract class ReverseQueryBuilder(private val debug: Boolean = false) {
 
     private var hasWhere = false
 
-    private var currentQuery = ""
+    protected var currentQuery = ""
     protected val parameters = ArrayList<Any>()
 
-    abstract fun cteQuery(lon: Double, lat: Double): String
+    abstract fun specificBaseQuery(lon: Double, lat: Double, metricDistance: Int)
 
-    fun baseQuery(lat: Double, lon: Double, searchTables: HashSet<OsmType>): ReverseQueryBuilder {
+    fun baseQuery(lat: Double, lon: Double, metricDistance: Int, searchTables: HashSet<OsmType>): ReverseQueryBuilder {
         if (searchTables.isEmpty()) throw Exception("Need to search in at least one table")
-        currentQuery = "WITH cte_query AS ("
-        currentQuery += cteQuery(lon, lat)
-        currentQuery += ") SELECT * FROM cte_query "
+        specificBaseQuery(lon, lat, metricDistance)
         return this
     }
 
@@ -35,12 +33,12 @@ abstract class ReverseQueryBuilder(private val debug: Boolean = false) {
             parameters.forEach { parameterValue ->
                 filledQuery = filledQuery.replaceFirst("?", parameterValue.toString())
             }
-            println("Filledquery: $filledQuery")
+            println("Filled in query\n: $filledQuery")
         }
         return Pair(currentQuery, parameters)
     }
 
-    private fun withWhere(where: String) {
+    protected fun withWhere(where: String) {
         currentQuery += if (!hasWhere) {
             hasWhere = true
             """
@@ -51,12 +49,6 @@ abstract class ReverseQueryBuilder(private val debug: Boolean = false) {
             AND $where
             """
         }
-    }
-
-    fun whereMetricDistance(metricDistance: Int): ReverseQueryBuilder {
-        withWhere("metric_distance < ?")
-        parameters.add(metricDistance)
-        return this
     }
 
     fun limit(limit: Int): ReverseQueryBuilder {

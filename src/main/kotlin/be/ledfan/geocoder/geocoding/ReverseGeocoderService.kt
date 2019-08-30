@@ -15,6 +15,7 @@ import org.locationtech.jts.geom.Coordinate as JtsCoordinate
 import org.locationtech.jts.operation.distance.DistanceOp
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.min
 
 private val reverseGeocoderContext = newFixedThreadPoolContext(16, "reverseGeocoderContext") // TODO make parameter configurable
 
@@ -38,7 +39,13 @@ class ReverseGeocoderService(private val reverseQueryBuilderFactory: ReverseQuer
         val actualLimitNumeric = if (limitNumeric != null && limitNumeric > 0) {
             limitNumeric
         } else {
-            5
+            5 // amount
+        }
+
+        val actualLimitRadius = if (limitRadius != null && limitRadius > 0) {
+            limitRadius
+        } else {
+            200 // meter
         }
 
         withContext(reverseGeocoderContext) {
@@ -47,10 +54,7 @@ class ReverseGeocoderService(private val reverseQueryBuilderFactory: ReverseQuer
                     // query and process each table in parallel
                     val privateCon = kodein.direct.instance<ConnectionWrapper>()
                     val (sqlQuery, parameters) = reverseQueryBuilderFactory.createBuilder(table, debug = true).run {
-                        baseQuery(lat, lon, requiredTables)
-                        if (limitRadius != null && limitRadius > 0) {
-                            whereMetricDistance(limitRadius)
-                        }
+                        baseQuery(lat, lon, actualLimitRadius, requiredTables)
                         if (desiredLayers != null) {
                             whereLayer(layers)
                         }
@@ -77,7 +81,7 @@ class ReverseGeocoderService(private val reverseQueryBuilderFactory: ReverseQuer
         }
 
         entities.sortBy { it.dynamicProperties["distance"] as Int }
-        entities = ArrayList(entities.subList(0, actualLimitNumeric))
+        entities = ArrayList(entities.subList(0, min(actualLimitNumeric, entities.size)))
 
         val nodes = entities.filter { it.Type == OsmType.Node } as List<OsmNode>
         val ways = entities.filter { it.Type == OsmType.Way } as List<OsmWay>
