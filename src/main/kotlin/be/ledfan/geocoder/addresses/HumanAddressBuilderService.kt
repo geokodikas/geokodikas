@@ -20,12 +20,15 @@ class HumanAddressBuilderService(
 
         addressIndex.street?.let {
             nameOfEntity(langCode, it)?.let { name ->
-                address += "$name "
+                address += name
             }
         }
 
-        addressIndex.housenumber?.let {
-            address += "$it, "
+        with(addressIndex.housenumber) {
+            if (this != null) {
+                address += " $this"
+            }
+            address += ", "
         }
 
         addressIndex.neighbourhood?.let {
