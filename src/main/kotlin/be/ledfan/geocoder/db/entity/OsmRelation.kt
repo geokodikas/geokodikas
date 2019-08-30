@@ -31,6 +31,13 @@ class OsmRelation(id: Long) : OsmEntity(id) {
             return r
         }
 
+        fun create(id: Long, tags: HashMap<String, String>, layer: Layer): OsmRelation {
+            val r = OsmRelation(id)
+            r.tags = tags
+            r.layer = layer
+            return r
+        }
+
     }
 
     lateinit var geometry: PGgeometry

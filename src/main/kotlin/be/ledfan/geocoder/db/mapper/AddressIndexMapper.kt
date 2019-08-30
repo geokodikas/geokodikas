@@ -1,6 +1,7 @@
 package be.ledfan.geocoder.db.mapper
 
 import be.ledfan.geocoder.db.ConnectionWrapper
+import be.ledfan.geocoder.db.cached.CachedRelationMapper
 import be.ledfan.geocoder.db.entity.AddressIndex
 import be.ledfan.geocoder.db.entity.OsmWay
 import be.ledfan.geocoder.db.entity.OsmType
@@ -8,7 +9,8 @@ import java.sql.Types
 
 class AddressIndexMapper(private val con: ConnectionWrapper,
                          private val osmWayMapper: OsmWayMapper,
-                         private val osmRelationMapper: OsmRelationMapper) : Mapper<AddressIndex>(con) {
+                         private val osmRelationMapper: OsmRelationMapper,
+                         private val cachedRelationMapper: CachedRelationMapper) : Mapper<AddressIndex>(con) {
 
     override val tableName = "address_index"
 
@@ -86,7 +88,7 @@ class AddressIndexMapper(private val con: ConnectionWrapper,
         addressIndex.countyId?.let { relationIds.add(it) }
         addressIndex.neighbourhoodId?.let { relationIds.add(it) }
 
-        val relations = osmRelationMapper.getByPrimaryIds(relationIds)
+        val relations = cachedRelationMapper.getByPrimaryIds(osmRelationMapper, relationIds)
 
         addressIndex.country = relations[addressIndex.countryId]
         addressIndex.localAdmin = relations[addressIndex.localadminId]

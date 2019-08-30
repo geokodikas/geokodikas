@@ -5,6 +5,7 @@ import be.ledfan.geocoder.config.Config
 import be.ledfan.geocoder.config.ConfigReader
 import be.ledfan.geocoder.db.ConnectionFactory
 import be.ledfan.geocoder.db.ConnectionWrapper
+import be.ledfan.geocoder.db.cached.CachedRelationMapper
 import be.ledfan.geocoder.db.entity.Country
 import be.ledfan.geocoder.db.mapper.*
 import be.ledfan.geocoder.geocoding.ReverseGeocoderService
@@ -59,7 +60,9 @@ val kodein = ConfigurableKodein().also {
 
         bind<OsmParentMapper>() with provider { OsmParentMapper(instance()) }
 
-        bind<AddressIndexMapper>() with provider { AddressIndexMapper(instance(), instance(), instance()) }
+        bind<AddressIndexMapper>() with provider { AddressIndexMapper(instance(), instance(), instance(), instance()) }
+
+        bind<CachedRelationMapper>() with singleton { CachedRelationMapper() }
 
         /**
          * Importer

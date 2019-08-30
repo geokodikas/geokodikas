@@ -2,6 +2,8 @@ package be.ledfan.geocoder.db.mapper
 
 import be.ledfan.geocoder.db.ConnectionWrapper
 import be.ledfan.geocoder.db.entity.OsmRelation
+import be.ledfan.geocoder.db.getHstore
+import be.ledfan.geocoder.db.getLayer
 import be.ledfan.geocoder.importer.Layer
 import org.intellij.lang.annotations.Language
 import java.util.*
@@ -66,6 +68,30 @@ class OsmRelationMapper(private val con: ConnectionWrapper) : Mapper<OsmRelation
         stmt.setString(1, layer.toString())
 
         return executeSelect(stmt)
+    }
+
+    /**
+     * Fetch tags and layer
+     */
+    fun getSlimByPrimaryIds(ids: List<Long>): HashMap<Long, OsmRelation> {
+        val sql = "SELECT osm_id, tags, layer FROM osm_relation WHERE osm_id = ANY(?)" // TODO replace osm_id
+        val array = con.createArrayOf("BIGINT", ids.toTypedArray())
+        val stmt = con.prepareStatement(sql)
+        stmt.setArray(1, array)
+
+        val result = stmt.executeQuery()
+
+        val r = HashMap<Long, OsmRelation>()
+
+        while (result.next()) {
+            val rEntity = entityCompanion.create(result.getLong("osm_id"), result.getHstore("tags"), result.getLayer())
+            r[result.getLong("osm_id")] = rEntity
+        }
+
+        stmt.close()
+        result.close()
+        return r
+
     }
 
 }
