@@ -27,7 +27,8 @@ class ReverseGeocoderService(private val reverseQueryBuilderFactory: ReverseQuer
             Result {
 
         val layers = if (desiredLayers == null || desiredLayers.isEmpty()) {
-            Layer.values().toList()
+            // use default layers, do not include any Relation or Junction, and VirtualTrafficFlow or PhysicalTrafficFlow
+            listOf(Layer.Address, Layer.Venue, Layer.Street, Layer.Link)
         } else {
             desiredLayers.map { Layer.valueOf(it) }
         }

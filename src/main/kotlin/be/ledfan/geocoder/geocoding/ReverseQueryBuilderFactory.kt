@@ -17,7 +17,7 @@ class ReverseQueryBuilderFactory(private val humanAddressBuilderService: HumanAd
                 WayReverseQueryBuilder(debug)
             }
             OsmType.Relation -> {
-                TODO()
+                RelationReverseQueryBuilder(debug)
             }
             OsmType.AddressIndex -> {
                 AddressIndexReverseQueryBuilder(debug)
