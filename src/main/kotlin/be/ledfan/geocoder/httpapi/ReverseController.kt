@@ -1,6 +1,7 @@
 package be.ledfan.geocoder.httpapi
 
 import be.ledfan.geocoder.db.ConnectionWrapper
+import be.ledfan.geocoder.db.entity.*
 import be.ledfan.geocoder.db.mapper.AddressIndexMapper
 import be.ledfan.geocoder.db.mapper.OsmParentMapper
 import be.ledfan.geocoder.db.mapper.WayNodeMapper
@@ -33,7 +34,7 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
         val limitRadius: Int? = call.request.queryParameters["limitRadius"]?.toInt()
         val limitLayers: List<String>? = call.request.queryParameters["limitLayers"]?.split(",")?.filter { it.trim() != "" }
 
-        val (closestPoint, order, nodes, ways, relations, addresses) = try {
+        val (closestPoint, order, entities) = try {
             reverseGeocoder.reverseGeocode(
                     route.lat,
                     route.lon,
@@ -63,12 +64,16 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
                 point(closestPoint.toGeoJsonCoordinate())
             }
         }
-        (nodes + ways + relations + addresses).forEach {
+        entities.forEach {
             jsonResponseBuilder.addEntity(it)
         }
 
         val geoJson = jsonResponseBuilder.toJson()
         if (route.formatting == "html") {
+            val nodes = entities.filter { it.Type == OsmType.Node } as List<OsmNode>
+            val ways = entities.filter { it.Type == OsmType.Way } as List<OsmWay>
+            val relations = entities.filter { it.Type == OsmType.Relation } as List<OsmRelation>
+            val addresses = entities.filter { it.Type == OsmType.AddressIndex } as List<AddressIndex>
             call.respond(htmlViewer.createHtml(geoJson, nodes, ways, relations, addresses, order))
         } else {
             call.respond(geoJson)
