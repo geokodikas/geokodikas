@@ -44,4 +44,4 @@ TBA
 
 ## License
 
-TBA
+GPLv3
