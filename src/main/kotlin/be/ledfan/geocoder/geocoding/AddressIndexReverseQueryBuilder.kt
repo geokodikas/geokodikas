@@ -1,8 +1,14 @@
 package be.ledfan.geocoder.geocoding
 
-class AddressIndexReverseQueryBuilder(debug: Boolean = false) : ReverseQueryBuilder(debug) {
+import be.ledfan.geocoder.addresses.HumanAddressBuilderService
+import be.ledfan.geocoder.addresses.LangCode
+import be.ledfan.geocoder.db.entity.AddressIndex
+import be.ledfan.geocoder.db.entity.OsmEntity
+import java.sql.ResultSet
 
-    override fun specificBaseQuery(lon: Double, lat: Double, metricDistance: Int, hasLayerLimits: Boolean) {
+class AddressIndexReverseQueryBuilder(humanAddressBuilderService: HumanAddressBuilderService) : ReverseQueryBuilder(humanAddressBuilderService) {
+
+    override fun initQuery() {
         repeat(2) {
             parameters.add(lon)
             parameters.add(lat)
@@ -26,6 +32,14 @@ class AddressIndexReverseQueryBuilder(debug: Boolean = false) : ReverseQueryBuil
                 """
 
         withWhere("ST_DWithin(ST_SetSRID(ST_Point(?, ?), 4326)::geography, geometry::geography, ?)")
+
+    }
+
+    override fun processResult(result: ResultSet): OsmEntity {
+        val addressIndex = AddressIndex.fillFromRow(result)
+        val address = humanAddressBuilderService.build(LangCode.NL, addressIndex)
+        addressIndex.dynamicProperties["Address"] = address
+        return processEntity(addressIndex, result)
     }
 
 }

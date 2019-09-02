@@ -1,22 +1,41 @@
 package be.ledfan.geocoder.geocoding
 
-import be.ledfan.geocoder.db.entity.OsmType
+import be.ledfan.geocoder.addresses.HumanAddressBuilderService
+import be.ledfan.geocoder.addresses.LangCode
+import be.ledfan.geocoder.db.ConnectionWrapper
+import be.ledfan.geocoder.db.entity.OsmEntity
 import be.ledfan.geocoder.forFirstAndRest
 import be.ledfan.geocoder.importer.Layer
+import be.ledfan.geocoder.kodein
+import org.kodein.di.direct
+import org.kodein.di.generic.instance
+import java.sql.ResultSet
+import kotlin.math.roundToInt
 
-abstract class ReverseQueryBuilder(private val debug: Boolean = false) {
+abstract class ReverseQueryBuilder(protected val humanAddressBuilderService: HumanAddressBuilderService) {
 
+    // Internal state
     private var hasWhere = false
+    var currentQuery = ""
+        protected set
 
-    protected var currentQuery = ""
-    protected val parameters = ArrayList<Any>()
+    var parameters = ArrayList<Any>()
+        protected set
 
-    abstract fun specificBaseQuery(lon: Double, lat: Double, metricDistance: Int, hasLayerLimits: Boolean)
+    protected var lat: Double = 0.0
+    protected var lon: Double = 0.0
+    protected var metricDistance: Int = 0
+    protected var hasLayerLimits: Boolean = false
 
-    fun baseQuery(lat: Double, lon: Double, metricDistance: Int, searchTables: HashSet<OsmType>, hasLayerLimits: Boolean): ReverseQueryBuilder {
-        if (searchTables.isEmpty()) throw Exception("Need to search in at least one table")
-        specificBaseQuery(lon, lat, metricDistance, hasLayerLimits)
-        return this
+    abstract fun initQuery()
+    abstract fun processResult(result: ResultSet): OsmEntity
+
+
+    fun setupArgs(lat: Double, lon: Double, metricDistance: Int, hasLayerLimits: Boolean) {
+        this.lat = lat
+        this.lon = lon
+        this.metricDistance = metricDistance
+        this.hasLayerLimits = hasLayerLimits
     }
 
     fun orderBy(): ReverseQueryBuilder {
@@ -27,15 +46,12 @@ abstract class ReverseQueryBuilder(private val debug: Boolean = false) {
         return this
     }
 
-    fun build(): Pair<String, List<Any>> {
-        if (debug) {
-            var filledQuery = currentQuery
-            parameters.forEach { parameterValue ->
-                filledQuery = filledQuery.replaceFirst("?", parameterValue.toString())
-            }
-            println("Filled in query\n: $filledQuery")
+    fun buildQueryForDebugging(): String {
+        var filledQuery = currentQuery
+        parameters.forEach { parameterValue ->
+            filledQuery = filledQuery.replaceFirst("?", parameterValue.toString())
         }
-        return Pair(currentQuery, parameters)
+        return filledQuery
     }
 
     protected fun withWhere(where: String) {
@@ -58,6 +74,9 @@ abstract class ReverseQueryBuilder(private val debug: Boolean = false) {
     }
 
     fun whereLayer(layers: List<Layer>): ReverseQueryBuilder {
+        if (!hasLayerLimits) {
+            throw Exception("HasLayerLimits is false, cannot specify layer to limit on")
+        }
         if (layers.isEmpty()) return this
 
         var whereClause = "("
@@ -74,6 +93,32 @@ abstract class ReverseQueryBuilder(private val debug: Boolean = false) {
 
         withWhere(whereClause)
         return this
+    }
+
+    fun execute(entities: MutableList<OsmEntity>) {
+        val privateCon = kodein.direct.instance<ConnectionWrapper>()
+        val stmt = privateCon.prepareStatement(currentQuery)
+
+        parameters.forEachIndexed { index, param ->
+            stmt.setObject(index + 1, param)
+        }
+
+        val result = stmt.executeQuery()
+
+        while (result.next()) {
+            entities.add(processResult(result))
+        }
+
+        stmt.close()
+        result.close()
+    }
+
+    fun processEntity(entity: OsmEntity, row: ResultSet): OsmEntity {
+        entity.dynamicProperties["distance"] = row.getDouble("metric_distance").roundToInt()
+        humanAddressBuilderService.nameOfEntity(LangCode.NL, entity)?.let { name ->
+            entity.dynamicProperties["name"] = name
+        }
+        return entity
     }
 
 }

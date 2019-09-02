@@ -100,7 +100,7 @@ val kodein = ConfigurableKodein().also {
          */
         bind<TagParser>() with singleton { TagParser() }
         bind<Country>() with singleton { Country.getFromDb(instance(), 52411L) } // TODO magic number
-        bind<HumanAddressBuilderService>() with provider { HumanAddressBuilderService(instance(), instance()) }
+        bind<HumanAddressBuilderService>() with provider { HumanAddressBuilderService(instance()) }
 
         /**
          * Controllers
@@ -115,8 +115,8 @@ val kodein = ConfigurableKodein().also {
          * ReverseGeocoding
          * TODO do we really want these to be singletons?
          */
-        bind<ReverseGeocoderService>() with singleton { ReverseGeocoderService(instance()) }
-        bind<ReverseQueryBuilderFactory>() with singleton { ReverseQueryBuilderFactory(instance()) }
+        bind<ReverseGeocoderService>() with singleton { ReverseGeocoderService(instance(), instance()) }
+        bind<ReverseQueryBuilderFactory>() with singleton { ReverseQueryBuilderFactory() }
 
 
     }

@@ -4,6 +4,7 @@ import be.ledfan.geocoder.config.Config
 import be.ledfan.geocoder.kodein
 import org.kodein.di.direct
 import org.kodein.di.generic.instance
+import java.sql.CallableStatement
 import java.sql.Connection
 import java.sql.PreparedStatement
 import java.util.*
@@ -14,7 +15,7 @@ class ConnectionWrapper(var connection: Connection) {
 
     fun createArrayOf(s: String, o: Array<Any>): java.sql.Array? = connection.createArrayOf(s, o)
 
-    fun prepareCall(s: String) = connection.prepareCall(s)
+    fun prepareCall(s: String): CallableStatement = connection.prepareCall(s)
 
     fun close() = connection.close()
 

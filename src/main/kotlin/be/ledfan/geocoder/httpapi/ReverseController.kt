@@ -8,6 +8,7 @@ import be.ledfan.geocoder.db.mapper.WayNodeMapper
 import be.ledfan.geocoder.geo.Coordinate
 import be.ledfan.geocoder.geo.toGeoJsonCoordinate
 import be.ledfan.geocoder.geocoding.ReverseGeocoderService
+import be.ledfan.geocoder.importer.Layer
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.locations.KtorExperimentalLocationsAPI
@@ -33,6 +34,7 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
         val limitNumeric: Int? = call.request.queryParameters["limitNumeric"]?.toInt()
         val limitRadius: Int? = call.request.queryParameters["limitRadius"]?.toInt()
         val limitLayers: List<String>? = call.request.queryParameters["limitLayers"]?.split(",")?.filter { it.trim() != "" }
+        val parsedLayers = limitLayers?.map { Layer.valueOf(it) }
 
         val (closestPoint, order, entities) = try {
             reverseGeocoder.reverseGeocode(
@@ -40,7 +42,7 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
                     route.lon,
                     limitNumeric,
                     limitRadius,
-                    limitLayers
+                    parsedLayers
             )
         } catch (e: Exception) {
             val msg = e.message

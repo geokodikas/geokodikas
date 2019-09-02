@@ -1,8 +1,13 @@
 package be.ledfan.geocoder.geocoding
 
-class RelationReverseQueryBuilder(debug: Boolean = false) : ReverseQueryBuilder(debug) {
+import be.ledfan.geocoder.addresses.HumanAddressBuilderService
+import be.ledfan.geocoder.db.entity.OsmEntity
+import be.ledfan.geocoder.db.entity.OsmRelation
+import java.sql.ResultSet
 
-    override fun specificBaseQuery(lon: Double, lat: Double, metricDistance: Int, hasLayerLimits: Boolean) {
+class RelationReverseQueryBuilder(humanAddressBuilderService: HumanAddressBuilderService) : ReverseQueryBuilder(humanAddressBuilderService) {
+
+    override fun initQuery() {
         parameters.add(lon)
         parameters.add(lat)
         currentQuery = """
@@ -20,7 +25,11 @@ class RelationReverseQueryBuilder(debug: Boolean = false) : ReverseQueryBuilder(
         if (!hasLayerLimits) {
             withWhere("layer IN ('MacroRegion', 'LocalAdmin', 'County', 'Neighbourhood', 'Country')")
         }
+    }
 
+    override fun processResult(result: ResultSet): OsmEntity {
+        val node = OsmRelation.fillFromRow(result)
+        return processEntity(node, result)
     }
 
 }

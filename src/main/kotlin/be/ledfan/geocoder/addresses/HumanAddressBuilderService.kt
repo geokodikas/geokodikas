@@ -5,9 +5,7 @@ import be.ledfan.geocoder.db.entity.OsmEntity
 import be.ledfan.geocoder.db.mapper.AddressIndexMapper
 import be.ledfan.geocoder.importer.core.TagParser
 
-class HumanAddressBuilderService(
-        private val addressIndexMapper: AddressIndexMapper,
-        private val tagParser: TagParser) {
+class HumanAddressBuilderService(private val addressIndexMapper: AddressIndexMapper) {
 
     fun build(langCode: LangCode, addressIndex: AddressIndex): String {
         if (!addressIndex.relationsFetched) {

@@ -1,8 +1,13 @@
 package be.ledfan.geocoder.geocoding
 
-class WayReverseQueryBuilder(debug: Boolean = false) : ReverseQueryBuilder(debug) {
+import be.ledfan.geocoder.addresses.HumanAddressBuilderService
+import be.ledfan.geocoder.db.entity.OsmEntity
+import be.ledfan.geocoder.db.entity.OsmWay
+import java.sql.ResultSet
 
-    override fun specificBaseQuery(lon: Double, lat: Double, metricDistance: Int, hasLayerLimits: Boolean) {
+class WayReverseQueryBuilder(humanAddressBuilderService: HumanAddressBuilderService) : ReverseQueryBuilder(humanAddressBuilderService) {
+
+    override fun initQuery() {
         repeat(2) {
             parameters.add(lon)
             parameters.add(lat)
@@ -26,6 +31,11 @@ class WayReverseQueryBuilder(debug: Boolean = false) : ReverseQueryBuilder(debug
         if (!hasLayerLimits) {
             withWhere("layer IN ('VirtualTrafficFlow'::Layer, 'PhysicalTrafficFlow'::Layer, 'Link'::Layer, 'Street'::Layer, 'Junction'::Layer)")
         }
+    }
+
+    override fun processResult(result: ResultSet): OsmEntity {
+        val node = OsmWay.fillFromRow(result)
+        return processEntity(node, result)
     }
 
 }

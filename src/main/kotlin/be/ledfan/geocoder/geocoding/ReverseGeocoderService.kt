@@ -1,14 +1,11 @@
 package be.ledfan.geocoder.geocoding
 
-import be.ledfan.geocoder.db.ConnectionWrapper
+import be.ledfan.geocoder.addresses.HumanAddressBuilderService
 import be.ledfan.geocoder.db.entity.OsmEntity
 import be.ledfan.geocoder.importer.Layer
-import be.ledfan.geocoder.kodein
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newFixedThreadPoolContext
 import kotlinx.coroutines.withContext
-import org.kodein.di.direct
-import org.kodein.di.generic.instance
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.operation.distance.DistanceOp
 import java.util.*
@@ -16,21 +13,20 @@ import kotlin.collections.ArrayList
 import kotlin.math.min
 import org.locationtech.jts.geom.Coordinate as JtsCoordinate
 
-private val reverseGeocoderContext = newFixedThreadPoolContext(16, "reverseGeocoderContext") // TODO make parameter configurable
+class ReverseGeocoderService(private val reverseQueryBuilderFactory: ReverseQueryBuilderFactory,
+                             private val humanAddressBuilderService: HumanAddressBuilderService) {
 
-class ReverseGeocoderService(private val reverseQueryBuilderFactory: ReverseQueryBuilderFactory) {
-
+    private val reverseGeocoderContext = newFixedThreadPoolContext(16, "reverseGeocoderContext") // TODO make parameter configurable
 
     suspend fun reverseGeocode(lat: Double, lon: Double,
                                limitNumeric: Int?, limitRadius: Int?,
-                               desiredLayers: List<String>?):
-            Result {
+                               desiredLayers: List<Layer>?): Result {
 
         val layers = if (desiredLayers == null || desiredLayers.isEmpty()) {
             // use default layers, do not include any Relation or Junction, and VirtualTrafficFlow or PhysicalTrafficFlow
             listOf(Layer.Address, Layer.Venue, Layer.Street, Layer.Link)
         } else {
-            desiredLayers.map { Layer.valueOf(it) }
+            desiredLayers
         }
 
         val requiredTables = getTablesForLayers(layers)
@@ -52,30 +48,17 @@ class ReverseGeocoderService(private val reverseQueryBuilderFactory: ReverseQuer
             for (table in requiredTables) {
                 this@withContext.launch {
                     // query and process each table in parallel
-                    val privateCon = kodein.direct.instance<ConnectionWrapper>()
-                    val (sqlQuery, parameters) = reverseQueryBuilderFactory.createBuilder(table, debug = true).run {
-                        baseQuery(lat, lon, actualLimitRadius, requiredTables, desiredLayers != null)
+                    reverseQueryBuilderFactory.createBuilder(table, humanAddressBuilderService).run {
+                        setupArgs(lat, lon, actualLimitRadius, desiredLayers != null)
+                        initQuery()
                         if (desiredLayers != null) {
                             whereLayer(layers)
                         }
                         orderBy()
                         limit(actualLimitNumeric)
-                        build()
+                        execute(entities)
                     }
 
-                    val stmt = privateCon.prepareStatement(sqlQuery)
-
-                    parameters.forEachIndexed { index, param ->
-                        stmt.setObject(index + 1, param)
-                    }
-
-                    val result = stmt.executeQuery()
-                    while (result.next()) {
-                        reverseQueryBuilderFactory.processResult(table, result, entities)
-                    }
-
-                    stmt.close()
-                    result.close()
                 }
             }
         }
