@@ -24,6 +24,7 @@ object ConnectionFactory {
 
 
         val jdbcUrl = "jdbc:postgresql://${config.database.host}:${config.database.port}/${config.database.dbName}"
+        KotlinLogging.logger {}.debug { "Using JDCB url: $jdbcUrl" }
 
         // Open a connection to the database
         try {
