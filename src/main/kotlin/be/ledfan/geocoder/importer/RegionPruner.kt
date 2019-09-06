@@ -32,7 +32,7 @@ class RegionPruner(private val config: Config,
              WHERE o.centroid IS NOT NULL
               AND osm_id <> 52411
               AND NOT st_contains((SELECT geometry FROM osm_relation WHERE osm_id = ?).geometry, ST_PointOnSurface(o.geometry));
-            """
+            """ // TODO hard coded country id
 
         val ids = collect(sql)
 
@@ -72,7 +72,7 @@ class RegionPruner(private val config: Config,
             FROM osm_way AS o
               WHERE NOT (SELECT geometry FROM osm_relation WHERE osm_id = 52411).geometry && o.geometry
                     AND NOT st_intersects((SELECT geometry FROM osm_relation WHERE osm_id = ?)  .geometry, o.geometry)
-              """
+              """ // TODO hard coded country Id
 
         val ids = collect(sql)
 

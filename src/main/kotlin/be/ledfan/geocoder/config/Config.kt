@@ -12,7 +12,11 @@ data class Importer(
 
 data class ImportFromExport(
         var fileLocation: String = "",
-        var fileMd5Sum: String = ""
+        var fileMd5Sum: String = "",
+        /**
+         * Whether to try the import before starting the HTTP API.
+         */
+        var tryImportOnHttp: Boolean = false
 )
 
 data class Database(
@@ -29,8 +33,13 @@ data class Runtime(
 )
 
 
+data class Http(
+        var publicUrl: String = ""
+)
+
 data class Config(val importer: Importer,
                   val runtime: Runtime,
                   val database: Database,
                   val importFromExport: ImportFromExport,
+                  val http: Http,
                   var tmpDir: File = File(System.getProperty("user.dir") + "/tmp"))

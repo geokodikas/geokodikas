@@ -6,6 +6,7 @@ import org.testcontainers.containers.output.OutputFrame
 import java.util.concurrent.TimeUnit
 import org.testcontainers.containers.output.WaitingConsumer
 import org.testcontainers.containers.output.Slf4jLogConsumer
+import org.testcontainers.utility.MountableFile
 import java.io.File
 
 class KGenericContainer(imageName: String) : GenericContainer<KGenericContainer>(imageName)
@@ -19,7 +20,7 @@ fun osm2psqlContainer(dbHost: String, dbUser: String, dbPassword: String, dbPort
     container.withEnv("PG_DB", dbName)
     container.withEnv("PGPASSWORD", dbPassword)
     container.withEnv("NUM_PROC", numProc)
-    container.withFileSystemBind(File(pbfFilePath).parent, "/workdir/input")
+    container.withCopyFileToContainer(MountableFile.forHostPath(pbfFilePath), "/workdir/input/input.pbf")
 
     val logger = KotlinLogging.logger {  }
     logger.info("Starting import, this will take some time")

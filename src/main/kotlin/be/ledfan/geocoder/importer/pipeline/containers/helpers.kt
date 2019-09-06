@@ -35,6 +35,16 @@ fun downloadAndCacheFile(url: String, destinationFileName: String, md5sum: Strin
     val config: Config = kodein.direct.instance()
     val destinationFile = File(config.tmpDir, destinationFileName)
 
+    if (File(url).exists()) {
+        val f = File(url)
+        if (md5sumOfFile(File(url)) == md5sum) {
+            logger.info("File to download ($url) is local path and checksum is correct")
+            return f.absolutePath
+        } else {
+            throw Exception("File to download ($url) is local path but checksum is wrong")
+        }
+    }
+
     if (destinationFile.exists() && md5sumOfFile(destinationFile) == md5sum) {
         logger.info("File already available with correct checksum, not downloading: $url")
         return destinationFile.absolutePath

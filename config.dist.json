@@ -10,5 +10,8 @@
     "password": "geokodikas",
     "db_name": "geokodikas",
     "host": "127.0.0.1"
+  },
+  "http": {
+    "public_url": "http://localhost:8080"
   }
 }

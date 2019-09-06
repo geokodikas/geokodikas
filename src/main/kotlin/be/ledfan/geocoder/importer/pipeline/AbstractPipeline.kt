@@ -6,10 +6,7 @@ import be.ledfan.geocoder.db.ConnectionFactory
 import be.ledfan.geocoder.db.ConnectionWrapper
 import be.ledfan.geocoder.importer.core.Importer
 import be.ledfan.geocoder.importer.core.StatsCollector
-import be.ledfan.geocoder.importer.pipeline.containers.downloadAndCacheFile
-import be.ledfan.geocoder.importer.pipeline.containers.imageExists
-import be.ledfan.geocoder.importer.pipeline.containers.osm2psqlContainer
-import be.ledfan.geocoder.importer.pipeline.containers.randomString
+import be.ledfan.geocoder.importer.pipeline.containers.*
 import be.ledfan.geocoder.importer.steps.executeBatchQueries
 import be.ledfan.geocoder.kodein
 import commitContainer
@@ -25,7 +22,7 @@ import org.testcontainers.containers.PostgreSQLContainer.POSTGRESQL_PORT
 import setupPostgresContainer
 import java.io.File
 
-data class IntegrationConfig(val pbFurl: String, val pbfName: String, val pbfCheckSum: String)
+data class IntegrationConfig(val pbFurl: String, val countryName: String, val pbfCheckSum: String)
 
 
 abstract class AbstractPipeline(private val ic: IntegrationConfig) {
@@ -37,9 +34,9 @@ abstract class AbstractPipeline(private val ic: IntegrationConfig) {
 
     fun import() {
 
-        val pbfFilePath = downloadAndCacheFile(ic.pbFurl, ic.pbfName, ic.pbfCheckSum)
-        val importedImageName = "postgis_${ic.pbfName}_${ic.pbfCheckSum}"
-        val fullImportedImageName = "full_import${ic.pbfName}_${ic.pbfCheckSum}"
+        val pbfFilePath = downloadAndCacheFile(ic.pbFurl, "${ic.countryName}_${ic.pbfCheckSum}.pbf", ic.pbfCheckSum)
+        val importedImageName = "postgis_${ic.countryName}_${ic.pbfCheckSum}"
+        val fullImportedImageName = "full_import${ic.countryName}_${ic.pbfCheckSum}"
 
         // first check if container with this name exists
         var doImport = true
@@ -119,8 +116,8 @@ abstract class AbstractPipeline(private val ic: IntegrationConfig) {
         executeBatchQueries(sqlQueries)
     }
 
-    fun export() {
-        val fileName = "full_import${ic.pbfName}_${ic.pbfCheckSum}__${randomString()}"
+    fun export(): Pair<String, String> {
+        val fileName = "full_import_${ic.countryName}_${ic.pbfCheckSum}__${randomString()}"
 
         logger.info("Going to export db into $fileName")
         val res = postgresContainer.execInContainer("pg_dump", "-U", "geokodikas", "--verbose", "-Fc", "geokodikas", "-f", "/tmp/db.postgres")
@@ -130,9 +127,11 @@ abstract class AbstractPipeline(private val ic: IntegrationConfig) {
             logger.info("Export db succeeded")
         }
 
-        val finalPath = File(config.tmpDir, fileName).absolutePath
+        val finalFile = File(config.tmpDir, fileName)
+        val finalPath = finalFile.absolutePath
         postgresContainer.copyFileFromContainer("/tmp/db.postgres", finalPath)
         logger.info("Db export available at $finalPath")
+        return Pair(fileName, md5sumOfFile(finalFile))
     }
 
     private fun closeAllConnections() {

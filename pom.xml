@@ -13,7 +13,6 @@
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
         <importer.main.class>be.ledfan.geocoder.importer.MainKt</importer.main.class>
         <import-pipeline.main.class>be.ledfan.geocoder.importer.pipeline.MainKt</import-pipeline.main.class>
-        <import-from-export.main.class>be.ledfan.geocoder.importer.import_from_export.MainKt</import-from-export.main.class>
         <rest-api.main.class>be.ledfan.geocoder.httpapi.MainKt</rest-api.main.class>
         <junit.jupiter.version>5.5.1</junit.jupiter.version>
         <surefire.version>2.22.2</surefire.version>
@@ -194,6 +193,16 @@
             <artifactId>kotlinx-html-jvm</artifactId>
             <version>0.6.12</version>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.9.9</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+            <version>2.9.9</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -268,24 +277,6 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>import-from-export</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <archive>
-                                <manifest>
-                                    <mainClass>${import-from-export.main.class}</mainClass>
-                                </manifest>
-                            </archive>
-                            <descriptorRefs>
-                                <descriptorRef>jar-with-dependencies</descriptorRef>
-                            </descriptorRefs>
-                            <finalName>import-from-export</finalName>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>rest-api</id>
                         <phase>package</phase>
                         <goals>
@@ -301,6 +292,24 @@
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
                             <finalName>rest-api</finalName>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>from-yaml</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <mainClass>be.ledfan.geocoder.importer.pipeline.FromYamlKt</mainClass>
+                                </manifest>
+                            </archive>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <finalName>from-yaml</finalName>
                         </configuration>
                     </execution>
                 </executions>

@@ -99,7 +99,7 @@ val kodein = ConfigurableKodein().also {
          * Other
          */
         bind<TagParser>() with singleton { TagParser() }
-        bind<Country>() with singleton { Country.getFromDb(instance(), 52411L) } // TODO magic number
+        bind<Country>() with singleton { Country.getFromDb(instance(), instance()) } // TODO magic number
         bind<HumanAddressBuilderService>() with provider { HumanAddressBuilderService(instance()) }
 
         /**
