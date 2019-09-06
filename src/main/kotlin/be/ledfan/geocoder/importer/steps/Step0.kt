@@ -133,7 +133,11 @@ suspend fun step0_create_schema(): Boolean {
                 tags hstore,
                 layer Layer NOT NULL    
             );
+            """,
+
+            """
             """)
+
 //            """
 //            CREATE TABLE IF NOT EXISTS one_way_restrictions
 //            (
