@@ -125,34 +125,4 @@ object ConfigReader {
             }
         }
     }
-
-    private fun loadMissingSettingsFromEnv(config: Config) {
-        if (config.database.username == "") {
-            getEnv("GEOKODIKAS_DB_USERNAME")?.let {
-                config.database.username = it
-            }
-        }
-        if (config.database.password == "") {
-            getEnv("GEOKODIKAS_DB_PASSWORD")?.let {
-                config.database.password = it
-            }
-        }
-        if (config.database.host == "") {
-            getEnv("GEOKODIKAS_DB_HOST")?.let {
-                config.database.host = it
-            }
-        }
-        if (config.database.port == 5432) {
-            getEnv("GEOKODIKAS_DB_PORT")?.let {
-                config.database.port = it.toInt()
-            }
-        }
-        if (config.database.dbName == "") {
-            getEnv("GEOKODIKAS_DB_NAME")?.let {
-                config.database.dbName = it
-            }
-        }
-
-    }
-
 }
