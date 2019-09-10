@@ -26,7 +26,7 @@ fun commitContainer(currentContainerId: String, saveAsName: String): Boolean {
         } ?: throw Exception("Stopping container timed out!")
     }
 
-    dockerClient.commitCmd(currentContainerId).withRepository(saveAsName).exec()
+    dockerClient.commitCmd(currentContainerId).withRepository(saveAsName.toLowerCase()).exec()
 
     logger.info("Container committed")
 

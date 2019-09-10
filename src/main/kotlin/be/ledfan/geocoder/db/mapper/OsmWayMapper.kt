@@ -4,6 +4,8 @@ import be.ledfan.geocoder.db.ConnectionWrapper
 import be.ledfan.geocoder.db.entity.OsmWay
 import mu.KotlinLogging
 import org.intellij.lang.annotations.Language
+import java.sql.Connection
+import java.sql.PreparedStatement
 import java.util.*
 
 class OsmWayMapper(private val con: ConnectionWrapper) : Mapper<OsmWay>(con) {
@@ -150,6 +152,38 @@ class OsmWayMapper(private val con: ConnectionWrapper) : Mapper<OsmWay>(con) {
         """.trimIndent())
 
         return executeSelect(stmt)
+    }
+
+    class GetAddressesAndVenuesWithPagination(private val blockSize: Int,
+                                              private val con: ConnectionWrapper,
+                                              private val executeSelect: (stmt: PreparedStatement) -> HashMap<Long, OsmWay>) {
+
+        private var currentBlock: Long = 0
+
+        fun nextBlock(): HashMap<Long, OsmWay> {
+            @Language("SQL")
+            val stmt = con.prepareCall("""
+                SELECT *
+                FROM osm_way
+                WHERE layer = 'Address'::Layer
+                   OR layer = 'Venue'::Layer
+                   ORDER BY osm_id
+                    OFFSET ?
+                    LIMIT ?
+                """.trimIndent())
+
+            stmt.setLong(1, currentBlock * blockSize)
+            stmt.setInt(2, blockSize)
+
+            currentBlock++
+
+            return executeSelect(stmt)
+        }
+
+    }
+
+    fun getAddressesAndVenuesWithPagination(blockSize: Int): GetAddressesAndVenuesWithPagination {
+        return GetAddressesAndVenuesWithPagination(blockSize, con, ::executeSelect)
     }
 
     fun getStreetsForWays_FilterByWayNameAndLocalAdmin(waysIds: ArrayList<Long>): HashMap<Long, Long?> {

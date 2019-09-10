@@ -42,7 +42,7 @@ class Broker<OsmType>(
      * Starts $processorCount processors which the elements for this broker are send to.
      */
     suspend fun startProcessors() {
-        logger.debug { "Starting $numProcessors processors for type: $osmTypeName ..." }
+        logger.info { "Starting $numProcessors processors for type: $osmTypeName ..." }
         for (i in 0 until numProcessors) {
             val job = GlobalScope.launch(Dispatchers.IO) {
                 try {
@@ -61,14 +61,14 @@ class Broker<OsmType>(
             }
             jobs[i] = job
         }
-        logger.debug { "$statsLineKey --> Started all processors, ${jobs.size}, ${processors.size}" }
+        logger.info { "$statsLineKey --> Started all processors, ${jobs.size}, ${processors.size}" }
         statsTimer = timer("print_stats_timer", period = 250) {
             updateStats()
         }
         while (processors.size != numProcessors) {
             delay(1000)
         }
-        logger.debug { "All processors eventually registered"}
+        logger.info { "All processors eventually registered"}
     }
 
     /**

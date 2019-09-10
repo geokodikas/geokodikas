@@ -46,17 +46,20 @@ class BuildAddressIndex(private val osmNodeMapper: OsmNodeMapper, private val os
         val wayBroker = createBroker()
         wayBroker.startProcessors()
 
-        val ways = ArrayList(osmWayMapper.getAddressesAndVenues().values)
-        logger.debug { "Found ${ways.size} addresses in ways table" }
-        var oldIndex = 0
-        while (oldIndex != ways.size) {
-            val end = min(oldIndex + wayBroker.freeSpace(), ways.size)
-            logger.debug { "Ways remaining: ${ways.size - oldIndex}, can queue: ${wayBroker.freeSpace()} items" }
-            val waysToQueue = ways.subList(oldIndex, end)
-            oldIndex = end
-            wayBroker.enqueueAll(waysToQueue)
-            delay(3000L)
+        val addresses = osmWayMapper.getAddressesAndVenuesWithPagination(config.importer.processorBlockSize)
+
+        while (true) {
+            val block = ArrayList(addresses.nextBlock().values)
+            if (block.size == 0) break
+            if (wayBroker.freeSpace() < block.size) {
+                logger.debug { "Not enough space in queue, to enqueue new block" }
+                delay(3000L)
+                continue
+            }
+            logger.debug { "Enqueuing new block" }
+            wayBroker.enqueueAll(block)
         }
+
 
         wayBroker.finishedReading()
         wayBroker.join()

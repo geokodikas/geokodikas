@@ -12,15 +12,15 @@ import java.io.File
 class KGenericContainer(imageName: String) : GenericContainer<KGenericContainer>(imageName)
 
 fun osm2psqlContainer(dbHost: String, dbUser: String, dbPassword: String, dbPort: Int, dbName: String, pbfFilePath: String, numProc: String): KGenericContainer {
-    val container = KGenericContainer("ledfan/osm2pgsql")
+    val container = KGenericContainer("geokodikas/osm2pgsql:master")
             .withCreateContainerCmdModifier{ it.withName("osm2_pgsql_importer__${randomString()}") }
     container.withEnv("PG_HOST", dbHost)
     container.withEnv("PG_USER", dbUser)
     container.withEnv("PG_PORT", dbPort.toString())
-    container.withEnv("PG_DB", dbName)
-    container.withEnv("PGPASSWORD", dbPassword)
-    container.withEnv("NUM_PROC", numProc)
-    container.withCopyFileToContainer(MountableFile.forHostPath(pbfFilePath), "/workdir/input/input.pbf")
+    container.withEnv("PG_NAME", dbName)
+    container.withEnv("PG_PASSWORD", dbPassword)
+    container.withEnv("OSM2PSQL_NUM_PROC", numProc)
+    container.withCopyFileToContainer(MountableFile.forHostPath(pbfFilePath), "/opt/geokodikas/input/input.pbf")
 
     val logger = KotlinLogging.logger {  }
     logger.info("Starting import, this will take some time")

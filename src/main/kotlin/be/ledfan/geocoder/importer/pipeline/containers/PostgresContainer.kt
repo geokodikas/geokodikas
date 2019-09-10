@@ -35,10 +35,10 @@ class KPostgreSQLContainer(dockerImageName: String) : PostgreSQLContainer<KPostg
     }
 }
 
-fun setupPostgresContainer(): PostgreSQLContainer<KPostgreSQLContainer> = setupPostgresContainer("ledfan/postgis_hstore:latest")
+fun setupPostgresContainer(): PostgreSQLContainer<KPostgreSQLContainer> = setupPostgresContainer("geokodikas/db-import:master")
 
 fun setupPostgresContainer(existingImage: String): KPostgreSQLContainer {
-    val postgresContainer = KPostgreSQLContainer(existingImage)
+    val postgresContainer = KPostgreSQLContainer(existingImage.toLowerCase())
             .withCreateContainerCmdModifier { it.withName("postgis__${randomString()}") }
     postgresContainer.start()
     val logConsumer = Slf4jLogConsumer(KotlinLogging.logger { })
