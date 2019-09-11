@@ -47,7 +47,11 @@ class AddressController(override val kodein: Kodein) : KodeinController(kodein) 
 
 
     override fun Routing.registerRoutes() {
-        get<Routes.Address> { route -> get(route, this.call) }
+        get<Routes.Address> { route ->
+            withErrorHandling(call) {
+                get(route, call)
+            }
+        }
     }
 
 }

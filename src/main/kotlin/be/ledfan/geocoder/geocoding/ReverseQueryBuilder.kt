@@ -81,11 +81,9 @@ abstract class ReverseQueryBuilder(protected val humanAddressBuilderService: Hum
 
         var whereClause = "("
         layers.forFirstAndRest({ layer ->
-            //            if (!isValidLayer(layer)) throw Exception("Invalid layer $layer")
             whereClause += "layer = ?::Layer "
             parameters.add(layer.toString())
         }, { layer ->
-            //            if (!isValidLayer(layer)) throw Exception("Invalid layer $layer")
             whereClause += "OR layer = ?::Layer "
             parameters.add(layer.toString())
         })

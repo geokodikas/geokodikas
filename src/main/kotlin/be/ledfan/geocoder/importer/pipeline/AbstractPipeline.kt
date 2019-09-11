@@ -4,6 +4,7 @@ import KPostgreSQLContainer
 import be.ledfan.geocoder.config.Config
 import be.ledfan.geocoder.db.ConnectionFactory
 import be.ledfan.geocoder.db.ConnectionWrapper
+import be.ledfan.geocoder.db.mapper.ImportFromExportMetadataMapper
 import be.ledfan.geocoder.importer.core.Importer
 import be.ledfan.geocoder.importer.core.StatsCollector
 import be.ledfan.geocoder.importer.pipeline.containers.*

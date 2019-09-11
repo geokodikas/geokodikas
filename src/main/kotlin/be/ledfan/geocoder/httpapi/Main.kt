@@ -50,7 +50,7 @@ fun main() {
                 true
             }
             last.md5sum == config.importFromExport.fileMd5Sum -> {
-                logger.info { "Already has import with sum ${last.md5sum} " }
+                logger.info { "Already has import with sum ${last.md5sum}." }
                 false
             }
             else -> {

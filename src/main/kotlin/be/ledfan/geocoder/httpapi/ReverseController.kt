@@ -29,29 +29,19 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
     private val addressIndexMapper: AddressIndexMapper by instance()
     private val htmlViewer = HTMLViewer(wayNodeMapper, osmParentMapper, addressIndexMapper)
 
-
     private suspend fun reverse(route: Routes.Reverse, call: ApplicationCall) {
         val limitNumeric: Int? = call.request.queryParameters["limitNumeric"]?.toInt()
         val limitRadius: Int? = call.request.queryParameters["limitRadius"]?.toInt()
         val limitLayers: List<String>? = call.request.queryParameters["limitLayers"]?.split(",")?.filter { it.trim() != "" }
         val parsedLayers = limitLayers?.map { Layer.valueOf(it) }
 
-        val (closestPoint, order, entities) = try {
-            reverseGeocoder.reverseGeocode(
-                    route.lat,
-                    route.lon,
-                    limitNumeric,
-                    limitRadius,
-                    parsedLayers
-            )
-        } catch (e: Exception) {
-            val msg = e.message
-            e.printStackTrace()
-            if (msg != null) {
-                return call.respondError(msg)
-            }
-            return call.respondError("Unknown error occurred")
-        }
+        val (closestPoint, order, entities) = reverseGeocoder.reverseGeocode(
+                route.lat,
+                route.lon,
+                limitNumeric,
+                limitRadius,
+                parsedLayers
+        )
 
         val jsonResponseBuilder = JSONResponseBuilder()
         jsonResponseBuilder.addFeature {
@@ -83,7 +73,11 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
     }
 
     override fun Routing.registerRoutes() {
-        get<Routes.Reverse> { route -> reverse(route, this.call) }
+        get<Routes.Reverse> { route ->
+            withErrorHandling(call) {
+                reverse(route, call)
+            }
+        }
     }
 
 }
