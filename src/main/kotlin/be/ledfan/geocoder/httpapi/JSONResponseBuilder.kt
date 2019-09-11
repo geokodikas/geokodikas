@@ -17,7 +17,7 @@ class JSONResponseBuilder {
     /**
      * Order matters!
      */
-    fun addEntity(osmEntity: OsmEntity, block: Feature.() -> Unit = {}) {
+    fun addEntity(osmEntity: OsmEntity, includeTags: List<String>? = null, block: Feature.() -> Unit = {}) {
         featureCollection.apply {
             withFeature {
                 withId("feature-${osmEntity.id}")
@@ -53,6 +53,15 @@ class JSONResponseBuilder {
                 }
 
                 withProperty("osm_id", osmEntity.id)
+                withProperty("layer", osmEntity.layer)
+
+                if (includeTags != null) {
+                    val tagData = HashMap<String, String?>()
+                    for (tag in includeTags) {
+                        tagData[tag] = osmEntity.tags[tag]
+                    }
+                    withProperty("tags", tagData)
+                }
 
                 if (osmEntity.dynamicProperties.size > 0) {
                     withProperty("dynamic_properties", osmEntity.dynamicProperties)

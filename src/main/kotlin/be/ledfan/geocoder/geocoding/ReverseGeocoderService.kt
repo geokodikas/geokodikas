@@ -4,7 +4,6 @@ import be.ledfan.geocoder.addresses.HumanAddressBuilderService
 import be.ledfan.geocoder.db.entity.OsmEntity
 import be.ledfan.geocoder.importer.Layer
 import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.newFixedThreadPoolContext
 import kotlinx.coroutines.withContext
 import org.locationtech.jts.geom.GeometryFactory

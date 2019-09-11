@@ -33,6 +33,7 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
         val limitNumeric: Int? = call.request.queryParameters["limitNumeric"]?.toInt()
         val limitRadius: Int? = call.request.queryParameters["limitRadius"]?.toInt()
         val limitLayers: List<String>? = call.request.queryParameters["limitLayers"]?.split(",")?.filter { it.trim() != "" }
+        val includeTags: List<String>? = call.request.queryParameters["includeTags"]?.split(",")?.filter { it.trim() != "" }
         val parsedLayers = limitLayers?.map { Layer.valueOf(it) }
 
         val (closestPoint, order, entities) = reverseGeocoder.reverseGeocode(
@@ -57,7 +58,7 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
             }
         }
         entities.forEach {
-            jsonResponseBuilder.addEntity(it)
+            jsonResponseBuilder.addEntity(it, includeTags)
         }
 
         val geoJson = jsonResponseBuilder.toJson()
