@@ -42,7 +42,11 @@ val kodein = ConfigurableKodein().also {
 
         bind<Config>() with singleton { ConfigReader.getConfig() }
 
-        bind<ConnectionWrapper>() with singleton(ref = threadLocal) { ConnectionFactory.createWrappedConnection(instance()) }
+        bind<ConnectionWrapper>() with singleton(ref = threadLocal) {
+            ConnectionFactory.createWrappedConnection(instance()).also { con ->
+                con.name = "connection-for-${Thread.currentThread().name}"
+            }
+        }
 
         bind<OsmNodeMapper>() with provider { OsmNodeMapper(instance()) }
 

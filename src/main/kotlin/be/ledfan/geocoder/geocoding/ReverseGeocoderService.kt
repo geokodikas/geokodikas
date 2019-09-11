@@ -3,12 +3,12 @@ package be.ledfan.geocoder.geocoding
 import be.ledfan.geocoder.addresses.HumanAddressBuilderService
 import be.ledfan.geocoder.db.entity.OsmEntity
 import be.ledfan.geocoder.importer.Layer
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newFixedThreadPoolContext
 import kotlinx.coroutines.withContext
 import org.locationtech.jts.geom.GeometryFactory
 import org.locationtech.jts.operation.distance.DistanceOp
-import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.min
 import org.locationtech.jts.geom.Coordinate as JtsCoordinate
@@ -30,7 +30,6 @@ class ReverseGeocoderService(private val reverseQueryBuilderFactory: ReverseQuer
         }
 
         val requiredTables = getTablesForLayers(layers)
-        var entities = Collections.synchronizedList(ArrayList<OsmEntity>())
 
         val actualLimitNumeric = if (limitNumeric != null && limitNumeric > 0) {
             limitNumeric
@@ -44,10 +43,10 @@ class ReverseGeocoderService(private val reverseQueryBuilderFactory: ReverseQuer
             200 // meter
         }
 
-        withContext(reverseGeocoderContext) {
-            for (table in requiredTables) {
-                this@withContext.launch {
-                    // query and process each table in parallel
+
+        val deferredEntities = withContext(reverseGeocoderContext) {
+            requiredTables.map { table ->
+                async(reverseGeocoderContext) {
                     reverseQueryBuilderFactory.createBuilder(table, humanAddressBuilderService).run {
                         setupArgs(lat, lon, actualLimitRadius, desiredLayers != null)
                         initQuery()
@@ -56,12 +55,16 @@ class ReverseGeocoderService(private val reverseQueryBuilderFactory: ReverseQuer
                         }
                         orderBy()
                         limit(actualLimitNumeric)
-                        execute(entities)
+                        val r = ArrayList<OsmEntity>()
+                        execute(r)
+                        println(buildQueryForDebugging())
+                        r
                     }
-
                 }
             }
         }
+
+        var entities = ArrayList(deferredEntities.map { it.await() }.flatten())
 
         entities.sortBy { it.dynamicProperties["distance"] as Int }
         entities = ArrayList(entities.subList(0, min(actualLimitNumeric, entities.size)))

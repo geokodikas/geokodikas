@@ -64,7 +64,8 @@ class Importer {
         steps["step4"] = listOf(
                 Pair("step4_checks", ::step4_checks),
                 Pair("step4_materialized_view", ::step4_materialized_view),
-                Pair("step4_build_address_index", ::step4_build_address_index))
+                Pair("step4_build_address_index", ::step4_build_address_index),
+                Pair("step4_create_indexes", ::step4_create_indexes))
 
     }
 

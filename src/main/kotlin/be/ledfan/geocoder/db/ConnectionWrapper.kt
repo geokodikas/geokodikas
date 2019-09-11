@@ -11,6 +11,8 @@ import java.util.*
 
 class ConnectionWrapper(var connection: Connection) {
 
+    var name = ""
+
     fun prepareStatement(s: String): PreparedStatement = connection.prepareStatement(s)
 
     fun createArrayOf(s: String, o: Array<Any>): java.sql.Array? = connection.createArrayOf(s, o)
