@@ -9,7 +9,10 @@ import com.beust.klaxon.JsonObject
 
 class JSONResponseBuilder {
 
-    private val featureCollection = featureCollection()
+    private val featureCollection = featureCollection {
+        // Identical way of attribution as in nominatim
+        withForeignMember("license", "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright")
+    }
 
     /**
      * Order matters!

@@ -47,6 +47,7 @@
         </div>
         <div class="col-6">
             <br>
+            <pre>Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright</pre>
             <details>
                 <pre><code>${geojson}</code></pre>
             </details>
