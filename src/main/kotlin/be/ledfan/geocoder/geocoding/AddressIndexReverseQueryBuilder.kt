@@ -14,7 +14,7 @@ class AddressIndexReverseQueryBuilder(humanAddressBuilderService: HumanAddressBu
             parameters.add(lat)
         }
         parameters.add(metricDistance)
-        currentQuery =  """
+        currentQuery = """
                 SELECT osm_id,
                        tags,
                        osm_type,
@@ -25,8 +25,11 @@ class AddressIndexReverseQueryBuilder(humanAddressBuilderService: HumanAddressBu
                        macroregion_id,
                        country_id,
                        housenumber,
-                       layer,
-                       geometry                                                       AS geometry,
+                       layer, """
+        if (includeGeometry) {
+            currentQuery += "geometry,"
+        }
+        currentQuery += """
                        st_distance_sphere(ST_SetSRID(ST_Point(?, ?), 4326), geometry) AS metric_distance
                 FROM address_index
                 """

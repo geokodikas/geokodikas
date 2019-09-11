@@ -18,8 +18,11 @@ class NodeReverseQueryBuilder(humanAddressBuilderService: HumanAddressBuilderSer
                version,
                tags,
                z_order,
-               layer,
-               centroid,
+               layer,"""
+        if (includeGeometry) {
+            currentQuery += "centroid,"
+        }
+        currentQuery += """
                st_distance_sphere(ST_SetSRID(ST_Point(?, ?), 4326), centroid) AS metric_distance
             FROM osm_node
         """

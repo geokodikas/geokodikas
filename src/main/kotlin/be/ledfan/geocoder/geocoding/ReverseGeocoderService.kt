@@ -19,7 +19,8 @@ class ReverseGeocoderService(private val reverseQueryBuilderFactory: ReverseQuer
 
     suspend fun reverseGeocode(lat: Double, lon: Double,
                                limitNumeric: Int?, limitRadius: Int?,
-                               desiredLayers: List<Layer>?): Result {
+                               desiredLayers: List<Layer>?,
+                               includeGeometry: Boolean = true): Result {
 
         val layers = if (desiredLayers == null || desiredLayers.isEmpty()) {
             // use default layers, do not include any Relation or Junction, and VirtualTrafficFlow or PhysicalTrafficFlow
@@ -47,7 +48,7 @@ class ReverseGeocoderService(private val reverseQueryBuilderFactory: ReverseQuer
             requiredTables.map { table ->
                 async(reverseGeocoderContext) {
                     reverseQueryBuilderFactory.createBuilder(table, humanAddressBuilderService).run {
-                        setupArgs(lat, lon, actualLimitRadius, desiredLayers != null)
+                        setupArgs(lat, lon, actualLimitRadius, desiredLayers != null, includeGeometry)
                         initQuery()
                         if (desiredLayers != null) {
                             whereLayer(layers)
@@ -68,19 +69,23 @@ class ReverseGeocoderService(private val reverseQueryBuilderFactory: ReverseQuer
         entities.sortBy { it.dynamicProperties["distance"] as Int }
         entities = ArrayList(entities.subList(0, min(actualLimitNumeric, entities.size)))
 
-        val closestEntity = entities.first()
-        val inputGeometry = GeometryFactory().createPoint(JtsCoordinate(lon, lat))
-        closestEntity.mainGeometry().value
+        val closestPoint = if (includeGeometry) {
+            val closestEntity = entities.first()
+            val inputGeometry = GeometryFactory().createPoint(JtsCoordinate(lon, lat))
+            closestEntity.mainGeometry().value
+            val distanceOp = DistanceOp(closestEntity.geometryAsJts(), inputGeometry)
+            distanceOp.nearestPoints().first()
+        } else {
+            null
+        }
 
-        val distanceOp = DistanceOp(closestEntity.geometryAsJts(), inputGeometry)
-        val closestPoint = distanceOp.nearestPoints().first()
         val order = entities.map { it.id }
 
         return Result(closestPoint, order, entities)
     }
 
     data class Result(
-            val closestPoint: JtsCoordinate,
+            val closestPoint: org.locationtech.jts.geom.Coordinate?,
             val order: List<Long>,
             val entities: List<OsmEntity>
     )

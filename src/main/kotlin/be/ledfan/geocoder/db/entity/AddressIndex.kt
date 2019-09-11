@@ -1,5 +1,6 @@
 package be.ledfan.geocoder.db.entity
 
+import be.ledfan.geocoder.db.getGeometry
 import be.ledfan.geocoder.db.getHstore
 import be.ledfan.geocoder.db.getLayer
 import org.postgis.PGgeometry
@@ -27,7 +28,7 @@ class AddressIndex(id: Long) : OsmEntity(id) {
             r.macroregionId = row.getLong("macroregion_id")
             r.countryId = row.getLong("country_id")
             r.housenumber = row.getString("housenumber")
-            r.geometry = row.getObject("geometry") as PGgeometry
+            row.getGeometry(r)
             r.tags = row.getHstore("tags")
             r.layer = row.getLayer()
 
@@ -72,3 +73,4 @@ class AddressIndex(id: Long) : OsmEntity(id) {
     var relationsFetched = false
 
 }
+

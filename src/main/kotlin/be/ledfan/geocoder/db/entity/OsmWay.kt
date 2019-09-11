@@ -1,6 +1,8 @@
 package be.ledfan.geocoder.db.entity
 
 //import be.ledfan.geocoder.geocoder.INameResolvable
+import be.ledfan.geocoder.db.getCentroid
+import be.ledfan.geocoder.db.getGeometry
 import be.ledfan.geocoder.db.getHstore
 import be.ledfan.geocoder.db.getLayer
 import be.ledfan.geocoder.importer.Layer
@@ -17,8 +19,8 @@ class OsmWay(id: Long) : OsmEntity(id) {
             val r = OsmWay(row.getLong("osm_id"))
 
             r.version = row.getInt("version")
-            r.geometry = row.getObject("geometry") as PGgeometry
-            r.centroid = row.getObject("centroid") as PGgeometry
+            row.getGeometry(r)
+            row.getCentroid(r)
             r.tags = row.getHstore("tags")
             r.zOrder = row.getInt("z_order")
             r.layer = row.getLayer()

@@ -15,12 +15,15 @@ class RelationReverseQueryBuilder(humanAddressBuilderService: HumanAddressBuilde
                    version,
                    tags,
                    z_order,
-                   layer,
-                   geometry,
+                   layer,"""
+        if (includeGeometry) {
+            currentQuery += "geometry,"
+        }
+        currentQuery += """
                    name,
                    0 as metric_distance
             FROM osm_relation
-        """
+            """
         withWhere("ST_Within(ST_SetSRID(ST_Point(?, ?), 4326), geometry)")
         if (!hasLayerLimits) {
             withWhere("layer IN ('MacroRegion', 'LocalAdmin', 'County', 'Neighbourhood', 'Country')")

@@ -35,13 +35,19 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
         val limitLayers: List<String>? = call.request.queryParameters["limitLayers"]?.split(",")?.filter { it.trim() != "" }
         val includeTags: List<String>? = call.request.queryParameters["includeTags"]?.split(",")?.filter { it.trim() != "" }
         val parsedLayers = limitLayers?.map { Layer.valueOf(it) }
+        val includeGeometry = if (route.formatting == "json") {
+            call.request.queryParameters["includeGeometry"]?.toBoolean() ?: true
+        } else {
+            true
+        }
 
         val (closestPoint, order, entities) = reverseGeocoder.reverseGeocode(
                 route.lat,
                 route.lon,
                 limitNumeric,
                 limitRadius,
-                parsedLayers
+                parsedLayers,
+                includeGeometry
         )
 
         val jsonResponseBuilder = JSONResponseBuilder()
@@ -51,14 +57,16 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
                 point(Coordinate(route.lon, route.lat))
             }
         }
-        jsonResponseBuilder.addFeature {
-            withId("closest-point")
-            withGeometry {
-                point(closestPoint.toGeoJsonCoordinate())
+        if (closestPoint != null) {
+            jsonResponseBuilder.addFeature {
+                withId("closest-point")
+                withGeometry {
+                    point(closestPoint.toGeoJsonCoordinate())
+                }
             }
         }
         entities.forEach {
-            jsonResponseBuilder.addEntity(it, includeTags)
+            jsonResponseBuilder.addEntity(it, includeTags, includeGeometry)
         }
 
         val geoJson = jsonResponseBuilder.toJson()

@@ -26,16 +26,18 @@ abstract class ReverseQueryBuilder(protected val humanAddressBuilderService: Hum
     protected var lon: Double = 0.0
     protected var metricDistance: Int = 0
     protected var hasLayerLimits: Boolean = false
+    protected var includeGeometry: Boolean = true
 
     abstract fun initQuery()
     abstract fun processResult(result: ResultSet): OsmEntity
 
 
-    fun setupArgs(lat: Double, lon: Double, metricDistance: Int, hasLayerLimits: Boolean) {
+    fun setupArgs(lat: Double, lon: Double, metricDistance: Int, hasLayerLimits: Boolean, includeGeometry: Boolean = true) {
         this.lat = lat
         this.lon = lon
         this.metricDistance = metricDistance
         this.hasLayerLimits = hasLayerLimits
+        this.includeGeometry = includeGeometry
     }
 
     fun orderBy(): ReverseQueryBuilder {

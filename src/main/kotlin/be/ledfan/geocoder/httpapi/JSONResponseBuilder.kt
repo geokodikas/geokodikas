@@ -17,7 +17,7 @@ class JSONResponseBuilder {
     /**
      * Order matters!
      */
-    fun addEntity(osmEntity: OsmEntity, includeTags: List<String>? = null, block: Feature.() -> Unit = {}) {
+    fun addEntity(osmEntity: OsmEntity, includeTags: List<String>? = null, includeGeometry: Boolean = true, block: Feature.() -> Unit = {}) {
         featureCollection.apply {
             withFeature {
                 withId("feature-${osmEntity.id}")
@@ -25,26 +25,34 @@ class JSONResponseBuilder {
                 when (osmEntity) {
                     is OsmWay -> {
                         withProperty("osm_type", "way")
-                        withGeometry {
-                            osmEntity.geometry.toGeoJson(this)
+                        if (includeGeometry) {
+                            withGeometry {
+                                osmEntity.geometry.toGeoJson(this)
+                            }
                         }
                     }
                     is OsmNode -> {
                         withProperty("osm_type", "node")
-                        withGeometry {
-                            osmEntity.centroid.toGeoJson(this)
+                        if (includeGeometry) {
+                            withGeometry {
+                                osmEntity.centroid.toGeoJson(this)
+                            }
                         }
                     }
                     is OsmRelation -> {
                         withProperty("osm_type", "relation")
-                        withGeometry {
-                            osmEntity.geometry.toGeoJson(this)
+                        if (includeGeometry) {
+                            withGeometry {
+                                osmEntity.geometry.toGeoJson(this)
+                            }
                         }
                     }
                     is AddressIndex -> {
                         withProperty("osm_type", "address")
-                        withGeometry {
-                            osmEntity.geometry.toGeoJson(this)
+                        if (includeGeometry) {
+                            withGeometry {
+                                osmEntity.geometry.toGeoJson(this)
+                            }
                         }
                     }
                     else -> {

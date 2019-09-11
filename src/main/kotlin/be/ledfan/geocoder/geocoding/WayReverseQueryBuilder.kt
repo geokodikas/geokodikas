@@ -20,12 +20,15 @@ class WayReverseQueryBuilder(humanAddressBuilderService: HumanAddressBuilderServ
                z_order,
                has_one_way_restriction,
                has_reversed_oneway,
-               layer,
-               geometry,
-               centroid,
+               layer, """
+
+        if (includeGeometry) {
+            currentQuery += "geometry,"
+        }
+        currentQuery += """
                st_distance_sphere(ST_SetSRID(ST_Point(?, ?), 4326), geometry) AS metric_distance
             FROM osm_way
-        """
+            """
         withWhere("ST_DWithin(ST_SetSRID(ST_Point(?, ?), 4326)::geography, geometry::geography, ?)")
 
         if (!hasLayerLimits) {
