@@ -7,8 +7,8 @@ import be.ledfan.geocoder.db.mapper.OsmParentMapper
 import be.ledfan.geocoder.db.mapper.WayNodeMapper
 import be.ledfan.geocoder.geo.Coordinate
 import be.ledfan.geocoder.geo.toGeoJsonCoordinate
+import be.ledfan.geocoder.geocoding.ReverseGeocodeRequest
 import be.ledfan.geocoder.geocoding.ReverseGeocoderService
-import be.ledfan.geocoder.importer.Layer
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.locations.KtorExperimentalLocationsAPI
@@ -30,25 +30,9 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
     private val htmlViewer = HTMLViewer(wayNodeMapper, osmParentMapper, addressIndexMapper)
 
     private suspend fun reverse(route: Routes.Reverse, call: ApplicationCall) {
-        val limitNumeric: Int? = call.request.queryParameters["limitNumeric"]?.toInt()
-        val limitRadius: Int? = call.request.queryParameters["limitRadius"]?.toInt()
-        val limitLayers: List<String>? = call.request.queryParameters["limitLayers"]?.split(",")?.filter { it.trim() != "" }
-        val includeTags: List<String>? = call.request.queryParameters["includeTags"]?.split(",")?.filter { it.trim() != "" }
-        val parsedLayers = limitLayers?.map { Layer.valueOf(it) }
-        val includeGeometry = if (route.formatting == "json") {
-            call.request.queryParameters["includeGeometry"]?.toBoolean() ?: true
-        } else {
-            true
-        }
+        val reverseGeocodeRequest = ReverseGeocodeRequest.createFromCall(route, call)
 
-        val (closestPoint, order, entities) = reverseGeocoder.reverseGeocode(
-                route.lat,
-                route.lon,
-                limitNumeric,
-                limitRadius,
-                parsedLayers,
-                includeGeometry
-        )
+        val (closestPoint, order, entities) = reverseGeocoder.reverseGeocode(reverseGeocodeRequest)
 
         val jsonResponseBuilder = JSONResponseBuilder()
         jsonResponseBuilder.addFeature {
@@ -66,7 +50,7 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
             }
         }
         entities.forEach {
-            jsonResponseBuilder.addEntity(it, includeTags, includeGeometry)
+            jsonResponseBuilder.addEntity(reverseGeocodeRequest, it)
         }
 
         val geoJson = jsonResponseBuilder.toJson()

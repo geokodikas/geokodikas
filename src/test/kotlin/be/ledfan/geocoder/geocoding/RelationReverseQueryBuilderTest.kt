@@ -4,12 +4,12 @@ import be.ledfan.geocoder.addresses.HumanAddressBuilderService
 import be.ledfan.geocoder.importer.Layer
 import be.ledfan.geocoder.trimDup
 import io.mockk.mockk
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import kotlin.contracts.ExperimentalContracts
-import kotlin.test.assertEquals
+import org.junit.jupiter.api.Assertions.assertEquals
 
 @ExperimentalContracts
-class RelationReverseQueryBuilderTEst {
+class RelationReverseQueryBuilderTest {
 
     private val humanAddressBuilderService = mockk<HumanAddressBuilderService>()
 
@@ -19,8 +19,10 @@ class RelationReverseQueryBuilderTEst {
         val lon = 12.42
         val radius = 100
         val relationReverseQueryBuilder = RelationReverseQueryBuilder(humanAddressBuilderService)
-        relationReverseQueryBuilder.setupArgs(lat, lon, radius, false)
-        relationReverseQueryBuilder.initQuery()
+
+        val req = ReverseGeocodeRequest.defaults.copy(lat = lat, lon = lon, limitRadius = radius)
+        relationReverseQueryBuilder.setupArgs(req)
+        relationReverseQueryBuilder.build()
 
         val query = relationReverseQueryBuilder.currentQuery
         val parameters = relationReverseQueryBuilder.parameters
@@ -28,10 +30,12 @@ class RelationReverseQueryBuilderTEst {
         assertEquals("""SELECT
                             osm_id, version, tags, z_order, layer, geometry, name, 0 as metric_distance 
                         FROM osm_relation WHERE ST_Within(ST_SetSRID(ST_Point(?, ?), 4326), geometry) 
-                        AND layer IN ('MacroRegion', 'LocalAdmin', 'County', 'Neighbourhood', 'Country')""".trimDup(), query.trimDup())
-        assertEquals(2, parameters.size)
+                        AND layer IN ('MacroRegion', 'LocalAdmin', 'County', 'Neighbourhood', 'Country')
+                        ORDER BY metric_distance LIMIT ?""".trimDup(), query.trimDup())
+        assertEquals(3, parameters.size)
         assertEquals(lon, parameters[0])
         assertEquals(lat, parameters[1])
+        assertEquals(ReverseGeocodeRequest.defaults.limitNumeric, 5)
     }
 
     @Test
@@ -43,11 +47,10 @@ class RelationReverseQueryBuilderTEst {
         val layer = Layer.Venue
         val relationReverseQueryBuilder = RelationReverseQueryBuilder(humanAddressBuilderService)
 
-        relationReverseQueryBuilder.setupArgs(lat, lon, radius, true)
-        relationReverseQueryBuilder.initQuery()
-        relationReverseQueryBuilder.whereLayer(listOf(layer))
-        relationReverseQueryBuilder.orderBy()
-        relationReverseQueryBuilder.limit(limit)
+        val req = ReverseGeocodeRequest.defaults.copy(lat = lat, lon = lon,  limitNumeric = limit,
+                limitRadius = radius, limitLayers = listOf(layer), hasLayerLimits = true)
+        relationReverseQueryBuilder.setupArgs(req)
+        relationReverseQueryBuilder.build()
 
         val query = relationReverseQueryBuilder.currentQuery
         val parameters = relationReverseQueryBuilder.parameters

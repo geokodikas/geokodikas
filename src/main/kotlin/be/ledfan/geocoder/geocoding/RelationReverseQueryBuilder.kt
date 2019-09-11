@@ -8,15 +8,15 @@ import java.sql.ResultSet
 class RelationReverseQueryBuilder(humanAddressBuilderService: HumanAddressBuilderService) : ReverseQueryBuilder(humanAddressBuilderService) {
 
     override fun initQuery() {
-        parameters.add(lon)
-        parameters.add(lat)
+        parameters.add(reverseGeocodeRequest.lon)
+        parameters.add(reverseGeocodeRequest.lat)
         currentQuery = """
             SELECT osm_id,
                    version,
                    tags,
                    z_order,
-                   layer,"""
-        if (includeGeometry) {
+                   layer, """
+        if (reverseGeocodeRequest.includeGeometry) {
             currentQuery += "geometry,"
         }
         currentQuery += """
@@ -25,7 +25,7 @@ class RelationReverseQueryBuilder(humanAddressBuilderService: HumanAddressBuilde
             FROM osm_relation
             """
         withWhere("ST_Within(ST_SetSRID(ST_Point(?, ?), 4326), geometry)")
-        if (!hasLayerLimits) {
+        if (!reverseGeocodeRequest.hasLayerLimits) {
             withWhere("layer IN ('MacroRegion', 'LocalAdmin', 'County', 'Neighbourhood', 'Country')")
         }
     }

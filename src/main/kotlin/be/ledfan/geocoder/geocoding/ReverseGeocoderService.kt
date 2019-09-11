@@ -17,48 +17,15 @@ class ReverseGeocoderService(private val reverseQueryBuilderFactory: ReverseQuer
 
     private val reverseGeocoderContext = newFixedThreadPoolContext(16, "reverseGeocoderContext") // TODO make parameter configurable
 
-    suspend fun reverseGeocode(lat: Double, lon: Double,
-                               limitNumeric: Int?, limitRadius: Int?,
-                               desiredLayers: List<Layer>?,
-                               includeGeometry: Boolean = true): Result {
-
-        val layers = if (desiredLayers == null || desiredLayers.isEmpty()) {
-            // use default layers, do not include any Relation or Junction, and VirtualTrafficFlow or PhysicalTrafficFlow
-            listOf(Layer.Address, Layer.Venue, Layer.Street, Layer.Link)
-        } else {
-            desiredLayers
-        }
-
-        val requiredTables = getTablesForLayers(layers)
-
-        val actualLimitNumeric = if (limitNumeric != null && limitNumeric > 0) {
-            limitNumeric
-        } else {
-            5 // amount
-        }
-
-        val actualLimitRadius = if (limitRadius != null && limitRadius > 0) {
-            limitRadius
-        } else {
-            200 // meter
-        }
-
+    suspend fun reverseGeocode(reverseGeocodeRequest: ReverseGeocodeRequest): Result {
 
         val deferredEntities = withContext(reverseGeocoderContext) {
-            requiredTables.map { table ->
+            reverseGeocodeRequest.requiredTables.map { table ->
                 async(reverseGeocoderContext) {
                     reverseQueryBuilderFactory.createBuilder(table, humanAddressBuilderService).run {
-                        setupArgs(lat, lon, actualLimitRadius, desiredLayers != null, includeGeometry)
-                        initQuery()
-                        if (desiredLayers != null) {
-                            whereLayer(layers)
-                        }
-                        orderBy()
-                        limit(actualLimitNumeric)
-                        val r = ArrayList<OsmEntity>()
-                        execute(r)
-                        println(buildQueryForDebugging())
-                        r
+                        setupArgs(reverseGeocodeRequest)
+                        build()
+                        execute()
                     }
                 }
             }
@@ -67,11 +34,11 @@ class ReverseGeocoderService(private val reverseQueryBuilderFactory: ReverseQuer
         var entities = ArrayList(deferredEntities.map { it.await() }.flatten())
 
         entities.sortBy { it.dynamicProperties["distance"] as Int }
-        entities = ArrayList(entities.subList(0, min(actualLimitNumeric, entities.size)))
+        entities = ArrayList(entities.subList(0, min(reverseGeocodeRequest.limitNumeric, entities.size)))
 
-        val closestPoint = if (includeGeometry) {
+        val closestPoint = if (reverseGeocodeRequest.includeGeometry) {
             val closestEntity = entities.first()
-            val inputGeometry = GeometryFactory().createPoint(JtsCoordinate(lon, lat))
+            val inputGeometry = GeometryFactory().createPoint(JtsCoordinate(reverseGeocodeRequest.lon, reverseGeocodeRequest.lat))
             closestEntity.mainGeometry().value
             val distanceOp = DistanceOp(closestEntity.geometryAsJts(), inputGeometry)
             distanceOp.nearestPoints().first()

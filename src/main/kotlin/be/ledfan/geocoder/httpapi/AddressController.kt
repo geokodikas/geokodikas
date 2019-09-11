@@ -2,10 +2,7 @@ package be.ledfan.geocoder.httpapi
 
 import be.ledfan.geocoder.addresses.HumanAddressBuilderService
 import be.ledfan.geocoder.addresses.LangCode
-import be.ledfan.geocoder.db.entity.OsmEntity
-import be.ledfan.geocoder.db.entity.OsmWay
 import be.ledfan.geocoder.db.mapper.*
-import com.beust.klaxon.JsonObject
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.locations.KtorExperimentalLocationsAPI

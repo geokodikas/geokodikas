@@ -22,25 +22,17 @@ abstract class ReverseQueryBuilder(protected val humanAddressBuilderService: Hum
     var parameters = ArrayList<Any>()
         protected set
 
-    protected var lat: Double = 0.0
-    protected var lon: Double = 0.0
-    protected var metricDistance: Int = 0
-    protected var hasLayerLimits: Boolean = false
-    protected var includeGeometry: Boolean = true
+    protected lateinit var reverseGeocodeRequest: ReverseGeocodeRequest
 
-    abstract fun initQuery()
+    protected abstract fun initQuery()
     abstract fun processResult(result: ResultSet): OsmEntity
 
 
-    fun setupArgs(lat: Double, lon: Double, metricDistance: Int, hasLayerLimits: Boolean, includeGeometry: Boolean = true) {
-        this.lat = lat
-        this.lon = lon
-        this.metricDistance = metricDistance
-        this.hasLayerLimits = hasLayerLimits
-        this.includeGeometry = includeGeometry
+    fun setupArgs(reverseGeocodeRequest: ReverseGeocodeRequest) {
+        this.reverseGeocodeRequest = reverseGeocodeRequest
     }
 
-    fun orderBy(): ReverseQueryBuilder {
+    protected fun orderBy(): ReverseQueryBuilder {
         val sql = """
             ORDER BY metric_distance
             """
@@ -69,14 +61,14 @@ abstract class ReverseQueryBuilder(protected val humanAddressBuilderService: Hum
         }
     }
 
-    fun limit(limit: Int): ReverseQueryBuilder {
+    protected fun limit(limit: Int): ReverseQueryBuilder {
         currentQuery += "LIMIT ?"
         parameters.add(limit)
         return this
     }
 
-    fun whereLayer(layers: List<Layer>): ReverseQueryBuilder {
-        if (!hasLayerLimits) {
+    protected fun whereLayer(layers: List<Layer>): ReverseQueryBuilder {
+        if (!reverseGeocodeRequest.hasLayerLimits) {
             throw Exception("HasLayerLimits is false, cannot specify layer to limit on")
         }
         if (layers.isEmpty()) return this
@@ -95,7 +87,8 @@ abstract class ReverseQueryBuilder(protected val humanAddressBuilderService: Hum
         return this
     }
 
-    fun execute(entities: MutableList<OsmEntity>) {
+    fun execute(): ArrayList<OsmEntity> {
+        val entities = ArrayList<OsmEntity>()
         val privateCon = kodein.direct.instance<ConnectionWrapper>()
         val stmt = privateCon.prepareStatement(currentQuery)
 
@@ -111,6 +104,7 @@ abstract class ReverseQueryBuilder(protected val humanAddressBuilderService: Hum
 
         stmt.close()
         result.close()
+        return entities
     }
 
     fun processEntity(entity: OsmEntity, row: ResultSet): OsmEntity {
@@ -119,6 +113,15 @@ abstract class ReverseQueryBuilder(protected val humanAddressBuilderService: Hum
             entity.dynamicProperties["name"] = name
         }
         return entity
+    }
+
+    fun build() {
+        initQuery()
+        if (reverseGeocodeRequest.hasLayerLimits) {
+            whereLayer(reverseGeocodeRequest.limitLayers)
+        }
+        orderBy()
+        limit(reverseGeocodeRequest.limitNumeric)
     }
 
 }

@@ -9,10 +9,10 @@ class WayReverseQueryBuilder(humanAddressBuilderService: HumanAddressBuilderServ
 
     override fun initQuery() {
         repeat(2) {
-            parameters.add(lon)
-            parameters.add(lat)
+            parameters.add(reverseGeocodeRequest.lon)
+            parameters.add(reverseGeocodeRequest.lat)
         }
-        parameters.add(metricDistance)
+        parameters.add(reverseGeocodeRequest.limitRadius)
         currentQuery = """
             SELECT osm_id,
                version,
@@ -22,7 +22,7 @@ class WayReverseQueryBuilder(humanAddressBuilderService: HumanAddressBuilderServ
                has_reversed_oneway,
                layer, """
 
-        if (includeGeometry) {
+        if (reverseGeocodeRequest.includeGeometry) {
             currentQuery += "geometry,"
         }
         currentQuery += """
@@ -31,7 +31,7 @@ class WayReverseQueryBuilder(humanAddressBuilderService: HumanAddressBuilderServ
             """
         withWhere("ST_DWithin(ST_SetSRID(ST_Point(?, ?), 4326)::geography, geometry::geography, ?)")
 
-        if (!hasLayerLimits) {
+        if (!reverseGeocodeRequest.hasLayerLimits) {
             withWhere("layer IN ('VirtualTrafficFlow'::Layer, 'PhysicalTrafficFlow'::Layer, 'Link'::Layer, 'Street'::Layer, 'Junction'::Layer)")
         }
     }

@@ -9,17 +9,17 @@ class NodeReverseQueryBuilder(humanAddressBuilderService: HumanAddressBuilderSer
 
     override fun initQuery() {
         repeat(2) {
-            parameters.add(lon)
-            parameters.add(lat)
+            parameters.add(reverseGeocodeRequest.lon)
+            parameters.add(reverseGeocodeRequest.lat)
         }
-        parameters.add(metricDistance)
+        parameters.add(reverseGeocodeRequest.limitRadius)
         currentQuery = """
             SELECT osm_id,
                version,
                tags,
                z_order,
-               layer,"""
-        if (includeGeometry) {
+               layer, """
+        if (reverseGeocodeRequest.includeGeometry) {
             currentQuery += "centroid,"
         }
         currentQuery += """
@@ -29,7 +29,7 @@ class NodeReverseQueryBuilder(humanAddressBuilderService: HumanAddressBuilderSer
 
         withWhere("ST_DWithin(ST_SetSRID(ST_Point(?, ?), 4326)::geography, centroid::geography, ?)")
 
-        if (!hasLayerLimits) {
+        if (!reverseGeocodeRequest.hasLayerLimits) {
             withWhere("layer IN ('VirtualTrafficFlow'::Layer, 'PhysicalTrafficFlow'::Layer, 'Junction'::Layer)")
         }
     }

@@ -10,10 +10,10 @@ class AddressIndexReverseQueryBuilder(humanAddressBuilderService: HumanAddressBu
 
     override fun initQuery() {
         repeat(2) {
-            parameters.add(lon)
-            parameters.add(lat)
+            parameters.add(reverseGeocodeRequest.lon)
+            parameters.add(reverseGeocodeRequest.lat)
         }
-        parameters.add(metricDistance)
+        parameters.add(reverseGeocodeRequest.limitRadius)
         currentQuery = """
                 SELECT osm_id,
                        tags,
@@ -26,7 +26,7 @@ class AddressIndexReverseQueryBuilder(humanAddressBuilderService: HumanAddressBu
                        country_id,
                        housenumber,
                        layer, """
-        if (includeGeometry) {
+        if (reverseGeocodeRequest.includeGeometry) {
             currentQuery += "geometry,"
         }
         currentQuery += """

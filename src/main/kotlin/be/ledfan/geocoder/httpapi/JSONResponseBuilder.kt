@@ -2,10 +2,9 @@ package be.ledfan.geocoder.httpapi
 
 import be.ledfan.geocoder.db.entity.*
 import be.ledfan.geocoder.geo.toGeoJson
+import be.ledfan.geocoder.geocoding.ReverseGeocodeRequest
 import be.ledfan.geojsondsl.Feature
-import be.ledfan.geojsondsl.feature
 import be.ledfan.geojsondsl.featureCollection
-import com.beust.klaxon.JsonObject
 
 class JSONResponseBuilder {
 
@@ -14,10 +13,14 @@ class JSONResponseBuilder {
         withForeignMember("license", "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright")
     }
 
+    fun addEntity(reverseGeocodeRequest: ReverseGeocodeRequest, osmEntity: OsmEntity, block: Feature.() -> Unit = {}) {
+        addEntity(osmEntity, reverseGeocodeRequest.includeGeometry, reverseGeocodeRequest.includeTags, block)
+    }
+
     /**
      * Order matters!
      */
-    fun addEntity(osmEntity: OsmEntity, includeTags: List<String>? = null, includeGeometry: Boolean = true, block: Feature.() -> Unit = {}) {
+    fun addEntity(osmEntity: OsmEntity, includeGeometry: Boolean = true, includeTags: List<String>? = null, block: Feature.() -> Unit = {}) {
         featureCollection.apply {
             withFeature {
                 withId("feature-${osmEntity.id}")

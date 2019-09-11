@@ -1,13 +1,10 @@
 package be.ledfan.geocoder.importer.core
 
-import be.ledfan.geocoder.importer.core.TagParser
-import be.ledfan.geocoder.importer.core.Tags
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
-import org.junit.jupiter.api.Assertions.assertThrows
 import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class TagParserUnitTest {
