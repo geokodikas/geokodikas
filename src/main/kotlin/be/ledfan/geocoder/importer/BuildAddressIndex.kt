@@ -36,7 +36,7 @@ class BuildAddressIndex(private val osmNodeMapper: OsmNodeMapper, private val os
         }
 
         val nodeBroker = createBroker()
-        nodeBroker.enqueueAll(nodes.values.toList())
+        nodeBroker.enqueueAll(nodes)
         nodeBroker.startProcessors()
         nodeBroker.finishedReading()
         nodeBroker.join()
@@ -49,8 +49,8 @@ class BuildAddressIndex(private val osmNodeMapper: OsmNodeMapper, private val os
         val addresses = osmWayMapper.getAddressesAndVenuesWithPagination(config.importer.processorBlockSize)
 
         while (true) {
-            val block = ArrayList(addresses.nextBlock().values)
-            if (block.size == 0) break
+            val block = addresses.nextBlock()
+            if (block.isEmpty()) break
             if (wayBroker.freeSpace() < block.size) {
                 logger.debug { "Not enough space in queue, to enqueue new block" }
                 delay(3000L)

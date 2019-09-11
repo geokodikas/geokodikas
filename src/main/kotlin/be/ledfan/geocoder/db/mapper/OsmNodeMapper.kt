@@ -32,7 +32,7 @@ class OsmNodeMapper(private val con: ConnectionWrapper) : Mapper<OsmNode>(con) {
         stmt.close()
     }
 
-    fun getAddressesAndVenues(): HashMap<Long, OsmNode> {
+    fun getAddressesAndVenues(): List<OsmNode> {
         @Language("SQL")
         val stmt = con.prepareCall("""
             SELECT *
@@ -40,7 +40,7 @@ class OsmNodeMapper(private val con: ConnectionWrapper) : Mapper<OsmNode>(con) {
             WHERE layer = 'Address'::Layer OR layer='Venue'::Layer
         """.trimIndent())
 
-        return executeSelect(stmt)
+        return executeSelectAsList(stmt)
     }
 
 }

@@ -40,6 +40,14 @@ abstract class Mapper<T>(private val con: ConnectionWrapper) {
         return executeSelect(stmt)
     }
 
+    fun getByPrimaryIdsAsList(ids: List<Long>): List<T> {
+        val sql = "SELECT * FROM $tableName WHERE osm_id = ANY(?)" // TODO replace osm_id
+        val array = con.createArrayOf("BIGINT", ids.toTypedArray())
+        val stmt = con.prepareStatement(sql)
+        stmt.setArray(1, array)
+        return executeSelectAsList(stmt)
+    }
+
     fun deleteByPrimaryId(id: Long) {
         val sql = "DELETE FROM $tableName WHERE osm_id = ?"
         val stmt = con.prepareStatement(sql) // TODO replace osm_id
@@ -69,6 +77,18 @@ abstract class Mapper<T>(private val con: ConnectionWrapper) {
         while (result.next()) {
             val rEntity = entityCompanion.fillFromRow(result)
             r[result.getLong("osm_id")] = rEntity
+        }
+
+        stmt.close()
+        result.close()
+        return r
+    }
+
+    protected fun executeSelectAsList(stmt: PreparedStatement) : List<T> {
+        val result = stmt.executeQuery()
+        val r = ArrayList<T>()
+        while (result.next()) {
+            r.add(entityCompanion.fillFromRow(result))
         }
 
         stmt.close()

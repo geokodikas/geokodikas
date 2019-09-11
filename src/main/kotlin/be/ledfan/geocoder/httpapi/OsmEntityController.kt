@@ -31,16 +31,16 @@ class OsmEntityController(override val kodein: Kodein) : KodeinController(kodein
         }
 
         val ids = route.id.split(",").map { it.toLong() }
-        val entities = mapper.getByPrimaryIds(ids)
+        val entities = mapper.getByPrimaryIdsAsList(ids)
 
-        if (entities.size == 0) {
+        if (entities.isEmpty()) {
             throw HttpApiNotFoundException("No entities found for ids: '${route.id}'")
         }
         if (entities.size != ids.size) {
-            throw HttpApiNotFoundException("No entities found for all ids, missing: '${ids.subtract(entities.keys.toList())}'")
+            throw HttpApiNotFoundException("No entities found for all ids, missing: '${ids.subtract(entities.map { it.id })}'")
         }
 
-        return entities.values.toList()
+        return entities
     }
 
     private fun toGeoJson(entities: List<OsmEntity>): JsonObject {
@@ -88,9 +88,9 @@ class OsmEntityController(override val kodein: Kodein) : KodeinController(kodein
             withErrorHandling(call) {
                 val ids = route.id.split(",").map { it.toLong() }
 
-                val nodes = osmNodeMapper.getByPrimaryIds(ids).values.toList()
-                val ways = osmWayMapper.getByPrimaryIds(ids).values.toList()
-                val relations = osmRelationMapper.getByPrimaryIds(ids).values.toList()
+                val nodes = osmNodeMapper.getByPrimaryIdsAsList(ids)
+                val ways = osmWayMapper.getByPrimaryIdsAsList(ids)
+                val relations = osmRelationMapper.getByPrimaryIdsAsList(ids)
                 val geoJson = toGeoJson(nodes + ways + relations)
 
                 if (route.formatting == "html") {
