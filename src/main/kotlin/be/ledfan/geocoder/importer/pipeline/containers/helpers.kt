@@ -53,16 +53,25 @@ fun downloadAndCacheFile(url: String, destinationFileName: String, md5sum: Strin
     logger.info("Downloading: $url to ${destinationFile.absolutePath}")
 
     val progressLock = Any()
-    var previousProgress = 0
+    var previousProgress = 0L
 
     val (request, response, result) = Fuel.download(url)
             .fileDestination { _, _ -> destinationFile }
             .progress { readBytes, totalBytes ->
                 synchronized(progressLock) {
-                    val progress = (readBytes.toFloat() / totalBytes.toFloat() * 100).toInt()
-                    if (progress % 5 == 0 && progress != previousProgress) {
-                        logger.info("Downloading $url: $progress%")
-                        previousProgress = progress
+                    if (totalBytes == -1L) {
+                        // length unspecified in response
+                        val progress = readBytes / 1024 / 1024
+                        if (progress % 20 == 0L && progress != previousProgress) {
+                            logger.info("Downloading $url: $progress MB")
+                            previousProgress = progress
+                        }
+                    } else {
+                        val progress = (readBytes.toFloat() / totalBytes.toFloat() * 100).toLong()
+                        if (progress % 5 == 0L && progress != previousProgress) {
+                            logger.info("Downloading $url: $progress%")
+                            previousProgress = progress
+                        }
                     }
                 }
             }
