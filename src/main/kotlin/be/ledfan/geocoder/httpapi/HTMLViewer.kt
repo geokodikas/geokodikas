@@ -17,7 +17,7 @@ class HTMLViewer(private val wayNodeMapper: WayNodeMapper, private val osmParent
     fun createHtml(geoJson: JsonObject, nodes: List<OsmNode>, ways: List<OsmWay>,
                    relations: List<OsmRelation>, addresses: List<AddressIndex>, order: List<Long>? = null): FreeMarkerContent {
 
-        val allEntities = ways.toList() + nodes.toList() + relations.toList()
+        val allEntities = ways.toList() + nodes.toList() + relations.toList() + addresses.toList()
         val parents = osmParentMapper.getParents(allEntities)
 
         // Ways
@@ -33,24 +33,11 @@ class HTMLViewer(private val wayNodeMapper: WayNodeMapper, private val osmParent
         tabs.putAll(htmlResponseBuilder.buildRelation(relations, parents))
 
         // addresses
-        tabs.putAll(htmlResponseBuilder.buildAddress(addresses))
+        tabs.putAll(htmlResponseBuilder.buildAddress(addresses, parents))
 
         return FreeMarkerContent("map_html.ftl",
                 mapOf("geojson" to geoJson.toJsonString(true),
                         "tabs" to htmlResponseBuilder.buildTabs(tabs, order)), null)
     }
-
-    fun createHtmlForAddress(geoJson: JsonObject, ways: List<OsmWay>): Any {
-        val parents = osmParentMapper.getParents(ways)
-
-        // Ways
-        val tabs = htmlResponseBuilder.buildWay(ways, parents, hashMapOf(), hashMapOf())
-
-        return FreeMarkerContent("map_html.ftl",
-                mapOf("geojson" to geoJson.toJsonString(true),
-                        "tabs" to htmlResponseBuilder.buildTabs(tabs)), null)
-
-    }
-
 
 }
