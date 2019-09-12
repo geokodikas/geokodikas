@@ -31,7 +31,7 @@ class AddressController(override val kodein: Kodein) : KodeinController(kodein) 
         jsonResponseBuilder.addEntity(addressIndex)
         val geoJson = jsonResponseBuilder.toJson()
 
-        val address = humanAddressBuilderService.build(LangCode.NL, addressIndex)
+        val address = humanAddressBuilderService.build(getLanguage(call), addressIndex)
         addressIndex.dynamicProperties["Address"] = address
 
         if (getFormatting(call) == "html") {

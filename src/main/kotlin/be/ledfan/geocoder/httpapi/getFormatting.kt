@@ -6,6 +6,7 @@ import io.ktor.http.parseHeaderValue
 import io.ktor.request.header
 
 
+// TODO move to extension of call
 fun getFormatting(call: ApplicationCall): String {
     val urlFormatting = call.request.queryParameters["formatting"]
     if (urlFormatting != null && listOf("json", "html").contains(urlFormatting)) {

@@ -109,7 +109,7 @@ abstract class ReverseQueryBuilder(protected val humanAddressBuilderService: Hum
 
     fun processEntity(entity: OsmEntity, row: ResultSet): OsmEntity {
         entity.dynamicProperties["distance"] = row.getDouble("metric_distance").roundToInt()
-        humanAddressBuilderService.nameOfEntity(LangCode.NL, entity)?.let { name ->
+        humanAddressBuilderService.nameOfEntity(reverseGeocodeRequest.preferredLanguage, entity)?.let { name ->
             entity.dynamicProperties["name"] = name
         }
         return entity
