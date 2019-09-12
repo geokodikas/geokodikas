@@ -22,25 +22,23 @@ class AddressController(override val kodein: Kodein) : KodeinController(kodein) 
     private val humanAddressBuilderService: HumanAddressBuilderService by instance()
 
     private suspend fun get(route: Routes.Address, call: ApplicationCall) {
-        val formatting = getFormatting(call)
-        if (formatting == "json") {
-            TODO("Not implemented")
-        }
-
         // get address
-        val addressIndex = addressIndexMapper.getByPrimaryId(route.id.toLong()) ?: TODO("Not implemented")
+        val addressIndex = addressIndexMapper.getByPrimaryId(route.id.toLong())
+                ?: throw HttpApiNotFoundException("Address with id ${route.id} not found")
         addressIndexMapper.fetchRelations(addressIndex)
 
-        val entity = addressIndex.entity ?: TODO("Not implemented")
-
         val jsonResponseBuilder = JSONResponseBuilder()
-        jsonResponseBuilder.addEntity(entity)
+        jsonResponseBuilder.addEntity(addressIndex)
         val geoJson = jsonResponseBuilder.toJson()
 
         val address = humanAddressBuilderService.build(LangCode.NL, addressIndex)
-        entity.dynamicProperties["Address"] = address
+        addressIndex.dynamicProperties["Address"] = address
 
-        call.respond(htmlViewer.createHtmlForAddress(geoJson = geoJson, ways = listOf(entity)))
+        if (getFormatting(call) == "html") {
+            call.respond(htmlViewer.createHtml(geoJson = geoJson, addresses = listOf(addressIndex), ways = listOf(), nodes = listOf(), relations = listOf()))
+        } else {
+            call.respond(geoJson)
+        }
     }
 
 
