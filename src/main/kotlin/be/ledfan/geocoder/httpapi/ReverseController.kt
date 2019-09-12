@@ -54,7 +54,7 @@ class ReverseController(override val kodein: Kodein) : KodeinController(kodein) 
         }
 
         val geoJson = jsonResponseBuilder.toJson()
-        if (route.formatting == "html") {
+        if (reverseGeocodeRequest.formatting == "html") {
             val nodes = entities.filter { it.Type == OsmType.Node } as List<OsmNode>
             val ways = entities.filter { it.Type == OsmType.Way } as List<OsmWay>
             val relations = entities.filter { it.Type == OsmType.Relation } as List<OsmRelation>

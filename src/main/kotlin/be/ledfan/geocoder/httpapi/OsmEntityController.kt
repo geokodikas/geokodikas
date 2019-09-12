@@ -24,10 +24,6 @@ class OsmEntityController(override val kodein: Kodein) : KodeinController(kodein
 
     private fun <T : OsmEntity> get(mapper: Mapper<T>, route: Routes.OsmEntity.OsmEntityRoute): List<T> {
 
-        if (!listOf("html", "json").contains(route.formatting)) {
-            throw HttpApiBadRequestException("Format must be either html or json")
-        }
-
         val ids = route.id.split(",").map { it.toLong() }
         val entities = mapper.getByPrimaryIdsAsList(ids)
 
@@ -53,7 +49,7 @@ class OsmEntityController(override val kodein: Kodein) : KodeinController(kodein
             withErrorHandling(call) {
                 val entities = get(osmWayMapper, route)
                 val geoJson = toGeoJson(entities)
-                if (route.formatting == "html") {
+                if (getFormatting(call) == "html") {
                     call.respond(htmlViewer.createHtml(geoJson = geoJson, ways = entities, nodes = listOf(), relations = listOf(), addresses = listOf()))
                 } else {
                     call.respond(geoJson)
@@ -64,7 +60,7 @@ class OsmEntityController(override val kodein: Kodein) : KodeinController(kodein
             withErrorHandling(call) {
                 val entities = get(osmNodeMapper, route)
                 val geoJson = toGeoJson(entities)
-                if (route.formatting == "html") {
+                if (getFormatting(call) == "html") {
                     call.respond(htmlViewer.createHtml(geoJson = geoJson, ways = listOf(), nodes = entities, relations = listOf(), addresses = listOf()))
                 } else {
                     call.respond(geoJson)
@@ -75,7 +71,7 @@ class OsmEntityController(override val kodein: Kodein) : KodeinController(kodein
             withErrorHandling(call) {
                 val entities = get(osmRelationMapper, route)
                 val geoJson = toGeoJson(entities)
-                if (route.formatting == "html") {
+                if (getFormatting(call) == "html") {
                     call.respond(htmlViewer.createHtml(geoJson = geoJson, ways = listOf(), nodes = listOf(), relations = entities, addresses = listOf()))
                 } else {
                     call.respond(geoJson)
@@ -91,7 +87,7 @@ class OsmEntityController(override val kodein: Kodein) : KodeinController(kodein
                 val relations = osmRelationMapper.getByPrimaryIdsAsList(ids)
                 val geoJson = toGeoJson(nodes + ways + relations)
 
-                if (route.formatting == "html") {
+                if (getFormatting(call) == "html") {
                     call.respond(htmlViewer.createHtml(geoJson = geoJson, ways = ways, nodes = nodes, relations = relations, addresses = listOf()))
                 } else {
                     call.respond(geoJson)

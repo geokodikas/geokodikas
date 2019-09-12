@@ -2,6 +2,7 @@ package be.ledfan.geocoder.geocoding
 
 import be.ledfan.geocoder.db.entity.OsmType
 import be.ledfan.geocoder.httpapi.Routes
+import be.ledfan.geocoder.httpapi.getFormatting
 import be.ledfan.geocoder.importer.Layer
 import io.ktor.application.ApplicationCall
 
@@ -46,13 +47,14 @@ data class ReverseGeocodeRequest(
                     } else {
                         Pair(providedLayers, true)
                     }
-            val requiredTables = getTablesForLayers(limitLayers)
             val includeTags: List<String>? = parseList(call.request.queryParameters["includeTags"])
-            val formatting = route.formatting
+
+            val formatting = getFormatting(call)
+
             val includeGeometry = if (formatting == "json") {
                 call.request.queryParameters["includeGeometry"]?.toBoolean() ?: defaults.includeGeometry
             } else {
-                true
+                true // when html default to include geometry in order to render the objects
             }
 
             return ReverseGeocodeRequest(
@@ -67,6 +69,7 @@ data class ReverseGeocodeRequest(
                     includeGeometry
             )
         }
+
     }
 
 }
