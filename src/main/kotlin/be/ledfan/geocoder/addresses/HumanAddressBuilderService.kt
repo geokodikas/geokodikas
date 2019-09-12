@@ -14,7 +14,12 @@ class HumanAddressBuilderService(private val addressIndexMapper: AddressIndexMap
 
         var address = ""
 
-        // TODO name of building
+        addressIndex.entity?.let {
+            // name of Address/Venue
+            nameOfEntity(langCode, it)?.let { name ->
+                address += "$name, "
+            }
+        }
 
         addressIndex.street?.let {
             nameOfEntity(langCode, it)?.let { name ->
@@ -63,6 +68,7 @@ class HumanAddressBuilderService(private val addressIndexMapper: AddressIndexMap
     }
 
     fun nameOfEntity(langCode: LangCode, entity: OsmEntity): String? {
+        // TODO Fix langcode
         if (!entity.parsedTags.hasChild("name")) {
             return null
         }
