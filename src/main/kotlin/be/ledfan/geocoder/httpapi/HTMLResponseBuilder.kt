@@ -195,7 +195,7 @@ class HTMLResponseBuilder {
                 val ids = ArrayList(addressIndexes.map { it.id })
                 ids.add(addressIndexes.first().streetId)
 
-                a(application.hrefToAny(ids,  "html")) {
+                a(application.hrefToAny(ids, "html")) {
                     text("Show all on map")
                 }
 
@@ -331,7 +331,7 @@ class HTMLResponseBuilder {
 
     }
 
-    fun buildAddress(entities: List<AddressIndex>): Map<Long, String> {
+    fun buildAddress(entities: List<AddressIndex>, parents: HashMap<Long, ArrayList<OsmRelation>>): Map<Long, String> {
         return HashMap(entities.associateBy { it.id }.mapValues { (_, entity) ->
             createHTML().div {
                 ul {
@@ -352,9 +352,20 @@ class HTMLResponseBuilder {
                         +"Layer is ${entity.layer}"
                     }
 
+                    entity.streetId?.let { streetId ->
+                        li {
+                            classes = setOf("list-group-item")
+                            a(application.hrefToOsm(OsmType.Way, streetId, "html")) {
+                                text("Attached street has id: $streetId")
+                            }
+                        }
+                    }
+
                     apply(dynamicProperties(entity))
                 }
 
+                br()
+                unsafe { +buildParentTable(parents[entity.id]) }
                 br()
                 unsafe { +buildTagTable(entity.tags) }
             }
