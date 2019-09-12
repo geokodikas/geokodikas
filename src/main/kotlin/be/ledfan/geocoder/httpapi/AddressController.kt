@@ -22,7 +22,8 @@ class AddressController(override val kodein: Kodein) : KodeinController(kodein) 
     private val humanAddressBuilderService: HumanAddressBuilderService by instance()
 
     private suspend fun get(route: Routes.Address, call: ApplicationCall) {
-        if (route.formatting == "json") {
+        val formatting = getFormatting(call)
+        if (formatting == "json") {
             TODO("Not implemented")
         }
 

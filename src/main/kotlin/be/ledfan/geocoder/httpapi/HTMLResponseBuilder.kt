@@ -84,7 +84,7 @@ class HTMLResponseBuilder {
                         }
                         td {
                             parent.name?.let {
-                                a(application.locations.href(Routes.OsmEntity.Relation(parent.id.toString(), "html"))) {
+                                a(application.hrefToOsm(OsmType.Relation, parent.id, "html")) {
                                     text(it)
                                 }
                             }
@@ -192,14 +192,17 @@ class HTMLResponseBuilder {
         return if (addressIndexes != null && addressIndexes.size > 0) {
             createHTML().div {
 
-                a(application.locations.href(Routes.OsmEntity.Any("${addressIndexes.first().streetId},${addressIndexes.map { it.id }.joinToString(",")}", "html"))) {
+                val ids = ArrayList(addressIndexes.map { it.id })
+                ids.add(addressIndexes.first().streetId)
+
+                a(application.hrefToAny(ids,  "html")) {
                     text("Show all on map")
                 }
 
                 ul {
                     addressIndexes.forEach { address ->
                         li {
-                            a(application.locations.href(Routes.OsmEntity.Node(address.id.toString(), "html"))) {
+                            a(application.hrefToOsm(OsmType.Node, address.id, "html")) {
                                 text(address.id)
                             }
                         }
@@ -221,7 +224,7 @@ class HTMLResponseBuilder {
                             text(node.layer.toString())
                         }
                         td {
-                            a(application.locations.href(Routes.OsmEntity.Node(node.id.toString(), "html"))) {
+                            a(application.hrefToOsm(OsmType.Node, node.id, "html")) {
                                 text(node.id)
                             }
                         }
@@ -243,7 +246,7 @@ class HTMLResponseBuilder {
                             text(node.layer.toString())
                         }
                         td {
-                            a(application.locations.href(Routes.OsmEntity.Way(node.id.toString(), "html"))) {
+                            a(application.hrefToOsm(OsmType.Way, node.id, "html")) {
                                 text(node.id)
                             }
                         }
