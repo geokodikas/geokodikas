@@ -40,7 +40,7 @@ class AddressIndexReverseQueryBuilder(humanAddressBuilderService: HumanAddressBu
 
     override fun processResult(result: ResultSet): OsmEntity {
         val addressIndex = AddressIndex.fillFromRow(result)
-        val address = humanAddressBuilderService.build(LangCode.NL, addressIndex)
+        val address = humanAddressBuilderService.build(reverseGeocodeRequest.preferredLanguage, addressIndex)
         addressIndex.dynamicProperties["Address"] = address
         return processEntity(addressIndex, result)
     }

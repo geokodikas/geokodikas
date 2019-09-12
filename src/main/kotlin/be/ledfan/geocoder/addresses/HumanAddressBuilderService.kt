@@ -7,17 +7,22 @@ import be.ledfan.geocoder.importer.core.TagParser
 
 class HumanAddressBuilderService(private val addressIndexMapper: AddressIndexMapper) {
 
-    fun build(langCode: LangCode, addressIndex: AddressIndex): String {
+    fun build(preferredLanguages: LinkedHashSet<String>, addressIndex: AddressIndex): String {
         if (!addressIndex.relationsFetched) {
             addressIndexMapper.fetchRelations(addressIndex)
         }
 
         var address = ""
 
-        // TODO name of building
+        addressIndex.entity?.let {
+            // name of Address/Venue
+            nameOfEntity(preferredLanguages, it)?.let { name ->
+                address += "$name, "
+            }
+        }
 
         addressIndex.street?.let {
-            nameOfEntity(langCode, it)?.let { name ->
+            nameOfEntity(preferredLanguages, it)?.let { name ->
                 address += name
             }
         }
@@ -30,31 +35,31 @@ class HumanAddressBuilderService(private val addressIndexMapper: AddressIndexMap
         }
 
         addressIndex.neighbourhood?.let {
-            nameOfEntity(langCode, it)?.let { name ->
+            nameOfEntity(preferredLanguages, it)?.let { name ->
                 address += "$name, "
             }
         }
 
         addressIndex.localAdmin?.let {
-            nameOfEntity(langCode, it)?.let { name ->
+            nameOfEntity(preferredLanguages, it)?.let { name ->
                 address += "$name, "
             }
         }
 
         addressIndex.county?.let {
-            nameOfEntity(langCode, it)?.let { name ->
+            nameOfEntity(preferredLanguages, it)?.let { name ->
                 address += "$name, "
             }
         }
 
         addressIndex.macroregion?.let {
-            nameOfEntity(langCode, it)?.let { name ->
+            nameOfEntity(preferredLanguages, it)?.let { name ->
                 address += "$name, "
             }
         }
 
         addressIndex.country?.let {
-            nameOfEntity(langCode, it)?.let { name ->
+            nameOfEntity(preferredLanguages, it)?.let { name ->
                 address += name
             }
         }
@@ -62,15 +67,21 @@ class HumanAddressBuilderService(private val addressIndexMapper: AddressIndexMap
         return address
     }
 
-    fun nameOfEntity(langCode: LangCode, entity: OsmEntity): String? {
+    fun nameOfEntity(preferredLanguages: LinkedHashSet<String>, entity: OsmEntity): String? {
+        // TODO Fix langcode
         if (!entity.parsedTags.hasChild("name")) {
             return null
         }
         var name: String? = null
         val nameTag = entity.parsedTags.child("name")
 
-        if (nameTag.amountOfChildren > 0 && nameTag.hasChild(langCode.identifier)) {
-            name = nameTag.child(langCode.identifier).singleValueOrNull()
+        if (nameTag.amountOfChildren > 0) {
+            for (possibleLang in preferredLanguages) {
+                if (nameTag.hasChild(possibleLang)) {
+                    name = nameTag.child(possibleLang).singleValueOrNull()
+                    if (name != null) break
+                }
+            }
         }
 
         return name ?: nameTag.singleValueOrNull()

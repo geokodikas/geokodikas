@@ -3,8 +3,10 @@ package be.ledfan.geocoder.geocoding
 import be.ledfan.geocoder.db.entity.OsmType
 import be.ledfan.geocoder.httpapi.Routes
 import be.ledfan.geocoder.httpapi.getFormatting
+import be.ledfan.geocoder.httpapi.getLanguage
 import be.ledfan.geocoder.importer.Layer
 import io.ktor.application.ApplicationCall
+import io.ktor.request.acceptLanguageItems
 
 data class ReverseGeocodeRequest(
         val formatting: String,
@@ -15,7 +17,8 @@ data class ReverseGeocodeRequest(
         val limitLayers: List<Layer>,
         val hasLayerLimits: Boolean,
         val includeTags: List<String>?,
-        val includeGeometry: Boolean) {
+        val includeGeometry: Boolean,
+        val preferredLanguage: LinkedHashSet<String>) {
 
     val requiredTables: HashSet<OsmType> by lazy { getTablesForLayers(limitLayers) }
 
@@ -30,13 +33,15 @@ data class ReverseGeocodeRequest(
                 listOf(Layer.Address, Layer.Venue, Layer.Street, Layer.Link),
                 false,
                 null,
-                true)
+                true,
+                linkedSetOf("en"))
 
         private fun parseList(input: String?): List<String>? {
             return input?.split(",")?.filter { it.trim() != "" }
         }
 
         fun createFromCall(route: Routes.Reverse, call: ApplicationCall): ReverseGeocodeRequest {
+
             val limitNumeric: Int = call.request.queryParameters["limitNumeric"]?.toInt() ?: defaults.limitNumeric
             val limitRadius: Int = call.request.queryParameters["limitRadius"]?.toInt() ?: defaults.limitRadius
 
@@ -66,7 +71,8 @@ data class ReverseGeocodeRequest(
                     limitLayers,
                     hasLayerLimits,
                     includeTags,
-                    includeGeometry
+                    includeGeometry,
+                    getLanguage(call)
             )
         }
 

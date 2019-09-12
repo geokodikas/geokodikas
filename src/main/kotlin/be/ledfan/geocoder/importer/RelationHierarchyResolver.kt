@@ -12,10 +12,10 @@ class RelationHierarchyResolver(private val con: ConnectionWrapper) {
     private var logger = KotlinLogging.logger {}
 
     suspend fun run() {
-        @Language("SQL")
 
         // Setup parents for relations
         // A relation (i.e. layer_order < 98) has the full hierarchy of parents stored and not only the first in the hierarchy
+        @Language("SQL")
         val sql1 = """
             INSERT INTO parent(child_id, child_layer, child_osm_type, parent_id, parent_layer, parent_osm_type)
             ( SELECT child.osm_id, child.layer, 'relation', parent.osm_id, parent.layer, 'relation'
@@ -65,10 +65,10 @@ class RelationHierarchyResolver(private val con: ConnectionWrapper) {
             )"""
 
 
-//        // Setup LocalAdmin parents for ways
-//        // Ways only have the neighbourhood (if any) and LocalAdmin stored
-//        // It is possible for ways to lie in multiple Neighbourhoods or LocalAdmins
-//        // This query thus will setup LocalAdmin
+        // Setup LocalAdmin parents for ways
+        // Ways only have the neighbourhood (if any) and LocalAdmin stored
+        // It is possible for ways to lie in multiple Neighbourhoods or LocalAdmins
+        // This query thus will setup LocalAdmin
         @Language("SQL")
         val sql5 = """
             INSERT INTO parent(child_id, child_layer, child_osm_type, parent_id, parent_layer, parent_osm_type)
@@ -85,7 +85,7 @@ class RelationHierarchyResolver(private val con: ConnectionWrapper) {
         FROM parent AS child
                 JOIN parent ON child.parent_id = parent.child_id
                 WHERE child.parent_layer = 'LocalAdmin'::Layer
-        AND child.child_layer <> 'Neighbourhood'::Layer
+                AND child.child_layer <> 'Neighbourhood'::Layer
         )"""
 
 
@@ -95,7 +95,6 @@ class RelationHierarchyResolver(private val con: ConnectionWrapper) {
         executeBatchQueriesParallel(queries)
         logger.info("Going to run final PIP query this may take some time")
         executeBatchQueries(listOf(sql6))
-
 
     }
 
