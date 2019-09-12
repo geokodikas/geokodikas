@@ -2,11 +2,10 @@ package be.ledfan.geocoder.importer.pipeline
 
 import be.ledfan.geocoder.importer.pipeline.implementation.BelgiumPipeline
 import be.ledfan.geocoder.importer.pipeline.implementation.MonacoPipeline
-import ch.qos.logback.classic.util.ContextInitializer
+import be.ledfan.geocoder.startup
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import mu.KotlinLogging
 
 
 data class Export(val completed: Boolean,
@@ -25,14 +24,7 @@ val pipelines = HashMap<String, (IntegrationConfig) -> AbstractPipeline>().also 
     it["Monaco"] = { ic -> MonacoPipeline(ic) }
 }
 
-fun main() {
-
-    System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, "logback.pipeline.xml");
-    val logger = KotlinLogging.logger {}
-    val mb = 1024 * 1024
-    val runtime = Runtime.getRuntime()
-    logger.info { "Currently allocated memory (runtime.totalMemory()) " + runtime.totalMemory() / mb }
-    logger.info { "Maximum allocatable memory (runtime.maxMemory()) " + runtime.maxMemory() / mb }
+suspend fun main() = startup {
 
     val mapper = ObjectMapper(YAMLFactory()) // Enable YAML parsing
     mapper.registerModule(KotlinModule()) // Enable Kotlin support

@@ -2,25 +2,18 @@ package be.ledfan.geocoder.importer
 
 import be.ledfan.geocoder.importer.core.Importer
 import be.ledfan.geocoder.kodein
+import be.ledfan.geocoder.startup
 import ch.qos.logback.classic.util.ContextInitializer
 import org.kodein.di.direct
 import org.kodein.di.generic.instance
 
-suspend fun main(args: Array<String>) {
-
-
-    if (args.isEmpty()) {
-        println("Not enough arguments, exiting.")
-        return
-    }
-
-    System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, "logback.importer.xml");
+suspend fun main(args: Array<String>) = startup(args, 1, "fileName" ) {
 
     val importer = kodein.direct.instance<Importer>()
 
     if (args[0] == "--drop-tables") {
         importer.executeStep("drop_tables")
-        return
+        return@startup
     }
 
     importer.run {

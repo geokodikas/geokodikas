@@ -1,11 +1,9 @@
 package be.ledfan.geocoder.httpapi
 
-import be.ledfan.geocoder.config.Config
-import be.ledfan.geocoder.config.ConfigReader
 import be.ledfan.geocoder.db.ConnectionFactory
 import be.ledfan.geocoder.db.mapper.ImportFromExportMetadataMapper
 import be.ledfan.geocoder.importer.import_from_export.importFromExport
-import ch.qos.logback.classic.util.ContextInitializer
+import be.ledfan.geocoder.startup
 import freemarker.cache.ClassTemplateLoader
 import io.ktor.application.Application
 import io.ktor.application.install
@@ -20,7 +18,6 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import mu.KotlinLogging
 import org.kodein.di.Instance
-import org.kodein.di.direct
 import org.kodein.di.generic.bind
 import org.kodein.di.generic.instance
 import org.kodein.di.jvmType
@@ -29,16 +26,8 @@ import org.slf4j.event.Level.*
 import kotlin.system.exitProcess
 import be.ledfan.geocoder.kodein as DiContainer
 
-fun main() {
-    System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, "logback.rest.xml");
-
+suspend fun main() = startup { (config) ->
     val logger = KotlinLogging.logger {}
-    val config = ConfigReader.getConfig()
-
-    val mb = 1024 * 1024
-    val runtime = Runtime.getRuntime()
-    logger.info { "Currently allocated memory (runtime.totalMemory()) " + runtime.totalMemory() / mb }
-    logger.info { "Maximum allocatable memory (runtime.maxMemory()) " + runtime.maxMemory() / mb }
 
     if (config.importFromExport.tryImportOnHttp) {
         val metadataMapper = ImportFromExportMetadataMapper(ConnectionFactory.createWrappedConnection(config))
@@ -66,14 +55,14 @@ fun main() {
                 metadataMapper.insert(config.importFromExport.fileMd5Sum, config.importFromExport.fileLocation)
                 exitProcess(0)
             } catch (e: Exception) {
-                logger.error(e) { "Exception during import"}
+                logger.error(e) { "Exception during import" }
                 exitProcess(1)
             }
         }
     }
 
     embeddedServer(Netty,
-            port = 8080,
+            port = 8081,
             watchPaths = listOf("be/ledfan"),
             module = Application::kodeinApplication)
             .start(wait = true)

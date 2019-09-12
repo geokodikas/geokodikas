@@ -37,6 +37,7 @@ object Routes {
         it.add(OsmEntity.Node(id = "1422600738,1889049559"))
         it.add(OsmEntity.Relation(id = "52411"))
         it.add(OsmEntity.Relation(id = "53134,90348"))
+        it.add(Reverse(lat=51.332267409713985, lon=4.521034955978394))
     }
 
 }

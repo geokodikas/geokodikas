@@ -1,17 +1,10 @@
 package be.ledfan.geocoder.importer.pipeline
 
-import ch.qos.logback.classic.util.ContextInitializer
+import be.ledfan.geocoder.startup
 import kotlin.system.exitProcess
 
 
-fun main(args: Array<String>) {
-
-    System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, "logback.pipeline.xml");
-
-    if (args.size != 3) {
-        println("Must provide three parameters: country, location of pbf file and md5sum of the file.")
-        exitProcess(1)
-    }
+suspend fun main(args: Array<String>) = startup(args, 3, "country, location of pbf file, md5sum of the file") { _ ->
 
     val countryName = args[0]
     val pbfUrl = args[1]
