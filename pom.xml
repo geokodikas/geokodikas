@@ -161,6 +161,8 @@
             <groupId>io.ktor</groupId>
             <artifactId>ktor-locations</artifactId>
             <version>1.3.0-beta-1</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/tmp_jars/ktor-locations-jvm-1.3.0-beta-1.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>io.ktor</groupId>
