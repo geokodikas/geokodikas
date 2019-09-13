@@ -13,7 +13,8 @@
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
         <importer.main.class>be.ledfan.geocoder.importer.MainKt</importer.main.class>
         <import-pipeline.main.class>be.ledfan.geocoder.importer.pipeline.MainKt</import-pipeline.main.class>
-        <rest-api.main.class>be.ledfan.geocoder.httpapi.MainKt</rest-api.main.class>
+        <http-api.main.class>be.ledfan.geocoder.httpapi.MainKt</http-api.main.class>
+        <export-manager.main.class>be.ledfan.geocoder.importer.pipeline.ExportManagerKt</export-manager.main.class>
         <junit.jupiter.version>5.5.1</junit.jupiter.version>
         <surefire.version>2.22.2</surefire.version>
         <ktor.version>1.2.3</ktor.version>
@@ -277,7 +278,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>rest-api</id>
+                        <id>http-api</id>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
@@ -285,17 +286,17 @@
                         <configuration>
                             <archive>
                                 <manifest>
-                                    <mainClass>${rest-api.main.class}</mainClass>
+                                    <mainClass>${http-api.main.class}</mainClass>
                                 </manifest>
                             </archive>
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
-                            <finalName>rest-api</finalName>
+                            <finalName>http-api</finalName>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>from-yaml</id>
+                        <id>export-manager</id>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
@@ -303,13 +304,13 @@
                         <configuration>
                             <archive>
                                 <manifest>
-                                    <mainClass>be.ledfan.geocoder.importer.pipeline.FromYamlKt</mainClass>
+                                    <mainClass>${export-manager.main.class}</mainClass>
                                 </manifest>
                             </archive>
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
-                            <finalName>from-yaml</finalName>
+                            <finalName>export-manager</finalName>
                         </configuration>
                     </execution>
                 </executions>

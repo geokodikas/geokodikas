@@ -26,6 +26,30 @@ For example, currently we only test in Belgium, some things must be changed befo
 We will elaborate more about other geocoders in the future.
 
 
+## Maven JAR
+
+The `mvn package` command generates multiple JARs:
+
+ - `target/import-pipeline-jar-with-dependencies.jar`
+
+   Given (an url to) a PBF file the tool starts with processing it using `osm2pgsql`, importing it into a Geokodikas database and then generating a Postgresql export file.
+   This tool automatically spins up docker containers for the postgres database and the `osm2pgsql` tool.
+
+ - `target/http-api-jar-with-dependencies.jar`
+
+   Runs the HTTP API on `http://localhost:8080`.
+   When `try_import_on_http` is specified in the config file, this can perform an import into the database from an exported postgres database.
+
+ - `target/export-manager-with-dependencies.jar`
+
+   Reads a [exports.yaml](https://github.com/geokodikas/exports) file from stdin.
+   For each non-completed record it executes the full pipeline resulting in a postgres export.
+
+ - `target/importer-jar-with-dependencies.jar`
+
+   Performs an import starting with a PBF file, mostly used during development.
+   Does not depend on docker. Requires that `osm2pgsql` has already run.
+
 ## Feedback
 
 If you have an idea or see something which can be improved don't hesitate to open an issue in order to discuss it.
