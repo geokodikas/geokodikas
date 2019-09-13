@@ -26,7 +26,7 @@ For example, currently we only test in Belgium, some things must be changed befo
 We will elaborate more about other geocoders in the future.
 
 
-## Maven JAR
+## Maven JARs
 
 The `mvn package` command generates multiple JARs:
 
