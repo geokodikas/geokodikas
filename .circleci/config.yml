@@ -33,8 +33,6 @@ jobs:
           name: Package
           command: |
             cp config.dist.json config.json
-            cp logback.travis.xml src/main/resources/logback-test.xml
-            cp logback.travis.xml src/main/resources/logback.xml
             mvn package -DskipTests
 
       # run tests!
