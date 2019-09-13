@@ -25,6 +25,14 @@ This project is still very much Work in Progress, don't expect it to outperform 
 For example, currently we only test in Belgium, some things must be changed before other or multi region will work.
 We will elaborate more about other geocoders in the future.
 
+## API
+
+[API Docs](https://geokodikas.github.io/api-docs/)
+
+
+## How to run it?
+
+The easiest way to test Geokodikas is by using [docker-compose](https://github.com/geokodikas/docker#docker-compose).
 
 ## Maven JARs
 

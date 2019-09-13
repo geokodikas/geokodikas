@@ -62,7 +62,7 @@ suspend fun main() = startup { (config) ->
     }
 
     embeddedServer(Netty,
-            port = 8081,
+            port = 8080,
             watchPaths = listOf("be/ledfan"),
             module = Application::kodeinApplication)
             .start(wait = true)
