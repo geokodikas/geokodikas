@@ -61,7 +61,8 @@ suspend fun downloadAndCacheFile(url: String, destinationFileName: String, md5su
     var previousProgress = 0L
 
     fun emptyDeserializer() = object : ResponseDeserializable<Unit> {
-        override fun deserialize(inputStream: InputStream) { /* no op*/ }
+        override fun deserialize(inputStream: InputStream) { /* no op*/
+        }
     }
 
     val result = Fuel.download(url)
@@ -99,7 +100,7 @@ suspend fun downloadAndCacheFile(url: String, destinationFileName: String, md5su
             return destinationFile.absolutePath
         }
         is Result.Failure -> {
--            throw Exception("Error during download of $url", result.getException())
+            throw Exception("Error during download of $url", result.getException())
         }
 
     }
