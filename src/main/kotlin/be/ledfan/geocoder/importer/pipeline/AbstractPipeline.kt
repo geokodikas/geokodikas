@@ -33,7 +33,7 @@ abstract class AbstractPipeline(private val ic: IntegrationConfig) {
     private var logger = KotlinLogging.logger {}
     private val config = kodein.direct.instance<Config>()
 
-    fun import() {
+    suspend fun import() {
 
         val pbfFilePath = downloadAndCacheFile(ic.pbFurl, "${ic.countryName}_${ic.pbfCheckSum}.pbf", ic.pbfCheckSum)
         val importedImageName = "postgis_${ic.countryName}_${ic.pbfCheckSum}"

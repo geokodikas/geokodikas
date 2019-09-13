@@ -3,12 +3,17 @@ package be.ledfan.geocoder.importer.pipeline.containers
 import be.ledfan.geocoder.config.Config
 import be.ledfan.geocoder.kodein
 import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.core.ResponseDeserializable
+import com.github.kittinunf.fuel.core.await
+import com.github.kittinunf.fuel.core.awaitResponse
+import com.github.kittinunf.fuel.core.awaitResult
 import com.github.kittinunf.result.Result
 import mu.KotlinLogging
 import org.kodein.di.direct
 import org.kodein.di.generic.instance
 import java.io.BufferedReader
 import java.io.File
+import java.io.InputStream
 import java.io.InputStreamReader
 import java.security.MessageDigest
 import java.math.BigInteger
@@ -30,7 +35,7 @@ fun md5sumOfFile(file: File): String {
     return String.format("%32s", output).replace(' ', '0')
 }
 
-fun downloadAndCacheFile(url: String, destinationFileName: String, md5sum: String): String {
+suspend fun downloadAndCacheFile(url: String, destinationFileName: String, md5sum: String): String {
     val logger = KotlinLogging.logger { }
     val config: Config = kodein.direct.instance()
     val destinationFile = File(config.tmpDir, destinationFileName)
@@ -55,7 +60,11 @@ fun downloadAndCacheFile(url: String, destinationFileName: String, md5sum: Strin
     val progressLock = Any()
     var previousProgress = 0L
 
-    val (request, response, result) = Fuel.download(url)
+    fun emptyDeserializer() = object : ResponseDeserializable<Unit> {
+        override fun deserialize(inputStream: InputStream) { /* no op*/ }
+    }
+
+    val result = Fuel.download(url)
             .fileDestination { _, _ -> destinationFile }
             .progress { readBytes, totalBytes ->
                 synchronized(progressLock) {
@@ -75,7 +84,10 @@ fun downloadAndCacheFile(url: String, destinationFileName: String, md5sum: Strin
                     }
                 }
             }
-            .response()
+            // use emptyDeserializer so that we can get the result (i.e. error/success) without copying the response
+            // which would load the whole file into memory.
+            .awaitResult(emptyDeserializer())
+
 
     when (result) {
         is Result.Success -> {
@@ -87,10 +99,10 @@ fun downloadAndCacheFile(url: String, destinationFileName: String, md5sum: Strin
             return destinationFile.absolutePath
         }
         is Result.Failure -> {
-            throw Exception("Error during download of $url", result.getException())
+-            throw Exception("Error during download of $url", result.getException())
         }
-    }
 
+    }
 }
 
 fun randomString(stringLength: Int = 8): String {

@@ -9,7 +9,7 @@ import org.intellij.lang.annotations.Language
 import org.kodein.di.direct
 import org.kodein.di.generic.instance
 
-fun importFromExport() {
+suspend fun importFromExport() {
 
     val config = kodein.direct.instance<Config>()
     val logger = KotlinLogging.logger {}
