@@ -146,7 +146,7 @@
         let lon = urlParams.get("lon");
         let radius = parseInt(urlParams.get("limitRadius"));
 
-        L.circle([lat, lon], radius).addTo(mymap);
+        // L.circle([lat, lon], radius).addTo(mymap);
     }
 
 
