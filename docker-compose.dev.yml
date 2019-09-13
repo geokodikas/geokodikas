@@ -1,0 +1,16 @@
+version: '3'
+services:
+  postgis:
+    image: geokodikas/db-import:master
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: "geokodikas"
+      POSTGRES_USER: "geokodikas"
+      POSTGRES_DB: "geokodikas"
+    ports:
+      - 5432:5432
+    shm_size: '512mb'
+
+volumes:
+  postgres:
