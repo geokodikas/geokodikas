@@ -23,19 +23,19 @@
     <repositories>
         <repository>
             <id>de.topobyte</id>
-            <url>http://mvn.topobyte.de</url>
+            <url>https://mvn.topobyte.de</url>
         </repository>
         <repository>
             <id>com.slimjars</id>
-            <url>http://mvn.slimjars.com</url>
+            <url>https://mvn.slimjars.com</url>
         </repository>
         <repository>
             <id>jcenter</id>
-            <url>http://jcenter.bintray.com/</url>
+            <url>https://jcenter.bintray.com/</url>
         </repository>
         <repository>
             <id>geo-solutions</id>
-            <url>http://maven.geo-solutions.it/</url>
+            <url>https://maven.geo-solutions.it/</url>
         </repository>
     </repositories>
 
