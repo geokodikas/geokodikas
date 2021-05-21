@@ -117,7 +117,7 @@
         <dependency>
             <groupId>org.kodein.di</groupId>
             <artifactId>kodein-di-framework-ktor-server-jvm</artifactId>
-            <version>6.5.3</version>
+            <version>7.6.0</version>
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
